@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<body>
+   <div th:fragment="common_js">
+       <!-- js placed at the end of the document so the pages load faster -->
+       <script th:src="@{/js/jquery-1.8.3.min.js}" src="../../static/js/jquery-1.8.3.min.js"></script>
+       <script th:src="@{/js/bootstrap.min.js}" src="../../static/js/bootstrap.min.js"></script>
+
+       <!--templates.commonmmon script for all pages-->
+       <script th:src="@{/js/common-scripts.js}" src="../../static/js/common-scripts.js"></script>
+   </div>
+
+</body>
+</html>
