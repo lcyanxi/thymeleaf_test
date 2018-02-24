@@ -12,46 +12,10 @@
                 <div data-original-title="导航栏" data-placement="right" class="icon-reorder tooltips"></div>
             </div>
             <!--logo start-->
-            <a href="#" class="logo">发票数据<span>分析系统</span></a>
+            <a href="#" class="logo">豆果DC后台<span>管理系统</span></a>
             <!--logo end-->
 
             <!--首页通知和模板下载-->
-            <div class="nav notify-row" id="top_menu">
-                <!--  notification start -->
-                <ul class="nav top-menu">
-                    <!-- settings start -->
-                    <li class="dropdown">
-                        <a th:href="@{/resources/data_template.xlsx}" href="../../resources/data_template.xlsx"
-                           data-toggle="tooltip" data-placement="bottom" title="进销excel模板">
-                            <span class="badge bg-info">模板</span>
-                            <i class="icon-cloud-download"></i>
-                        </a>
-                    </li>
-                    <!-- settings end -->
-                    <!-- notification dropdown start 消息提示-->
-                    <li id="header_notification_bar" class="dropdown">
-                        <a data-toggle="dropdown" class="dropdown-toggle" href="#">
-                            <i class="icon-bell-alt"></i>
-                            <!-- <span th:if="${unreadcount}>0" class="badge bg-warning" th:text="${unreadcount}">0</span>-->
-                        </a>
-                        <ul class="dropdown-menu extended notification">
-                            <div class="notify-arrow notify-arrow-yellow"></div>
-                            <li>
-                                <p class="yellow" th:text="'你有'+${unreadcount}+'个新通知'"></p>
-                            </li>
-                            <li th:each="msg,msgStat:${unreadmessage}" style="margin: 4px;">
-                                <span class="label label-info"><i class="icon-envelope"></i></span>
-                                <span th:text="${msg.mContent}">Welcome !</span>
-                            </li>
-                            <li>
-                                <a href="#" th:href="@{/staff/message/markread/all}">所有标记为已读</a>
-                            </li>
-                        </ul>
-                    </li>
-                    <!-- notification dropdown end -->
-                </ul>
-                <!--  notification end -->
-            </div>
             <!--通知下载结束-->
 
             <!--右侧部分-->
@@ -61,8 +25,8 @@
                     <!-- user login dropdown start 个人信息等(在头像按钮下)-->
                     <li class="dropdown">
                         <a data-toggle="dropdown" class="dropdown-toggle" href="#">
-                            <!--  <img alt="" th:src="${staff.sAvatar}" width="35" height="35" src="../../img/avatar-mini4.jpg"/>-->
-                            <!--  <span class="username" th:text="${staff.sName}"></span>-->
+                              <img alt="" th:src="@{/img/avatar.jpg}"  width="35" height="35" src="../static/img/avatar.jpg"/>
+                              <span class="username">lichang</span>
                             <b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu extended logout">
@@ -98,7 +62,7 @@
                     <li class="sub-menu">
                         <a href="javascript:;" class="">
                             <i class="icon-edit-sign"></i>
-                            <span>数据管理</span>
+                            <span>任务监控</span>
                             <span class="arrow"></span>
                         </a>
                         <ul class="sub">
@@ -113,7 +77,7 @@
                     <li class="sub-menu">
                         <a href="javascript:;" class="">
                             <i class="icon-bar-chart"></i>
-                            <span>数据分析</span>
+                            <span>用户行为统计</span>
                             <span class="arrow"></span>
                         </a>
                         <ul class="sub">
@@ -130,7 +94,7 @@
                     <li class="sub-menu">
                         <a href="javascript:;" class="">
                             <i class="icon-code-fork"></i>
-                            <span>趋势预测</span>
+                            <span>豆果自助超市</span>
                             <span class="arrow"></span>
                         </a>
                         <ul class="sub">
@@ -141,7 +105,7 @@
                     <li class="sub-menu">
                         <a href="javascript:;" class="">
                             <i class="icon-user-md"></i>
-                            <span>员工管理</span>
+                            <span>电商统计</span>
                             <span class="arrow"></span>
                         </a>
                         <ul class="sub">
@@ -154,7 +118,7 @@
                     <li class="sub-menu">
                         <a href="javascript:;" class="">
                             <i class="icon-male"></i>
-                            <span>个人中心</span>
+                            <span>APP渠道统计</span>
                             <span class="arrow"></span>
                         </a>
                         <ul class="sub">
@@ -166,7 +130,7 @@
                     <li class="sub-menu">
                         <a href="javascript:;" class="">
                             <i class="icon-envelope"></i>
-                            <span>消息管理</span>
+                            <span>网站统计</span>
                             <span class="arrow"></span>
                         </a>
                         <ul class="sub">
@@ -177,7 +141,7 @@
                     <li class="sub-menu">
                         <a href="javascript:;" class="">
                             <i class="icon-shield"></i>
-                            <span>系统安全</span>
+                            <span>APP统计</span>
                             <span class="arrow"></span>
                         </a>
                         <ul class="sub">
@@ -187,7 +151,29 @@
                     <li class="sub-menu">
                         <a href="javascript:;" class="">
                             <i class="icon-info"></i>
-                            <span>关于</span>
+                            <span>菜谱统计</span>
+                            <span class="arrow"></span>
+                        </a>
+                        <ul class="sub">
+                            <li><a th:href="@{/aboutus}" href="aboutus.html">关于我们</a></li>
+                            <li><a th:href="@{/aboutsystem}" href="aboutsystem.html">关于系统</a></li>
+                        </ul>
+                    </li>
+                    <li class="sub-menu">
+                        <a href="javascript:;" class="">
+                            <i class="icon-info"></i>
+                            <span>作品统计</span>
+                            <span class="arrow"></span>
+                        </a>
+                        <ul class="sub">
+                            <li><a th:href="@{/aboutus}" href="aboutus.html">关于我们</a></li>
+                            <li><a th:href="@{/aboutsystem}" href="aboutsystem.html">关于系统</a></li>
+                        </ul>
+                    </li>
+                    <li class="sub-menu">
+                        <a href="javascript:;" class="">
+                            <i class="icon-info"></i>
+                            <span>地区分布</span>
                             <span class="arrow"></span>
                         </a>
                         <ul class="sub">

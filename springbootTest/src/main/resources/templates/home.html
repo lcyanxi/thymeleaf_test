@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+      xmlns:th="http://www.thymeleaf.org">
 
 <head th:replace="/common/common_css :: common_css"></head>
 
@@ -21,6 +20,30 @@
                         </h4>
                     </div>
                     <!--头部 位置显示栏结束-->
+                    <div class="portlet-body p10">
+                        <table class="table table-striped border-top" id="sample_1">
+                            <!--头部显示所包含的内容-->
+                            <thead>
+                            <tr>
+                                <th style="width: 10px">
+                                    <button class="btn btn-primary btn-sm">
+                                        <i class="icon-male"></i>
+                                    </button>
+                                </th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Address</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <!--头部显示所包含的内容 结束-->
+
+                            <!--显示每个员工的详细信息-->
+
+                            <!--显示每个员工的详细信息 结束-->
+
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -28,6 +51,57 @@
     </section>
 </section>
 <!--引入js 文件-->
-<div th:replace="/common/common_js :: common_js"></div>
+<div>
+    <!-- js placed at the end of the document so the pages load faster -->
+    <script th:src="@{/js/jquery-1.8.3.min.js}" src="../static/js/jquery-1.8.3.min.js"></script>
+    <script th:src="@{/js/bootstrap.min.js}" src="../static/js/bootstrap.min.js"></script>
+
+    <!--templates.commonmmon script for all pages-->
+    <script th:src="@{/js/common-scripts.js}" src="../static/js/common-scripts.js"></script>
+    <!--templates.commonmmon script for this pages-->
+    <script th:src="@{/js/jquery.dataTables.min.js}" src="../static/js/jquery.dataTables.min.js"></script>
+    <script th:src="@{/js/DT_bootstrap.js}" type="text/javascript"
+            src="../static/js/DT_bootstrap.js"></script>
+    <script th:src="@{/js/dynamic-table.js}" src="../static/js/dynamic-table.js"></script>
+
+
+    <!--    <script type="text/javascript">
+            $(document).ready(function () {
+
+    /*            $.ajax({
+                    type: "POST",
+                    url: "/tableDemoAjax",
+                    dataType: 'json',
+                    success: function (data) {
+                        alert(data)
+                    }
+                });*/
+
+                $("#tb").dataTable({
+                    "bProcessing": false,                   // 是否显示取数据时的那个等待提示
+                    "bServerSide": true,                    //这个用来指明是通过服务端来取数据
+                    "sAjaxSource": "/tableDemoAjax",      //这个是请求的地址
+                    "fnServerData": retrieveData            // 获取数据的处理函数
+                });
+            });
+
+            // 3个参数的名字可以随便命名,但必须是3个参数,少一个都不行
+            function retrieveData(sSource, aoData, fnCallback) {
+                $.ajax({
+                    url: sSource,                              //这个就是请求地址对应sAjaxSource
+                    data: {"aoData": JSON.stringify(aoData)},   //这个是把datatable的一些基本数据传给后台,比如起始位置,每页显示的行数 ,分页,排序,查询等的值
+                    type: 'post',
+                    dataType: 'json',
+                    async: false,
+                    success: function (result) {
+                        fnCallback(result);                     //把返回的数据传给这个方法就可以了,datatable会自动绑定数据的
+                    },
+                    error: function (msg) {
+                    }
+                });
+            }
+        </script>-->
+
+</div>
 </body>
 </html>
