@@ -20,15 +20,18 @@ import java.util.List;
 @Controller
 
     public class webController {
-    @RequestMapping(value = "/hello", method = RequestMethod.GET)
-    public String hello(Model model) {
-        model.addAttribute("name", "Dear");
+    @RequestMapping(value = "/home", method = RequestMethod.GET)
+    public String hello() {
         return "home";
     }
 
     @RequestMapping(value = "/login",method = RequestMethod.POST)
     public String login() {
-        return "home";
+        return "index";
+    }
+    @RequestMapping(value = "/index",method = RequestMethod.GET)
+    public String toIndex() {
+        return "index";
     }
     @RequestMapping(value = "/",method = RequestMethod.GET)
     public String toLogin() {

@@ -60,19 +60,12 @@
                         </a>
                     </li>
                     <li class="sub-menu">
-                        <a href="javascript:;" class="">
+                        <a href="home.html" class="" th:href="@{/home}">
                             <i class="icon-edit-sign"></i>
-                            <span>任务监控</span>
+                            <span>用户管理</span>
                             <span class="arrow"></span>
                         </a>
-                        <ul class="sub">
-                            <li shiro:hasAnyRoles="操作员,管理员"><a class="" th:href="@{/bill/uploadexcel}"
-                                                               href="bill/uploadexcel.html">导入数据</a>
-                            </li>
-                            <li shiro:hasAnyRoles="管理员"><a class="" th:href="@{/bill/managedata}"
-                                                           href="bill/managedata.html">操作数据</a>
-                            </li>
-                        </ul>
+
                     </li>
                     <li class="sub-menu">
                         <a href="javascript:;" class="">
