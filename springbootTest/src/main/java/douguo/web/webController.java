@@ -17,10 +17,22 @@ import java.util.List;
 /**
  * Created by lcyanxi on 2018/2/14.
  */
-@Controller public class webController {
-    @RequestMapping(value = "/hello", method = RequestMethod.GET) public String hello(Model model) {
+@Controller
+
+    public class webController {
+    @RequestMapping(value = "/hello", method = RequestMethod.GET)
+    public String hello(Model model) {
         model.addAttribute("name", "Dear");
         return "home";
+    }
+
+    @RequestMapping(value = "/login",method = RequestMethod.POST)
+    public String login() {
+        return "home";
+    }
+    @RequestMapping(value = "/",method = RequestMethod.GET)
+    public String toLogin() {
+        return "login";
     }
 
     @RequestMapping(value = "/tableDemoAjax",method = RequestMethod.POST)
