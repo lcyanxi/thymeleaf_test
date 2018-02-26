@@ -1,16 +1,14 @@
 package douguo.web;
 
+import douguo.mapper.UserMapper;
 import douguo.model.Info;
+import douguo.model.UserEntity;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,8 +16,39 @@ import java.util.List;
  * Created by lcyanxi on 2018/2/14.
  */
 @Controller
+public class webController {
 
-    public class webController {
+    @Autowired
+    private UserMapper userMapper;
+
+
+    @RequestMapping("/getUsers")
+    public List<UserEntity> getUsers() {
+        List<UserEntity> users=userMapper.getAll();
+        return users;
+    }
+
+    @RequestMapping("/getUser")
+    public UserEntity getUser(Long id) {
+        UserEntity user=userMapper.getOne(id);
+        return user;
+    }
+
+    @RequestMapping("/add")
+    public void save(UserEntity user) {
+        userMapper.insert(user);
+    }
+
+    @RequestMapping(value="update")
+    public void update(UserEntity user) {
+        userMapper.update(user);
+    }
+
+    @RequestMapping(value="/delete/{id}")
+    public void delete(@PathVariable("id") Long id) {
+        userMapper.delete(id);
+    }
+
     @RequestMapping(value = "/home", method = RequestMethod.GET)
     public String hello() {
         return "home";
