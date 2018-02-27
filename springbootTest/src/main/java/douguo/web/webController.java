@@ -64,7 +64,7 @@ public class webController {
     }
     @RequestMapping(value = "/",method = RequestMethod.GET)
     public String toLogin() {
-        return "login";
+        return "pages/index";
     }
 
     @RequestMapping(value = "/tableDemoAjax",method = RequestMethod.POST)
