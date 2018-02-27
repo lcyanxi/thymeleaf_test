@@ -12,7 +12,8 @@
 
 
 ## spring boot 热部署配置
-```
+    pom
+```java
    <!-- 热部署模块 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -20,8 +21,9 @@
             <optional>true</optional> <!-- 这个需要为 true 热部署才有效 -->
             <scope>true</scope>
         </dependency>
-        
-        
+```
+
+```java
         <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -33,8 +35,10 @@
 
 
 ## jquery+datables后台分页效果展示
+![image](https://github.com/lcyanxi/thymeleaf_test/raw/master/img/data1.png)
 <img align="left" width="400" height="200" src="https://github.com/lcyanxi/thymeleaf_test/raw/master/img/data1.png"/>
 <img align="left" width="400" height="200" src="https://github.com/lcyanxi/thymeleaf_test/raw/master/img/data2.png"/>
-
+    
+<br>
 ## 使用阿里的druid效果展示
 <img align="left" width="400" height="200" src="https://github.com/lcyanxi/thymeleaf_test/raw/master/img/druid.png"/>
