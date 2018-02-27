@@ -36,9 +36,8 @@
 
 ## jquery+datables后台分页效果展示
 ![image](https://github.com/lcyanxi/thymeleaf_test/raw/master/img/data1.png)
-<img align="left" width="400" height="200" src="https://github.com/lcyanxi/thymeleaf_test/raw/master/img/data1.png"/>
-<img align="left" width="400" height="200" src="https://github.com/lcyanxi/thymeleaf_test/raw/master/img/data2.png"/>
-    
-<br>
+![image](https://github.com/lcyanxi/thymeleaf_test/raw/master/img/data2.png)
+
 ## 使用阿里的druid效果展示
-<img align="left" width="400" height="200" src="https://github.com/lcyanxi/thymeleaf_test/raw/master/img/druid.png"/>
+![image](https://github.com/lcyanxi/thymeleaf_test/raw/master/img/druid.png)
+
