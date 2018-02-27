@@ -24,7 +24,7 @@ public class webController {
 
     @RequestMapping("/getUsers")
     public List<UserEntity> getUsers() {
-        List<UserEntity> users=userMapper.getAll();
+        List<UserEntity> users=userMapper.getAll(2,10);
         return users;
     }
 
@@ -94,7 +94,10 @@ public class webController {
             }
         }
 
-        // 生成20条测试数据，在实际开发中这里的数据应该是根据分页、排序、查询等情况从数据库中进行查询的
+        int totalSize=userMapper.getCount();
+        List<UserEntity> valueList=userMapper.getAll(iDisplayStart,iDisplayStart+iDisplayLength);
+
+/*        // 生成20条测试数据，在实际开发中这里的数据应该是根据分页、排序、查询等情况从数据库中进行查询的
         List<String[]> lst = new ArrayList<String[]>();
         List<Info> list=new ArrayList<>();
         for (int i = 0; i < 100; i++) {
@@ -104,15 +107,15 @@ public class webController {
             info.setLastname("lastname"+i);
             info.setId(i);
             list.add(info);
-        }
+        }*/
 
         JSONObject getObj = new JSONObject();
         System.out.println("sEcho:"+sEcho);
         System.out.println("iDisplayStart"+iDisplayStart+":iDisplayStart+iDisplayLength"+iDisplayStart+iDisplayLength);
         getObj.put("sEcho", sEcho);
-        getObj.put("iTotalRecords", list.size());          //实际的行数
-        getObj.put("iTotalDisplayRecords", list.size());   //显示的行数,这个要和上面写的一样
-        getObj.put("aaData", list.subList(iDisplayStart,iDisplayStart+iDisplayLength));//要以JSON格式返回，否则前台没法显示
+        getObj.put("iTotalRecords", totalSize);          //实际的行数
+        getObj.put("iTotalDisplayRecords", totalSize);   //显示的行数,这个要和上面写的一样
+        getObj.put("aaData", valueList);//要以JSON格式返回，否则前台没法显示
         System.out.println(getObj);
         return getObj.toString();
     }

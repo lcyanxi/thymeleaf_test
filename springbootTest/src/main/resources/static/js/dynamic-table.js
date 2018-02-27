@@ -32,9 +32,9 @@ var Script = function () {
             //配置列要显示的数据
             "columns": [
                 { "data": null},
-                { "data": "firstname" },
-                { "data": "lastname" },
-                { "data": "address" },
+                { "data": "userName" },
+                { "data": "nickName" },
+                { "data": "passWord" },
                 { "data": "" }//操作按钮列
             ],
 

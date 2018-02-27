@@ -1,6 +1,7 @@
 package douguo.mapper;
 
 import douguo.model.UserEntity;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -8,7 +9,9 @@ import java.util.List;
  * Created by lcyanxi on 2018/2/26.
  */
 public interface UserMapper {
-    List<UserEntity> getAll();
+    int  getCount();
+
+    List<UserEntity> getAll(@Param("start") int start,@Param("length") int length);
 
     UserEntity getOne(Long id);
 
