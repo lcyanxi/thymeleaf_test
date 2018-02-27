@@ -10,19 +10,18 @@
 * jquery+datables后台分页
 * spring boot 热部署
 
-##jquery+datables后台分页效果展示
-
+## jquery+datables后台分页效果展示
 <img align="left" width="400" height="200" src="https://github.com/lcyanxi/thymeleaf_test/raw/master/img/data1.png"/>
-
 <img align="left" width="400" height="200" src="https://github.com/lcyanxi/thymeleaf_test/raw/master/img/data2.png"/>
 
-##使用阿里的druid效果展示
+## 使用阿里的druid效果展示
 <img align="left" width="400" height="200" src="https://github.com/lcyanxi/thymeleaf_test/raw/master/img/druid.png"/>
 
 
 
 ## spring boot 热部署配置
 * pom
+
 ```
    <!-- 热部署模块 -->
         <dependency>
