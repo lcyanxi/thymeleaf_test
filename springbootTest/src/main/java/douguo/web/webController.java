@@ -95,19 +95,8 @@ public class webController {
         }
 
         int totalSize=userMapper.getCount();
-        List<UserEntity> valueList=userMapper.getAll(iDisplayStart,iDisplayStart+iDisplayLength);
+        List<UserEntity> valueList=userMapper.getAll(iDisplayStart,iDisplayLength);
 
-/*        // 生成20条测试数据，在实际开发中这里的数据应该是根据分页、排序、查询等情况从数据库中进行查询的
-        List<String[]> lst = new ArrayList<String[]>();
-        List<Info> list=new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            Info info=new Info();
-            info.setAddress("address"+i);
-            info.setFirstname("firstname"+i);
-            info.setLastname("lastname"+i);
-            info.setId(i);
-            list.add(info);
-        }*/
 
         JSONObject getObj = new JSONObject();
         System.out.println("sEcho:"+sEcho);

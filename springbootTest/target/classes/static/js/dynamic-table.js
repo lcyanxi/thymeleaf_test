@@ -21,9 +21,9 @@ var Script = function () {
 
                 }
             },
-            "iDisplayLength":50,//每页的行数，每页默认数量:10
+            "iDisplayLength":10,//每页的行数，每页默认数量:10
             "bAutoWidth": false, //自适应宽度
-            "bFilter": false,//是否显示搜索框
+            "bFilter": true,//是否显示搜索框
             "bProcessing": false,                   // 是否显示取数据时的那个等待提示
             "bServerSide": true,                    //这个用来指明是通过服务端来取数据
             "sAjaxSource": "/tableDemoAjax",      //这个是请求的地址
