@@ -1,12 +1,13 @@
 package douguo.model;
 
-
+import java.io.Serializable;
 
 /**
  * Created by lcyanxi on 2018/2/26.
  */
-public class UserEntity {
+public class UserEntity implements Serializable{
 
+    private static final long serialVersionUID = 23458641759842411L;
     private Long id;
     private String userName;
     private String passWord;
@@ -50,6 +51,17 @@ public class UserEntity {
     }
 
     public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    public UserEntity() {
+    }
+
+    public UserEntity(Long id, String userName, String passWord, String userSex, String nickName) {
+        this.id = id;
+        this.userName = userName;
+        this.passWord = passWord;
+        this.userSex = userSex;
         this.nickName = nickName;
     }
 }

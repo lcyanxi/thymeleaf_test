@@ -1,4 +1,4 @@
-package douguo.config;
+package douguo.config.druid;
 
 import com.alibaba.druid.support.http.StatViewServlet;
 
