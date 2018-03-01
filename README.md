@@ -6,9 +6,10 @@
 * thymeleaf
 * mybatis
 * mysql
-* druid
+* druid 做sql监控
 * jquery+datables后台分页
 * spring boot 热部署
+* redis跟mybatis结合做缓存
 
 
 ## spring boot 热部署配置
