@@ -67,6 +67,21 @@ public class webController {
         return "pages/index";
     }
 
+    @RequestMapping(value = "/checkout",method = RequestMethod.GET)
+    public String toCheckout() {
+        return "pages/checkout";
+    }
+
+    @RequestMapping(value = "/account",method = RequestMethod.GET)
+    public String toAccount() {
+        return "pages/account";
+    }
+
+    @RequestMapping(value = "/products",method = RequestMethod.GET)
+    public String toProducts() {
+        return "pages/products";
+    }
+
     @RequestMapping(value = "/tableDemoAjax",method = RequestMethod.POST)
     @ResponseBody
     public String tableDemoAjax(@RequestParam String aoData) {
