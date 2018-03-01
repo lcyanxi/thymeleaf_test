@@ -21,7 +21,7 @@
                     <ul class="nav navbar-nav">
                         <li><a th:href="@{/index}" href="../pages/index.html" class="active">首页</a></li>
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Birthday<b class="caret"></b></a>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">生日<b class="caret"></b></a>
                             <ul class="dropdown-menu multi-column columns-4">
                                 <div class="row">
                                     <div class="col-sm-3">
@@ -236,17 +236,17 @@
                         <form id="loginForm">
                             <fieldset id="body">
                                 <fieldset>
-                                    <label for="email">Email Address</label>
+                                    <label for="email">邮箱or手机号</label>
                                     <input type="text" name="email" id="email"/>
                                 </fieldset>
                                 <fieldset>
-                                    <label for="password">Password</label>
+                                    <label for="password">密码</label>
                                     <input type="password" name="password" id="password"/>
                                 </fieldset>
-                                <input type="submit" id="login" value="Sign in"/>
-                                <label for="checkbox"><input type="checkbox" id="checkbox"/> <i>Remember me</i></label>
+                                <input type="submit" id="login" value="登 录"/>
+                                <label for="checkbox"><input type="checkbox" id="checkbox"/> <i>记住我</i></label>
                             </fieldset>
-                            <p>New User ? <a class="sign" th:href="@{/account}" href="../pages/account.html">Sign Up</a> <span><a href="#">Forgot your password?</a></span></p>
+                            <p>新用户? <a class="sign" th:href="@{/account}" href="../pages/account.html">注册</a> <span><a href="#">忘记密码?</a></span></p>
                         </form>
                     </div>
                 </div>
