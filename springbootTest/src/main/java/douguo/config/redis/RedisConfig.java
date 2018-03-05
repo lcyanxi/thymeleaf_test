@@ -53,7 +53,7 @@ Redis 不是应用的共享内存，它只是一个内存服务器，就像 MySq
     public CacheManager cacheManager(
         @SuppressWarnings("rawtypes") RedisTemplate redisTemplate) {
         RedisCacheManager cacheManager = new RedisCacheManager(redisTemplate);
-                cacheManager.setDefaultExpiration(300);//设置缓存保留时间（seconds）
+                cacheManager.setDefaultExpiration(6);//设置缓存保留时间（seconds）
         return cacheManager;
     }
 

@@ -54,10 +54,10 @@ public class webController {
         return "home";
     }
 
-    @RequestMapping(value = "/login",method = RequestMethod.POST)
+/*    @RequestMapping(value = "/login",method = RequestMethod.POST)
     public String login() {
         return "index";
-    }
+    }*/
     @RequestMapping(value = "/index",method = RequestMethod.GET)
     public String toIndex() {
         return "index";
