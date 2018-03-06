@@ -1,9 +1,13 @@
 package douguo.bean;
 
+
+import java.io.Serializable;
+
 /**
  * Created by lichang on 2018/3/5
  */
-public class Permission {
+public class Permission implements Serializable{
+
     private Integer id;
     private String name;
     private String permissionUrl;
@@ -48,16 +52,5 @@ public class Permission {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    @Override
-    public String toString() {
-        return "Permission{" +
-            "id=" + id +
-            ", name=" + name +
-            ", permissionUrl=" + permissionUrl +
-            ", method=" + method +
-            ", description=" + description +
-            '}';
     }
 }

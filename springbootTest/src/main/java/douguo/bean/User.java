@@ -1,69 +1,29 @@
 package douguo.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by lichang on 2018/3/5
  */
-public class User implements UserDetails {
+public class User implements Serializable {
     private Integer id;
     private String cnname;
     private String username;
+
     @JsonIgnore
     private String password;
-    private String rePassword;
-    private String historyPassword;
     private String email;
-    @JsonIgnore
     private String telephone;
     private String mobilePhone;
-    private List<? extends GrantedAuthority> authorities;
-    private Role role;
-    private Integer roleId;
+    private String wechatId;
+    private String skill;
+    private Integer departmentId;
+    private Integer loginCount;
 
-
-    @Override
-    @JsonIgnore
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    @JsonIgnore
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    @JsonIgnore
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    @JsonIgnore
-    public boolean isEnabled() {
-        return true;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    @Override
-    @JsonIgnore
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
-    }
-
-    public void setGrantedAuthorities(List<? extends GrantedAuthority> authorities) {
-        this.authorities = authorities;
-    }
+    private List<Role> roles;
 
     public Integer getId() {
         return id;
@@ -80,12 +40,15 @@ public class User implements UserDetails {
     public void setCnname(String cnname) {
         this.cnname = cnname;
     }
-    @Override
+
     public String getUsername() {
         return username;
     }
 
-    @Override
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -118,37 +81,46 @@ public class User implements UserDetails {
         this.mobilePhone = mobilePhone;
     }
 
-    public String getRePassword() {
-        return rePassword;
+    public String getWechatId() {
+        return wechatId;
     }
 
-    public void setRePassword(String rePassword) {
-        this.rePassword = rePassword;
+    public void setWechatId(String wechatId) {
+        this.wechatId = wechatId;
     }
 
-    public String getHistoryPassword() {
-        return historyPassword;
+    public String getSkill() {
+        return skill;
     }
 
-    public void setHistoryPassword(String historyPassword) {
-        this.historyPassword = historyPassword;
+    public void setSkill(String skill) {
+        this.skill = skill;
     }
 
-    public Role getRole() {
-        return role;
+    public Integer getDepartmentId() {
+        return departmentId;
     }
 
-    public void setRole(Role role) {
-        this.role = role;
+    public void setDepartmentId(Integer departmentId) {
+        this.departmentId = departmentId;
     }
 
-    public Integer getRoleId() {
-        return roleId;
+    public Integer getLoginCount() {
+        return loginCount;
     }
 
-    public void setRoleId(Integer roleId) {
-        this.roleId = roleId;
+    public void setLoginCount(Integer loginCount) {
+        this.loginCount = loginCount;
     }
+
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -159,6 +131,11 @@ public class User implements UserDetails {
             ", email=" + email +
             ", telephone=" + telephone +
             ", mobilePhone=" + mobilePhone +
+            ", wechatId=" + wechatId +
+            ", skill=" + skill +
+            ", departmentId=" + departmentId +
+            ", loginCount=" + loginCount +
             '}';
     }
 }
+

@@ -89,21 +89,4 @@ var Script = function () {
         jQuery('#sample_1_wrapper .dataTables_length select').addClass("form-control"); // modify table per page dropdown
 
 
-    jQuery(document).ready(function () {
-
-        //按钮的绑定事件要放到document或者其他父标签上，因为元素是在datatable方法加载完成之后才显示出来的
-        //编辑
-        $(".portlet-body").on('click', 'button#editrow', function () {
-
-            var data = $("#sample_1").DataTable().row($(this).parents("tr")).data();
-            alert(data.firstname + "'s Division is: ");
-        });
-        //删除
-        $(".portlet-body").on('click', 'button#delrow', function () {
-
-            var data = $("#sample_1").DataTable().row($(this).parents("tr")).data();
-            alert("Do you want delete " + data.firstname + "?");
-        });
-
-    });
 }();
