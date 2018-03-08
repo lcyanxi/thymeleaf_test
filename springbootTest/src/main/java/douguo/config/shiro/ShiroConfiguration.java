@@ -38,7 +38,7 @@ import java.util.Map;
     @Bean(name = "hashedCredentialsMatcher") public HashedCredentialsMatcher hashedCredentialsMatcher() {
         HashedCredentialsMatcher credentialsMatcher = new HashedCredentialsMatcher();
         credentialsMatcher.setHashAlgorithmName("MD5");
-        credentialsMatcher.setHashIterations(2);
+        credentialsMatcher.setHashIterations(3);
         credentialsMatcher.setStoredCredentialsHexEncoded(true);
         return credentialsMatcher;
     }

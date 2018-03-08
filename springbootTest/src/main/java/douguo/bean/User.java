@@ -3,42 +3,42 @@ package douguo.bean;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
  * Created by lichang on 2018/3/5
  */
 public class User implements Serializable {
-    private Integer id;
-    private String cnname;
+    private String id;
+    private String nickname;
     private String username;
+    private String sex;
 
     @JsonIgnore
     private String password;
     private String email;
-    private String telephone;
-    private String mobilePhone;
-    private String wechatId;
-    private String skill;
-    private Integer departmentId;
-    private Integer loginCount;
+    private String mobile;
+    private String birthday;
+    private String type;
+    private Date registerTime;
 
     private List<Role> roles;
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public String getCnname() {
-        return cnname;
+    public String getNickname() {
+        return nickname;
     }
 
-    public void setCnname(String cnname) {
-        this.cnname = cnname;
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public String getUsername() {
@@ -47,6 +47,14 @@ public class User implements Serializable {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getSex() {
+        return sex;
+    }
+
+    public void setSex(String sex) {
+        this.sex = sex;
     }
 
     public String getPassword() {
@@ -65,52 +73,28 @@ public class User implements Serializable {
         this.email = email;
     }
 
-    public String getTelephone() {
-        return telephone;
+    public String getMobile() {
+        return mobile;
     }
 
-    public void setTelephone(String telephone) {
-        this.telephone = telephone;
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
     }
 
-    public String getMobilePhone() {
-        return mobilePhone;
+    public String getBirthday() {
+        return birthday;
     }
 
-    public void setMobilePhone(String mobilePhone) {
-        this.mobilePhone = mobilePhone;
+    public void setBirthday(String birthday) {
+        this.birthday = birthday;
     }
 
-    public String getWechatId() {
-        return wechatId;
+    public String getType() {
+        return type;
     }
 
-    public void setWechatId(String wechatId) {
-        this.wechatId = wechatId;
-    }
-
-    public String getSkill() {
-        return skill;
-    }
-
-    public void setSkill(String skill) {
-        this.skill = skill;
-    }
-
-    public Integer getDepartmentId() {
-        return departmentId;
-    }
-
-    public void setDepartmentId(Integer departmentId) {
-        this.departmentId = departmentId;
-    }
-
-    public Integer getLoginCount() {
-        return loginCount;
-    }
-
-    public void setLoginCount(Integer loginCount) {
-        this.loginCount = loginCount;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public List<Role> getRoles() {
@@ -121,21 +105,18 @@ public class User implements Serializable {
         this.roles = roles;
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-            "id=" + id +
-            ", cnname=" + cnname +
-            ", username=" + username +
-            ", password=" + password +
-            ", email=" + email +
-            ", telephone=" + telephone +
-            ", mobilePhone=" + mobilePhone +
-            ", wechatId=" + wechatId +
-            ", skill=" + skill +
-            ", departmentId=" + departmentId +
-            ", loginCount=" + loginCount +
-            '}';
+    public Date getRegisterTime() {
+        return registerTime;
+    }
+
+    public void setRegisterTime(Date registerTime) {
+        this.registerTime = registerTime;
+    }
+
+    @Override public String toString() {
+        return "User{" + "id=" + id + ", nickname='" + nickname + '\'' + ", username='" + username + '\'' + ", sex='"
+            + sex + '\'' + ", password='" + password + '\'' + ", email='" + email + '\'' + ", mobile='" + mobile + '\''
+            + ", birthday='" + birthday + '\'' + ", type='" + type + '\'' + ", roles=" + roles + '}';
     }
 }
 

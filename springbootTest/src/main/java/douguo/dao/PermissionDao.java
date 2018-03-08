@@ -19,5 +19,5 @@ public interface PermissionDao {
 
     int update(Permission permission);
 
-    List<Permission> getByUserId(Integer userId);
+    List<Permission> getByUserId(String userId);
 }

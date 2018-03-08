@@ -67,6 +67,11 @@ public class webController {
         return "pages/index";
     }
 
+    @RequestMapping(value = "/permisson",method = RequestMethod.GET)
+    public String toPermisson() {
+        return "permisson";
+    }
+
     @RequestMapping(value = "/checkout",method = RequestMethod.GET)
     public String toCheckout() {
         return "pages/checkout";
