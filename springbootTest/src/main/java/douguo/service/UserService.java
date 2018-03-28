@@ -3,6 +3,7 @@ package douguo.service;
 import douguo.bean.User;
 import douguo.config.shiro.SecurityService;
 import douguo.dao.UserDao;
+import douguo.util.MD5Util;
 import douguo.util.ToolRandoms;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,13 +37,8 @@ public class UserService {
     }
 
     public User register(User user){
-        String sId = ToolRandoms.randomCode8();
-        //Map map=securityService.encodePassword(user.getPassword(),user.getId());
-        //拿到加密后的密码和摘要
-        Map map = securityService.encodePassword("20182018", sId);
-        String sPassword = (String) map.get(SecurityService.ENCODE_RESULT_KEY_PASSWORD);
-        String Ssalt = (String) map.get(SecurityService.ENCODE_RESULT_KEY_SALT);
-
+        user.setPassword(MD5Util.encode(user.getPassword()));
+        userDao.create(user);
 
         return null;
     }

@@ -3,12 +3,15 @@
 <mapper namespace="douguo.dao.UserDao">
     <resultMap id="userMap" type="douguo.bean.User">
         <id property="id" column="id"/>
-        <result property="cnname" column="cnname"/>
+        <result property="nickname" column="nickname"/>
         <result property="username" column="username"/>
         <result property="password" column="password"/>
         <result property="email" column="email"/>
-        <result property="telephone" column="telephone"/>
-        <result property="mobilePhone" column="mobile_phone"/>
+        <result property="sex" column="sex"/>
+        <result property="mobile" column="mobile"/>
+        <result property="type" column="type"/>
+        <result property="birthday" column="birthday"/>
+        <result property="registerTime" column="registertime"/>
     </resultMap>
 
 
@@ -60,28 +63,26 @@
         </selectKey>
         INSERT INTO user(
         id,
-        cnname,
+        nickname,
         username,
         password,
         email,
-        telephone,
-        mobile_phone,
-        wechat_id,
-        skill,
-        department_id,
-        login_count
+        sex,
+        mobile,
+        birthday,
+        registertime,
+        type
         )VALUES(
         #{id},
-        #{cnname},
+        #{nickname},
         #{username},
         #{password},
         #{email},
-        #{telephone},
-        #{mobilePhone},
-        #{wechatId},
-        #{skill},
-        #{departmentId},
-        #{loginCount}
+        #{sex},
+        #{mobile},
+        #{birthday},
+        #{registerTime},
+        #{type}
         )
     </insert>
 

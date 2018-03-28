@@ -1,0 +1,5139 @@
+【A表】2017年6月1日~2017年8月31日中有课程购买行为的用户，表格内容包括：用户ID、昵称、手机、邮箱、注册日期、最后登陆时间、豆果主页、购买课程次数、是否为达人
+
+SELECT abc.user_id,abc.nickname,abc.mobile,abc.email,d.registerdate,abc.last_time,abc.indexpage,abc.payno,abc.daren
+FROM (
+    SELECT  ab.payno,ab.user_id,ab.nickname,ab.mobile,ab.email,ab.indexpage,ab.daren,c.last_time
+    FROM (
+        SELECT a.payno,b.user_id,b.nickname,b.mobile,b.email,b.indexpage,b.daren
+        FROM (
+            SELECT user_id, count(*) as payno
+            FROM dg_live_enroll
+            WHERE status=2 AND to_date(paytime) BETWEEN '2017-06-01' AND '2017-08-31'
+            GROUP BY user_id
+        ) a JOIN (
+            SELECT user_id,nickname,mobile,email,concat("http://www.douguo.com/u/",username,".html") AS indexpage,if(purview >=0 AND  is_vip='1' AND cate>0,'是','否') AS daren
+            FROM dg_user
+        ) b ON  a.user_id=b.user_id
+    )ab JOIN (
+        SELECT user_id, to_date(last_time) as last_time    //外部分区表很重要
+        FROM dwh_reg_user_logins_latest
+        WHERE p_day=20170904                 //条件一定要写
+    ) c ON ab.user_id=c.user_id
+) abc JOIN (
+    SELECT user_id, to_date(registerdate) as registerdate
+    FROM dg_userdetail
+) d ON abc.user_id=d.user_id
+
+
+【B表】2017年3月1日~2017年8月31日中有购买行为的用户，表格内容包括：用户ID、昵称、手机、邮箱、最后登陆时间、豆果主页、购买订单总数、是否为达人
+
+SELECT ab.user_id,ab.nickname,ab.mobile,ab.email,c.last_time,ab.indexpage,ab.num,ab.daren
+  FROM (
+    SELECT  a.num ,b.user_id,b.nickname,b.mobile,b.email,b.indexpage,b.daren
+          FROM (
+              SELECT user_id, count(*) AS num
+              FROM dg_order
+              WHERE  to_date(pay_time)  BETWEEN '2017-03-01' AND '2017-08-31'
+              GROUP BY user_id
+
+
+          )a JOIN (
+              SELECT user_id,nickname,mobile,email,concat("http://www.douguo.com/u/",username,".html") AS indexpage,if(purview >=0 AND  is_vip='1' AND cate>0,'是','否') AS daren
+              FROM dg_user
+          )b ON a.user_id=b.user_id
+ 
+     )ab JOIN  (
+          SELECT user_id, to_date(last_time) AS last_time
+          FROM dwh_reg_user_logins_latest
+          WHERE p_day='20170904'
+   ) c ON ab.user_id=c.user_id
+
+
+
+
+【B表】2017年3月1日~2017年8月31日中有购买行为的用户，表格内容包括：用户ID、昵称、手机、邮箱、最后登陆时间、豆果主页、购买订单总数、是否为达人，2017年到现在的最高金额
+
+ SELECT abc.user_id,abc.nickname,abc.mobile,abc.email,abc.last_time,abc.indexpage,abc.num,abc.daren,d.total_price
+   FROM (
+              SELECT ab.user_id,ab.nickname,ab.mobile,ab.email,c.last_time,ab.indexpage,ab.num,ab.daren
+              FROM (
+                  SELECT  a.num ,b.user_id,b.nickname,b.mobile,b.email,b.indexpage,b.daren
+                  FROM (
+                      SELECT user_id, count(*) AS num
+                      FROM dg_order
+                      WHERE  (parent_id=0 OR parent_id='' OR parent_id=order_id) AND pay_flag=20  AND store_id<>7568765 and to_date(pay_time)  BETWEEN '2017-03-01' AND '2017-08-31'
+                      GROUP BY user_id
+
+                  )a JOIN (
+                      SELECT user_id,nickname,mobile,email,concat("http://www.douguo.com/u/",username,".html") AS indexpage,if(purview >=0 AND  is_vip='1' AND cate>0,'是','否') AS daren
+                      FROM dg_user
+                  )b ON a.user_id=b.user_id
+         
+             )ab JOIN  (
+                  SELECT user_id, to_date(last_time) AS last_time
+                  FROM dwh_reg_user_logins_latest
+                  WHERE p_day='20170904'
+           ) c ON ab.user_id=c.user_id
+
+   ) abc JOIN(
+      SELECT user_id, max(total_price)/100 AS total_price
+                FROM dg_order
+                WHERE   (parent_id=0 OR parent_id='' OR parent_id=order_id) AND pay_flag=20  AND store_id<>7568765  AND to_date(pay_time)  BETWEEN '2017-01-01' AND '2017-08-31'
+                GROUP BY user_id
+   ) d ON abc.user_id=d.user_id
+
+
+
+
+##运营部下半年需要进行消耗用户积分的工作，需要了解豆果美食全部用户每日赚取积分的数额，最近一周的数据。
+
+SELECT sum(score)  ,to_date(createtime) AS createtime
+FROM dg_integration
+WHERE to_date(createtime)  BETWEEN '2017-08-30' AND '2017-09-05' And score >0
+GROUP BY to_date(createtime) 
+order by createtime      //order by 后面要加limit  不然要报错
+limit 10000
+
+
+【C表】2017年8月1日~2017年9月5日中有购买行为的用户，表格内容包括：用户ID、昵称、手机、邮箱、豆果主页、购买订单总数、购买订单最高金额，是否为达人 
+
+SELECT b.user_id,b.nickname,b.mobile,b.email,b.indexpage,a.order_num,a.max_price,b.daren     
+FROM(
+    SELECT user_id, count(DISTINCT order_id) as order_num,max(total_price)/100 as max_price        //count(distinct u)  distinct对u去重
+    FROM dg_order
+    WHERE (parent_id=0 OR parent_id='' OR parent_id=order_id) AND pay_flag=20  AND store_id<>7568765 and to_date(pay_time)  BETWEEN '2017-08-01' AND '2017-09-05'
+    GROUP BY user_id
+) a JOIN(
+    SELECT user_id,nickname,mobile,email,concat("http://www.douguo.com/u/",username,".html") AS indexpage,if(purview >=0 AND  is_vip='1' AND cate>0,'是','否') AS daren
+    FROM dg_user
+) b ON a.user_id=b.user_id
+
+
+
+每周购买2次以上用户占比，每月购买2次用户占比。
+
+SELECT a2.user_id,concat(round((a2.order_num2/b.order_num)*100,2),"%")
+FROM (
+      select a.user_id, a.order_num as order_num2,'1' as joinColumn
+      from(
+            select  user_id ,count(distinct order_id) as order_num
+            from  dg_order
+            where  (parent_id=0 OR parent_id='' OR parent_id=order_id) AND pay_flag=20  AND store_id<>7568765  AND to_date(pay_time)  BETWEEN '2017-08-01' AND '2017-09-05'
+            GROUP BY user_id
+      ) a
+      WHERE a.order_num>2
+) a2  JOIN (
+      select  user_id ,count(distinct order_id) as order_num,'1' as joinColumn
+      from  dg_order
+      where  (parent_id=0 OR parent_id='' OR parent_id=order_id) AND pay_flag=20  AND store_id<>7568765  AND to_date(pay_time)  BETWEEN '2017-08-01' AND '2017-09-05'
+      GROUP BY user_id
+
+) b ON a2.joinColumn=b.joinColumn
+
+
+
+
+
+每周购买2次以上用户占比，每月购买2次用户占比。
+
+select  a.order_num2,a.order_num,a. order_percent,b.enroll_num2,b.enroll_num,b.enroll_percent
+from(
+
+     select  count(if(t1.order_num>=2,1,NULL)) as order_num2,count(1) as order_num,concat(round((count(if(t1.order_num>=2,1,NULL))/count(1))*100,2),"%") as order_percent,'1' as joinColumn
+     from(
+        select  user_id ,count(order_id) as order_num
+        from  dg_order
+        where  (parent_id=0 OR parent_id='' OR parent_id=order_id) AND pay_flag=20  AND store_id<>7568765  AND to_date(pay_time)  BETWEEN '<<BEGIN_DATE>>' AND '<<END_DATE>>'
+        GROUP BY user_id
+     ) t1
+) a join (
+
+    select  count(if(t2.enroll_num>=2,1,NULL)) as enroll_num2, count(1) as enroll_num,  concat(round((count(if(t2.enroll_num>=2,1,NULL))/count(1))*100,2),"%") as enroll_percent,'1' as joinColumn
+    from(
+          select  user_id ,count(id) as enroll_num
+          from  dg_live_enroll
+          where status=2 and  paytype<>'couponNoSettlement'  AND to_date(paytime)  BETWEEN '<<BEGIN_DATE>>' AND '<<END_DATE>>'
+          GROUP BY user_id
+    ) t2
+
+) b on a.joinColumn=b.joinColumn
+
+
+
+
+// 直播周报需要 可选时段里，所有课程的购买节数按降序排列
+select ab.title,c.class_id,ab.nickname,c.num as num
+from(
+      select b.id,a.nickname,b.title
+      from(
+          select user_id,nickname   select to_date(registerdate),count(*) as num,max(weekofyear(registerdate)),max(month(registerdate)),max(year(registerdate)) \
+                from dg_userdetail \
+                where  to_date(registerdate)>='${BEGIN_DATE}' and to_date(registerdate)<='${END_DATE}' \
+                group by to_date(registerdate)"
+          from dg_user 
+      ) a join(
+          select id,user_id,title   
+          from  dg_live_class
+      ) b on a.user_id=b.user_id 
+) ab join(
+     SELECT  class_id , count(id) as num
+     FROM dg_live_enroll
+     where to_date(paytime) between '2017-09-08' and '2017-09-14' and status=2 and paytype<>'couponNoSettlement'  and isrobot<>1
+     GROUP BY class_id 
+) c on ab.id=c.class_id
+ORDER BY num desc
+limit 10000
+
+
+// 直播周报需要 可选时段里，所有课程的购买节数按降序排列
+
+select ab.title,ab.class_id,c.nickname,ab.num as num
+from(
+      select b.user_id,a.class_id,a.num,b.title
+      from(
+          SELECT class_id,count(id) as num
+          FROM dg_live_enroll
+          where to_date(paytime) between '<<BEGIN_DATE>>' and '<<END_DATE>>' and status=2 and paytype<>'couponNoSettlement'  and isrobot<>1
+          GROUP BY class_id
+      ) a join(
+          select  user_id,id,title   
+          from  dg_live_class
+      ) b on a.class_id=b.id   //注意连接的字段的选择
+)ab join(
+       select user_id,nickname  
+       from dg_user 
+)c on ab.user_id=c.user_id
+order by  num desc   //ordery by 最好写在最后面
+limit 10000 
+
+
+
+
+select a.source,b.statdate,b.num,b.week,b.month,b.year
+from (
+    select user_id ,source
+    from dg_user
+) a join (
+    select user_id, to_date(registerdate) as statdate,count(*) as num,max(weekofyear(registerdate)) as week,max(month(registerdate)) as month,max(year(registerdate)) as year
+    from dg_userdetail 
+    where  to_date(registerdate)>='${BEGIN_DATE}' and to_date(registerdate)<='${END_DATE}' 
+) b on a.user_id=b.user_id
+
+
+
+
+
+
+select ab.source,ab.registerdate,count(ab.user_id),ab.week,ab.month,ab.year \
+from( \
+        select a.user_id, b.source,a.registerdate,a.week,a.month,a.year \
+        from( \
+             select user_id, to_date(registerdate) as registerdate,max(weekofyear(registerdate)) as week,max(month(registerdate)) as month,max(year(registerdate)) as year \
+             from dg_userdetail \
+             where  to_date(registerdate)>='${BEGIN_DATE}' and to_date(registerdate)<='${END_DATE}' \
+             group by user_id, registerdate \ //聚合函数一定要用group by
+        ) a join( \
+             select  user_id,source \
+             from dg_user \
+        ) b on a.user_id=b.user_id \
+) ab \
+group by ab.source, ab.registerdate,ab.week,ab.month,ab.year
+
+
+//家庭健康管理标签
+select category_id,count(distinct cook_id) from dg_cook_categories where category_id in (368,367,376,343,373,348,375,381,380,379,349,364,583,369,372,384,359,350,668,21,218,213,210,429,22,199,188) group by category_id; 
+
+
+
+//微信群活动约有200+人获奖用户已提交了昵称，现需要这些人的id或uid
+
+select  a.user_id,b.nickname
+from (
+        select user_id,nickname
+        from dg_user
+) a join (
+        select id as nickname
+        from dh_tmp
+) b on a.nickname=b.nickname
+
+
+
+
+//往hive表里插入数据
+load data local inpath '/opt/DATA/goldmine/src/kpi/daily_count/user/sms_huodong/20150407_uid_01_hive.log' overwrite into table dh_tmp_user      //注意以后别人给的数据要检查，看是否有空格的
+
+
+
+select t.family_num,t.member_num,tt.cook_num,t.avg_family_members,t.avg_manage_days,'${CUR_DATE_SIMP}' as statdate,'${CUR_DATE_SIMP}' as createtime,'${CUR_DATE_SIMP}' as updatetime \
+from ( \
+        select a.family_num,a.member_num,a.avg_family_members,b.avg_manage_days,a.statdate \
+        from (  \
+                select '${CUR_DATE}' as statdate,count(distinct family_id) as family_num, \
+                        count(distinct id) as member_num,round(count(distinct id)/count(distinct family_id),2) as avg_family_members \
+                from dg_family_member  \
+                where to_date(createtime)<='${CUR_DATE}' \
+        ) a left join ( \
+                select '${CUR_DATE}' as statdate,round(SUM(dfh.days)/count(distinct dfh.family_id),2) as avg_manage_days \
+                from ( \
+                        select family_id,count(distinct plandate) as days \
+                        from dg_family_healthplan \
+                        where to_date(createtime)<='${CUR_DATE}' \
+                        group by family_id \
+                ) dfh \
+        ) b on a.statdate=b.statdate \
+) t join ( \
+        select '${CUR_DATE}' as statdate,count(distinct caipu_id) as cook_num from dg_family_healthplan_caipu where to_date(createtime)<='${CUR_DATE}' \
+) tt on t.statdate=tt.statdate
+
+
+
+
+
+select ab.modifytime,count(*)
+from(
+    select b.device_token,b.imei,b.modifytime
+    from(
+          select  device_token,imei,modifytime
+          from dg_devicetoken
+          where to_date(modifytime)='2017-09-25' AND device_token=''
+    ) a join(
+          select device_token,imei,modifytime
+          from dg_devicetoken
+          where to_date(modifytime)='2017-09-26' and device_token<>''
+    ) b on a.imei=b.imei
+) ab
+
+
+
+select b.modifytime,count(*)from( select device_token,imei,modifytime from( select device_token,imei,to_date(modifytime) as modifytime from dg_devicetoken where to_date(odifytime)='2017-09-25' AND device_token='' ) a join( select device_token,imei,to_date(modifytime) as modifytime from dg_devicetoken where to_date(modifytime)='2017-09-26' and device_token<>'' ) b on a.imei=b.imei)
+
+
+
+ //   其中包括 id、昵称、主页、粉丝量、生日或年龄、手机号、注册豆果日期、所在地、购买订单数量、最高订单金额、收入情况
+
+SELECT b.user_id,b.nickname,b.mobile,b.email,b.indexpage,a.order_num,a.max_price,b.daren     
+FROM(
+    SELECT user_id, count(DISTINCT order_id) as order_num,max(total_price)/100 as max_price        //购买订单数 ，最高订单金额
+    FROM dg_order
+    WHERE (parent_id=0 OR parent_id='' OR parent_id=order_id) AND pay_flag=20  AND store_id<>7568765 and to_date(pay_time)  BETWEEN '2017-08-01' AND '2017-09-05'
+    GROUP BY user_id
+) a JOIN(
+    SELECT user_id,nickname,mobile,concat("http://www.douguo.com/u/",username,".html") AS indexpage,origin_city  //获取id,昵称，首页，电话，所在地
+    FROM dg_user
+    where mobile<>''
+) b ON a.user_id=b.user_id
+
+
+select user_id,birthday,registerdate   //获取生日，注册日期
+from   dg_userdetail
+
+
+select user_id , fans_num      //获取粉丝量
+from dg_user_status
+
+
+
+
+
+ //   其中包括 id、昵称、主页、粉丝量、生日或年龄、手机号、注册豆果日期、所在地、购买订单数量、最高订单金额、收入情况
+
+select tmp3.user_id,tmp3.nickname,tmp3.indexpage,tmp3.fans_num,tmp3.birthday,tmp3.mobile,tmp3.registerdate ,tmp3.origin_city,tmp3.order_num,tmp3.max_price ,tmp4.name
+from(
+      select  tmp2.user_id,tmp2.nickname,tmp2.mobile,tmp2.indexpage,tmp2.origin_city,tmp2.order_num,tmp2.max_price ,tmp2.registerdate ,tmp2.birthday,cc.fans_num
+      from(       
+              select tmp.user_id,tmp.nickname,tmp.mobile,tmp.indexpage,tmp.origin_city,tmp.order_num,tmp.max_price ,tmp1.registerdate ,tmp1.birthday
+              from(
+                      SELECT bb.user_id,bb.nickname,bb.mobile,bb.indexpage,bb.origin_city,aa.order_num,aa.max_price 
+                      FROM( 
+                          SELECT user_id, count(DISTINCT order_id) as order_num,max(total_price)/100 as max_price 
+                          FROM dg_order 
+                          WHERE (parent_id=0 OR parent_id='' OR parent_id=order_id) AND pay_flag=20  AND store_id<>7568765 
+                          GROUP BY user_id 
+                      ) aa JOIN( 
+                          SELECT user_id,nickname,mobile,concat('http://www.douguo.com/u/',username,'.html') AS indexpage,  origin_city 
+                          FROM dg_user 
+                          where mobile<>'' or mobile<>null
+                      ) bb ON aa.user_id=bb.user_id            
+              ) tmp join(
+                       select user_id,birthday,registerdate 
+                       from   dg_userdetail 
+              )tmp1 on tmp.user_id=tmp1.user_id
+      ) tmp2 join (
+              select user_id , fans_num  
+              from dg_user_status 
+      ) cc on tmp2.user_id=cc.user_id
+) tmp3 join(    
+          select m.user_id,n.name
+          from(
+                select df.user_id,df.family_id,ndfm.income
+                from (
+                        select id as family_id,user_id 
+                        from dg_family 
+                ) df join (
+                        select dfm.family_id,dfm.income 
+                        from (
+                                select *,ROW_NUMBER() OVER (PARTITION BY family_id order by id) as rn 
+                                from dg_family_member 
+                                where status=1 and weight<>0 and height<>0 
+                        ) dfm 
+                        where dfm.rn=1 
+                ) ndfm on df.family_id=ndfm.family_id  
+          ) m join(
+              select id,name 
+              from dg_family_tag 
+              where status=1 
+          ) n on m.income=n.id
+          group by m.user_id,n.name
+) tmp4 on tmp3.user_id=tmp4.user_id
+
+
+
+
+select tmp3.user_id,tmp3.nickname,tmp3.mobile,tmp3.indexpage,tmp3.origin_city,tmp3.order_num,tmp3.max_price ,tmp3.registerdate ,tmp3.birthday,tmp3.fans_num,tmp4.name \
+from( \
+      select  tmp2.user_id,tmp2.nickname,tmp2.mobile,tmp2.indexpage,tmp2.origin_city,tmp2.order_num,tmp2.max_price ,tmp2.registerdate ,tmp2.birthday,cc.fans_num \
+      from( \
+              select tmp.user_id,tmp.nickname,tmp.mobile,tmp.indexpage,tmp.origin_city,tmp.order_num,tmp.max_price ,tmp1.registerdate ,tmp1.birthday \
+              from( \
+                      SELECT bb.user_id,bb.nickname,bb.mobile,bb.indexpage,bb.origin_city,aa.order_num,aa.max_price \
+                      FROM( \
+                          SELECT user_id, count(DISTINCT order_id) as order_num,max(total_price)/100 as max_price \
+                          FROM dg_order \
+                          WHERE (parent_id=0 OR parent_id='' OR parent_id=order_id) AND pay_flag=20  AND store_id<>7568765 \
+                          GROUP BY user_id \
+                      ) aa JOIN( \
+                          SELECT user_id,nickname,mobile,concat('http://www.douguo.com/u/',username,'.html') AS indexpage,origin_city \
+                          FROM dg_user \
+                          where mobile<>'' \
+                      ) bb ON aa.user_id=bb.user_id \
+              ) tmp join( \
+                       select user_id,birthday,registerdate \
+                       from   dg_userdetail \
+              )tmp1 on tmp.user_id=tmp1.user_id \
+      ) tmp2 join ( \
+              select user_id , fans_num  \
+              from dg_user_status \
+      ) cc on tmp2.user_id=cc.user_id \
+) tmp3 join( \
+          select m.user_id,n.name \
+          from( \
+                select df.user_id,df.family_id,ndfm.income \
+                from ( \
+                        select id as family_id,user_id \
+                        from dg_family \
+                ) df join ( \
+                        select dfm.family_id,dfm.income \
+                        from ( \
+                                select *,ROW_NUMBER() OVER (PARTITION BY family_id order by id) as rn \
+                                from dg_family_member \
+                                where status=1 and weight<>0 and height<>0 \
+                        ) dfm  \
+                        where dfm.rn=1 \
+                ) ndfm on df.family_id=ndfm.family_id  \
+          ) m join( \
+              select id,name \
+              from dg_family_tag \
+              where status=1 \
+          ) n on m.income=n.id \
+) tmp4 on tmp3.user_id=tmp4.user_id
+
+
+
+
+
+// 1、目前有多少用户有积分？总积分数量是多少？
+select count(DISTINCT user_id),sum(point)
+from  dg_user_status
+where point<>0 
+
+
+
+//2、17年有登录的有积分的用户是多少？共多少积分？
+//3、3个月内有登录的有积分的用户是多少？共多少积分？
+
+select count(distinct a.user_id),sum(a.point)
+from(
+      select user_id,point
+      from dg_user_status
+      where point<>0 
+) a join(
+     select user_id
+     from dwh_reg_user_logins_latest
+     where p_day=20170929 and  to_date(last_time)  BETWEEN '2017-06-30' AND '2017-09-29' 
+) b on a.user_id =b.user_id
+
+
+
+//4、达人有积分的有多少人？达人的总积分是多少？   purview >=0 AND  is_vip='1' AND cate>0
+
+select  count(DISTINCT a.user_id),sum(b.point)
+from(
+    select user_id
+    from dg_user
+    where purview >=0 AND  is_vip='1' AND cate>0
+) a join(
+    select user_id,point
+    from dg_user_status
+    where point<>0 
+) b on a.user_id=b.user_id
+
+//5、17年有登录的达人有积分的用户是多少？共多少积分？
+//6、3个月内有登录的达人有积分的用户是多少？共多少积分？
+select count(DISTINCT ab.user_id),sum(ab.point)
+from(
+      select  a.user_id,b.point
+      from(
+          select user_id
+          from dg_user
+          where purview >=0 AND  is_vip='1' AND cate>0
+      ) a join(
+          select user_id,point
+          from dg_user_status
+          where point<>0 
+      ) b on a.user_id=b.user_id
+) ab join (
+     select user_id
+     from dwh_reg_user_logins_latest
+     where p_day=20170929 and  to_date(last_time)  BETWEEN '2017-06-30' AND '2017-09-29' 
+) c on ab.user_id = c.user_id
+
+
+//17年获取的积分总数是多少？有多个用户？
+
+select count(distinct user_id),sum(score)
+     from dg_integration
+     where to_date(createtime) BETWEEN '2017-01-01' AND '2017-09-29' 
+
+
+//17年达人获取的积分总数是多少？有多个达人？
+
+
+select  count(distinct b.user_id),sum(b.score)
+from(
+      select user_id
+      from dg_user
+      where purview >=0 AND  is_vip='1' AND cate>0
+) a join (
+     select user_id,score
+     from dg_integration
+     where to_date(createtime) BETWEEN '2017-01-01' AND '2017-09-29' 
+) b on a.user_id = b.user_id
+  
+
+
+
+select b.time,concat(round((b.num/a.total*100,2),"%") as time_percent
+from(
+    select count(*) as total,'1' as joinColumn
+    from dh_server_log
+    where p_day in (20171002,20170925,20170918,20170911)
+) a join (
+
+    select hour(time) as time,count(*) as num,'1' as joinColumn
+    from dh_server_log
+    where p_day=(20171002,20170925,20170918,20170911)
+    group by hour(time)
+) b on a.joinColumn=b.joinColumn
+
+
+
+
+
+
+
+
+
+
+select  a.order_num2,a.order_num,a. order_percent,b.enroll_num2,b.enroll_num,b.enroll_percent
+from(
+
+     select  count(if(t1.order_num>=2,1,NULL)) as order_num2,count(1) as order_num,concat(round((count(if(t1.order_num>=2,1,NULL))/count(1))*100,2),"%") as order_percent,'1' as joinColumn
+     from(
+        select  user_id ,count(order_id) as order_num
+        from  dg_order
+        where  (parent_id=0 OR parent_id='' OR parent_id=order_id) AND pay_flag=20  AND store_id<>7568765  AND to_date(pay_time)  BETWEEN '<<BEGIN_DATE>>' AND '<<END_DATE>>'
+        GROUP BY user_id
+     ) t1
+) a join (
+
+    select  count(if(t2.enroll_num>=2,1,NULL)) as enroll_num2, count(1) as enroll_num,  concat(round((count(if(t2.enroll_num>=2,1,NULL))/count(1))*100,2),"%") as enroll_percent,'1' as joinColumn
+    from(
+          select  user_id ,count(id) as enroll_num
+          from  dg_live_enroll
+          where status=2 and  paytype<>'couponNoSettlement'  AND to_date(paytime)  BETWEEN '<<BEGIN_DATE>>' AND '<<END_DATE>>'
+          GROUP BY user_id
+    ) t2
+
+) b on a.joinColumn=b.joinColumn
+
+  
+
+
+
+//http://om.douguo.com/cookbook/1056204.html?f=sm
+select to_date(create_time) , count(*) 
+from dh_wap_pv 
+where p_day=20171009 and request rlike 'http://om\\.douguo\\.com/cookbook/[0-9]*\\.html\\?f=sm.*' and  to_date(create_time) BETWEEN '2017-10-06' AND '2017-10-09'
+group by to_date(create_time);
+
+
+
+附件是课堂首页 每一个专题运营位配置的URL，辛苦统计每一个的PV／UV数据，
+网红甜品  http://m.douguo.com/activity/rushtemplate/loadview/11936?ysh=0
+优质新课  http://m.douguo.com/activity/rushtemplate/loadview/12016?ysh=0
+怀念的味道 http://m.douguo.com/activity/rushtemplate/loadview/12021?ysh=0
+面包show  http://m.douguo.com/activity/rushtemplate/loadview/11997?ysh=0
+零食专题  http://m.douguo.com/activity/rushtemplate/loadview/11865?ysh=0
+情人节 http://m.douguo.com/activity/rushtemplate/loadview/11935?ysh=0
+年味儿 http://m.douguo.com/activity/rushtemplate/loadview/11994?ysh=0
+主食爱好者 http://m.douguo.com/activity/rushtemplate/loadview/11790?ysh=0
+小白课堂  http://m.douguo.com/activity/rushtemplate/loadview/11755?ysh=0
+中餐top5  http://m.douguo.com/activity/rushtemplate/loadview/11771?ysh=0
+烘焙top6  http://m.douguo.com/activity/rushtemplate/loadview/11800?ysh=0
+
+
+
+select to_date(create_time) as time,  count(*) from dh_wap_pv where p_day>='20171006' and p_day<='20171009'
+  and request rlike '/cookbook/[0-9]*\\.html\\?f=sm.*' group by to_date(create_time) order by time
+limit 10000
+
+
+//这个是月度用户登陆频次的统计脚本，你们了解一下
+select p_month,logins,count(*) from dwh_app_logins_month where p_month>=201705 group by p_month,logins order by p_month,logins;
+
+
+
+        select '${END_DATE}' as statdate,'${END_DATE}' as stat_type_value,\
+                0 as new_active_users,du.new_reg_users,0 as active_users,dulog.login_users,allu.action_users,\
+                0 as view_cook_pv,0 as view_cook_users,dc.cooks,dc.cook_users,0 as view_dish_pv,\
+                0 as view_dish_users,ds.dishs,ds.dish_users,dcc.cookcomments,dcc.cookcomment_users,\
+                dsc.dishcomments,dsc.dishcomment_users,dclt.cookcollects,dclt.cookcollect_users,dslk.dish_favs,\
+                dslk.dish_fav_users,dp.group_posts,dp.group_post_users,dr.group_replys,dr.group_reply_users, \
+                0 as mall_orders,0 as mall_pays,0 as mall_moneys,0 as searchs,df.user_friend_num \
+        from (
+                select 'uid' as uid,count(*) as new_reg_users \
+                from dg_userdetail \
+                where to_date(registerdate) >= '${!BEGIN_DATE}' and to_date(registerdate) <= '${END_DATE}' \
+        ) du  left outer join (\
+                select 'uid' as uid,count(*) as cooks,count(distinct dck.user_id) as cook_users \
+                from (\
+                        select user_id,cook_id \
+                        from dg_cook \
+                        where flag>=0 and to_date(create_time) >='${!BEGIN_DATE}' and to_date(create_time)<='${END_DATE}' \
+                ) dck left outer join (\
+                        ${quser} \
+                ) dtu on dck.user_id=dtu.user_id \
+                where dtu.user_id is not null \
+        ) dc on du.uid=dc.uid \
+        left outer join (\
+                select 'uid' as uid,count(*) as dishs,count(distinct dck.user_id) as dish_users \
+                from (\
+                        select user_id,dish_id \
+                        from dg_dish \
+                        where to_date(createdate)>='${!BEGIN_DATE}' and to_date(createdate)<='${END_DATE}' and flag>=1 \
+                ) dck left outer join (\
+                        ${quser} \
+                ) dtu on dck.user_id=dtu.user_id \
+                where dtu.user_id is not null \
+        ) ds on du.uid=ds.uid \
+        left outer join (\
+                select 'uid' as uid,count(*) as cookcomments,count(distinct dck.user_id) as cookcomment_users \
+                from (\
+                        select userid as user_id,commentid \
+                        from dg_cookcomment \
+                        where to_date(createdate)>='${!BEGIN_DATE}' and to_date(createdate)<='${END_DATE}' and flag>=0 \
+                ) dck left outer join (\
+                        ${quser} \
+                ) dtu on dck.user_id=dtu.user_id \
+                where dtu.user_id is not null \
+        ) dcc on du.uid=dcc.uid \
+        left outer join (\
+                select 'uid' as uid,count(*) as dishcomments,count(distinct dck.user_id) as dishcomment_users \
+                from (\
+                        select user_id,commentid \
+                        from dg_dishcomment \
+                        where to_date(createdate)>='${!BEGIN_DATE}' and to_date(createdate)<='${END_DATE}' and flag>=0 \
+                ) dck left outer join (\
+                        ${quser} \
+                ) dtu on dck.user_id=dtu.user_id \
+                where dtu.user_id is not null \
+        ) dsc on du.uid=dsc.uid \
+        left  outer join( \
+                select 'uid' as uid,count(*) as user_friend_num \
+                from( \
+                     select id,user_id \
+                     from dg_friend \
+                     where to_date(createtime)>='${!BEGIN_DATE}' and to_date(createtime)<='${END_DATE}' \
+                ) dcf left outer join ( \
+                       ${quser} \
+                ) dtu on dcf.user_id=dtu.user_id \
+                where dtu.user_id id not null \
+        ) df on  du.uid=df.uid \
+        left outer join (\
+                select 'uid' as uid,count(*) as cookcollects,count(distinct dck.user_id) as cookcollect_users \
+                from (\
+                        select user_id,collect_id \
+                        from dg_cookcollect \
+                        where to_date(createtime)>='${!BEGIN_DATE}' and to_date(createtime)<='${END_DATE}' and flag>=0 \
+                ) dck left outer join (\
+                        ${quser} \
+                ) dtu on dck.user_id=dtu.user_id \
+                where dtu.user_id is not null \
+        ) dclt on du.uid=dclt.uid \
+        left outer join (\
+                select 'uid' as uid,count(*) as dish_favs,count(distinct dck.user_id) as dish_fav_users \
+                from (\
+                        select user_id,id \
+                        from dg_dishfav \
+                        where to_date(createdate)>='${!BEGIN_DATE}' and to_date(createdate)<='${END_DATE}'  \
+                ) dck left outer join (\
+                        ${quser} \
+                ) dtu on dck.user_id=dtu.user_id \
+                where dtu.user_id is not null \
+        ) dslk on du.uid=dslk.uid \
+        left outer join (\
+                select 'uid' as uid,count(*) as group_posts,count(distinct dck.user_id) as group_post_users \
+                from (\
+                        select user_id,id \
+                        from dg_post \
+                        where to_date(createtime)>='${!BEGIN_DATE}' and to_date(createtime)<='${END_DATE}' and flag=1 \
+                ) dck left outer join (\
+                        ${quser} \
+                ) dtu on dck.user_id=dtu.user_id \
+                where dtu.user_id is not null \
+        ) dp on du.uid=dp.uid \
+        left outer join (\
+                select 'uid' as uid,count(*) as group_replys,count(distinct dck.user_id) as group_reply_users \
+                from (\
+                        select user_id,reply_id \
+                        from dg_reply \
+                        where to_date(createtime)>='${!BEGIN_DATE}' and to_date(createtime)<='${END_DATE}' and flag=1 \
+                ) dck left outer join (\
+                        ${quser} \
+                ) dtu on dck.user_id=dtu.user_id \
+                where dtu.user_id is not null \
+        ) dr on du.uid=dr.uid \
+        left outer join (\
+                select 'uid' as uid,count(distinct dck.user_id) as login_users \
+                from (\
+                        select req[\"uid\"] as user_id \
+                        from dh_server_log \
+                        where p_day>=${!BEGIN_PARTITION} and p_day<=${END_PARTITION} and plat='API' and (req[\"souc\"]='3' or req[\"souc\"]='4') \
+                        group by req[\"uid\"]
+                ) dck left outer join (\
+                        ${quser} \
+                ) dtu on dck.user_id=dtu.user_id \
+                where dtu.user_id is not null \
+        ) dulog on du.uid=dulog.uid \
+        left outer join (\
+                select 'uid' as uid,count(distinct duser.user_id) as action_users \
+                from (\
+                        select user_id \
+                        from dg_cook \
+                        where flag>=0 and to_date(create_time) >='${!BEGIN_DATE}' and to_date(create_time)<='${END_DATE}' \
+                        UNION ALL \
+                         select user_id \
+                        from dg_dish \
+                        where to_date(createdate)>='${!BEGIN_DATE}' and to_date(createdate)<='${END_DATE}' and flag>=1 \
+                        UNION ALL \
+                        select userid as user_id \
+                        from dg_cookcomment \
+                        where to_date(createdate)>='${!BEGIN_DATE}' and to_date(createdate)<='${END_DATE}' and flag>=0 \
+                        UNION ALL \
+                          select user_id \
+                        from dg_dishcomment \
+                        where to_date(createdate)>='${!BEGIN_DATE}' and to_date(createdate)<='${END_DATE}' and flag>=0 \
+                        UNION ALL \
+                          select user_id \
+                        from dg_cookcollect \
+                        where to_date(createtime)>='${!BEGIN_DATE}' and to_date(createtime)<='${END_DATE}' and flag>=0 \
+                        UNION ALL \
+                         select user_id \
+                        from dg_dishfav \
+                        where to_date(createdate)>='${!BEGIN_DATE}' and to_date(createdate)<='${END_DATE}'  \
+                        UNION ALL \
+                         select user_id \
+                        from dg_post \
+                        where to_date(createtime)>='${!BEGIN_DATE}' and to_date(createtime)<='${END_DATE}' and flag=1 \
+                        UNION ALL \
+                          select user_id \
+                        from dg_reply \
+                        where to_date(createtime)>='${!BEGIN_DATE}' and to_date(createtime)<='${END_DATE}' and flag=1 \
+                ) duser left outer join (\
+                        ${quser} \
+                ) dtu on duser.user_id=dtu.user_id \
+                where dtu.user_id is not null \
+        ) allu on du.uid=allu.uid
+
+10,25,50,100
+
+//现需要观察7月1日至9月30日，新增注册数与新增安装数的统计比值变化
+select a.statdate, concat(round((a.dg_num/b.app_num)*100,2),"%") as percent
+from (
+        select to_date(registerdate) as statdate, count(distinct user_id) as dg_num
+        from dg_userdetail
+        where to_date(registerdate)  BETWEEN '<<BEGIN_DATE>>' AND '<<END_DATE>>'
+        group by  to_date(registerdate) 
+) a join (
+        select to_date(time) as  statdate , count(distinct uid) as app_num
+        from app_user
+        where p_day >='<<BEGIN_PARTITION>>' and p_day<='<<END_PARTITION>>'
+        group  by  to_date(time)
+) b on a.statdate=b.statdate
+order by a.statdate
+limit 10000
+
+
+// 数据需求-最近半年内使用第三方登录未绑定手机号用户的绝对值,因解决之前存在的“死账号”买课后无法查看的问题，改了注册登录的逻辑，想知道近半年内受影响的用户数量
+select count(distinct a.user_id)
+from(    
+    select user_id
+    from dg_third
+    where to_date(creattime) BETWEEN '2017-01-01' AND '2017-09-30'
+) a join (
+    select user_id
+    from dg_user
+    where mobile=''
+) b on a.user_id=b.user_id
+
+
+//1、标签为「早餐」的菜谱数量及数据；55339
+//3、标签为「午餐」的菜谱数量及数据；
+//5、标签为「下午茶」的菜谱数量及数据；
+
+select count(distinct cook_id)           
+from dg_cook_categories
+where categoryname='夜宵'
+
+select cook_id
+from dg_cook_categories
+where categoryname='夜宵'
+
+
+//2、标签为「早餐」且为「精品」的菜谱数量及数据；  22226
+
+select count(distinct b.cook_id)
+from(
+      select cook_id
+      from dg_cook_categories
+      where categoryname='夜宵'
+) a join (
+      select cook_id
+      from dg_cook
+      where flag >= 1 and levelid<=2 
+) b on a.cook_id=b.cook_id
+
+
+select  b.cook_id
+from(
+      select cook_id
+      from dg_cook_categories
+      where categoryname='夜宵'
+) a join (
+      select cook_id
+      from dg_cook
+      where flag >= 1 and levelid<=2 
+) b on a.cook_id=b.cook_id
+
+   //请帮忙导出所有17年还活跃的圈圈发帖用户及回帖用户全部信息，具体如下，辛苦
+    //用户id、昵称、是否达人、最后登陆时间、注册日期、发帖数、评论数、菜谱数、A类菜谱数、B类菜谱数、作品数、性别、生日、积分、手机号、邮箱、省、市、主页、粉丝量
+  //发帖数、评论数、菜谱数、A类菜谱数、B类菜谱数、作品数、粉丝量  且为精品
+
+
+select  dpr.user_id,u.nickname,if(u.purview >=0 AND  u.is_vip='1' AND u.cate>0,'是','否') AS daren,dwh.last_time,dgu.registerdate,dgp.post_num,dgc.comment_num,dus.cook_num,dgcook.a_cook_num, 
+dgcook.b_cook_num,dus.dishes_num,u.sex,dgu.birthday,dus.integration_num,u.mobile,u.email,dwh.city, dwh.province,concat('http://www.douguo.com/u/',u.username,'.html') AS indexpage,dus.fans_num,dgp.jing_post_num  
+from ( 
+        select nn.user_id 
+        from( 
+            select user_id 
+            from dg_post 
+            where to_date(createtime) BETWEEN '2017-01-01' AND '2017-10-12' and user_id>0 
+            UNION ALL 
+            select user_id 
+            from dg_reply 
+            where to_date(createtime) BETWEEN '2017-01-01' AND '2017-10-12' and user_id>0 
+        ) nn  group by nn.user_id 
+) dpr left join ( 
+        select user_id,fans_num,dishes_num ,recipes_num as cook_num,integration_num
+        from dg_user_status 
+) dus on dpr.user_id=dus.user_id 
+left  join ( 
+       select userid,count(*) as comment_num 
+       from dg_cookcomment 
+       group by userid 
+) dgc on dpr.user_id=dgc.userid 
+left outer join ( 
+      select user_id, count(if(levelid<=2,1,NULL)) as a_cook_num, count(if(levelid=3,1,NULL)) as b_cook_num 
+      from dg_cook 
+      group by user_id 
+) dgcook on dpr.user_id=dgcook.user_id 
+left join ( 
+      select user_id,count(*) as post_num,count(if (isjing=1,1,NULL) ) as jing_post_num 
+      from dg_post 
+      group by user_id 
+) dgp on dpr.user_id=dgp.user_id 
+left join dg_userdetail dgu on dpr.user_id=dgu.user_id 
+left  join dg_user u on dpr.user_id=u.user_id 
+left join ( 
+     SELECT user_id,province,city, to_date(last_time) as last_time 
+     FROM dwh_reg_user_logins_latest 
+     WHERE p_day=20171012 
+) dwh on dpr.user_id=dwh.user_id
+
+
+
+
+
+                          
+
+//附件提供的“进阶达人明细”ID中，达人在9月1日-9月30日间发布（新增加）的菜谱总数、A类菜谱数、B类菜谱数、作品数、粉丝数、兑换课程数
+
+
+select dgu.user_id,u.nickname, dgc.cook_num,dgc.a_cook_num,dgc.b_cook_num,dgd.dishes_num,dus.fans_num,dle.class_num 
+from ( 
+       SELECT id as user_id 
+       FROM dh_tmp 
+) dgu left join ( 
+      select user_id,count(*) as cook_num , count(if(levelid<=2,1,NULL)) as a_cook_num, count(if(levelid=3,1,NULL)) as b_cook_num 
+      from dg_cook 
+      where to_date(create_time) BETWEEN '2017-09-01' AND '2017-09-30' 
+      group by user_id 
+) dgc on dgu.user_id=dgc.user_id 
+left join ( 
+     select userid,count(*) as fans_num 
+     from dg_friend  
+     where to_date(createdate) BETWEEN '2017-09-01' AND '2017-09-30' 
+     group by userid 
+) dus on dgu.user_id=dus.userid 
+left join ( 
+     select user_id,count(*) as dishes_num 
+     from dg_dish 
+     where to_date(createdate)  BETWEEN '2017-09-01' AND '2017-09-30' 
+     group by user_id 
+) dgd on dgu.user_id=dgd.user_id 
+left join (  
+     select user_id,count(*) as class_num 
+     from dg_live_enroll 
+     where status=2 and paytype = 'couponNoSettlement' and to_date(paytime) BETWEEN '2017-09-01' AND '2017-09-30' 
+     group by user_id 
+) dle on dgu.user_id=dle.user_id 
+left join ( 
+     select user_id,nickname 
+     from dg_user 
+) u on dgu.user_id=u.user_id
+
+
+
+
+
+//利仁活动数据  收集cook_id数  pv ,  收藏数
+
+select link,flag,createtime,title,pull_id from dg_huodong where title like '%利仁%' and pull_id>0 and flag>=0 limit 100;
+select cook_id from dg_pull_item where pull_id=102 limit 1;
+select click_times,collectsnum from dg_cook where cook_id=995168;
+
+select count(a.cook_id) as cook_num,sum(b.click_times) as pv,sum(b.collectsnum) as collect_num
+from (
+  select cook_id from dg_pull_item where pull_id=201
+) a join (
+  select cook_id,click_times,collectsnum 
+  from dg_cook 
+) b on a.cook_id=b.cook_id
+
+
+
+
+
+
+
+select a2.name,a.total
+from(
+  select cook_id, sum(pv) as total
+  from dwh_cook
+  where  p_day>='2017-11-05' 
+  group by cook_id
+   order by total desc limit 10
+) a join (
+  select cook_id,name
+  from dg_cook
+) a2 on a.cook_id=a2.cook_id
+
+
+        select to_date(time) as time,req[\"obj\"] as caidan_id,count(*) as pv,count(1) as uv \
+        from dh_server_log \
+        where p_day>=${BEGIN_PARTITION} and p_day<=${END_PARTITION} and req[\"qtype\"]='view_caipu_caidan_detail' and req[\"srctype\"] in ('2302')
+
+
+
+
+select  a.time,count(*)
+from (
+select  req['imei'] as imei, to_date(time) as time
+from dh_server_log
+where p_day>=20170801 and p_day<=20170812 and req['srctype'] ='2302'
+) a join (
+select imei,to_date(time) as time
+from  app_user
+where p_day>=20170801 and p_day<=20170812
+) b on a.imei=b.imei and a.time=b.time
+group by a.time
+
+
+
+
+select to_date(time) as time,count(*)
+from  app_user
+where p_day>=20170801 and p_day<=20170812
+group by to_date(time)
+
+
+select to_date(time) as time,count(*)
+from dh_server_log
+where p_day>=20170801 and p_day<=20170812 and req['srctype'] ='2302'
+group by to_date(time) 
+
+
+
+create table temp as 
+select t.req
+from(
+      select a.req
+      from (
+      select  req,req['imei'] as imei
+      from dh_server_log
+      where p_day>=20170801 and p_day<=20170801
+      ) a join (
+      select imei
+      from  app_user
+      where p_day>=20170801 and p_day<=20170801
+      ) b on a.imei=b.imei
+      group by b.imei
+) t
+
+
+
+关键词搜索或者我们后台菜谱数据中，带有“巴旦木”在标题的菜谱，或者原料里面带“巴旦木”的菜谱，
+最好是最近3年的数据（每年的总数）
+select year(aa.create_time) as year , count(*)
+from (
+     select  to_date(create_time)  as create_time
+     from dg_cook
+     where name like '%大杏仁%' and  to_date(create_time)   BETWEEN '2015-01-01' AND '2017-11-14'
+       UNION ALL
+    select  to_date(updatetime) as create_time
+    from dg_cook_ingredients
+    where ingredientname like '%大杏仁%' and  to_date(updatetime) BETWEEN '2015-01-01' AND '2017-11-14'
+) aa 
+group by  year(aa.create_time)
+
+//上传作品 post_create_zuopin
+select req['srctype'],count(*) as pv,count(distinct req["euid"]) as uv \
+from  dh_server_log \
+where p_day=20171116 and req['qtype']='post_create_zuopin' \
+group by req['srctype']
+
+
+
+//秀美食 view_dish_homev2   秀早餐 view_dish_tag
+select req['qtype'],count(*) as pv,count(distinct req['euid']) as uv
+from  dh_server_log
+where p_day=20171116 and (req['qtype']='view_dish_homev2' or req['qtype']='view_dish_tag')
+group by req['srctype']
+
+
+
+
+
+
+CREATE EXTERNAL TABLE `dwh_srctype_parameter_compare`(
+  `name` string,
+  `srctype` int)
+   ROW FORMAT DELIMITED  
+  FIELDS TERMINATED BY ',' 
+  STORED AS TEXTFILE 
+  LOCATION '/user/hive/warehouse/dg/tables/dwh_srctype_parameter_compare';
+
+
+
+请帮忙按照附件表格中积分维度，帮我跑下都有多少人。历史积分（integration_num>）、可用积分（point）两个维度都跑一下
+
+    select  count(if (integration_num<=500,1,null)) , count(if(integration_num>500 and integration_num<=1000,1,null)),  count(if(integration_num>1000 and integration_num<=2000,1,null)), 
+    count(if(integration_num>2000 and integration_num<=4000,1,null)),  count(if (integration_num>=4000 and integration_num<=8000,1,null)),count(if (integration_num>=8000 and integration_num<=70000,1,null)),
+     count(if (integration_num>=70000 and integration_num<=200000,1,null)), count(if (integration_num>200000,1,null)) 
+    from dg_user_status
+
+
+    select  count(if (point<=500,1,null)) , count(if(point>500 and point<=1000,1,null)),  count(if(point>1000 and point<=2000,1,null)), 
+    count(if(point>2000 and point<=4000,1,null)),  count(if (point>=4000 and point<=8000,1,null)),count(if (point>=8000 and point<=70000,1,null)),
+     count(if (point>=70000 and point<=200000,1,null)), count(if (point>200000,1,null)) 
+    from dg_user_status
+
+
+
+
+第一份来自海外的菜谱 时间点 
+select m.name,m.create_time,m.country 
+from (
+    select b.name,b.create_time,a.country ,ROW_NUMBER() OVER(partition by b.create_time ORDER BY b.create_time) AS ndx
+    from (
+    select user_id ,country from dwh_reg_user_logins_latest where p_day =20171119 and  country<>'中国'
+    ) a join (
+      select user_id,create_time,name
+      from dg_cook
+    ) b on a.user_id=b.user_id
+) m
+where m.ndx=1
+
+附件为对接方提供的IDFA数据，麻烦将我们的数据库的11月20日中午12点-11.21日早上8点的数据进行比
+load data local inpath '/home/dg-hadoop/zhangjianfei/idfa_two.log' overwrite into table dh_tmp
+--比对idfa
+select count(a.id) 
+from (
+  select id from dh_tmp
+) a join (
+  select ifa from dh_app_logins where p_day=20171120
+) b on a.id=b.ifa
+
+
+
+
+由于客户要求，李锦记最热活动需提供参与活动的每道菜谱评论数
+李锦记最热活动活动id：1304
+链接  http://m.douguo.com/activity/cpzj/index/1304?isapp=1&open=0
+
+
+select pull_id from dg_huodong where id=1304;concat("http://www.douguo.com/u/",username,".html") AS indexpage
+
+select  nn.nickname,nn.indexpage,mm.dishpage,mm.name,mm.collect_num,mm.comment_num
+from (
+      select c.user_id,c.name,c.dishpage,e.collect_num,b.comment_num
+      from (
+            select cook_id from dg_pull_item where pull_id=816
+      ) a left join (
+             select cookid,count(*) as comment_num
+             from dg_cookcomment
+             group by cookid
+      ) b on a.cook_id=b.cookid
+      left join (
+            select user_id,name,cook_id,concat("http://www.douguo.com/cookbook/",cook_id) AS dishpage
+            from dg_cook
+      ) c on a.cook_id=c.cook_id
+      left join (
+            select cook_id,count(*) as collect_num
+            from dg_cookcollect
+            where flag>=0
+            group by cook_id
+      ) e on a.cook_id=e.cook_id
+) mm join (
+      select user_id, nickname,concat("http://www.douguo.com/u/",username,".html") AS indexpage
+      from dg_user
+) nn on mm.user_id=nn.user_id
+
+
+
+
+
+
+
+好物推荐 从文章内容里面找出商品ID 、文章id,再从用户购买（指付款了的）中找出用户和商品ID之间的对应关系
+   select t1.id,t2.user_id,t1.goods_id
+   from (
+         select a.id,a.user_id,regexp_extract(a.url,'id=([0-9]+)',1) as goods_id
+         from (
+              select id,user_id,regexp_extract(content, 'recipes://(.*?)(\" target)', 1) as url
+              from dg_article_data
+              where regexp_extract(content, 'recipes://(.*?)(\" target)', 0)<>''
+         ) a 
+   ) t1 join (
+        select doi.goods_id,doi.user_id
+        from dg_order_item 
+        doi left outer join (
+                select order_id 
+                from dg_order 
+                where (parent_id=0 or parent_id='' or parent_id=order_id) and store_id<>7568765 and pay_flag=20 
+        ) do on doi.main_order_id=do.order_id 
+        where do.order_id is not null 
+   ) t2 on t1.goods_id=t2.goods_id
+
+
+
+select a.id,a.user_id,regexp_extract(a.content,'?id=([0-9]+)',1)
+from dg_article_data
+
+
+
+首页-同城热门
+
+select ta.p_day,ta.opv,ta.ouv,tb.npv,tb.nuv
+from (
+  select p_day,count(*) as opv,count(distinct req["euid"]) as ouv 
+  from dh_server_log 
+  where req["qtype"]='view_caipu_predefined_list' and cmmt='list type\: onecityrecipe\;id\: 6' and p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>'
+  group by p_day
+) ta join (
+  select p_day,count(*) as npv,count(distinct req["euid"]) as nuv 
+  from (
+    select a.*
+    from (
+      select *
+      from dh_server_log 
+      where req["qtype"]='view_caipu_predefined_list' and cmmt='list type\: onecityrecipe\;id\: 6' and p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>'
+    ) a join (
+      select euid 
+      from app_user
+      where p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>'
+    ) b on a.req["euid"]=b.euid
+  ) tmpt
+  group by p_day
+) tb on ta.p_day=tb.p_day
+
+
+首页今日最新
+select ta.p_day,ta.opv,ta.ouv,tb.npv,tb.nuv
+from (
+  select p_day,count(*) as opv,count(distinct req["euid"]) as ouv 
+  from dh_server_log 
+  where req["qtype"]='view_caipu_predefined_list' and cmmt='list type\: newrecipe\;id\: 5' and p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>'
+  group by p_day
+) ta join (
+  select p_day,count(*) as npv,count(distinct req["euid"]) as nuv 
+  from (
+    select a.*
+    from (
+      select *
+      from dh_server_log 
+      where req["qtype"]='view_caipu_predefined_list' and cmmt='list type\: newrecipe\;id\: 5' and p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>'
+    ) a join (
+      select euid 
+      from app_user
+      where p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>'
+    ) b on a.req["euid"]=b.euid
+  ) tmpt
+  group by p_day
+) tb on ta.p_day=tb.p_day
+
+
+
+首页精品菜单
+select ta.p_day,ta.opv,ta.ouv,tb.npv,tb.nuv
+from (
+  select p_day,count(*) as opv,count(distinct req["euid"]) as ouv 
+  from dh_server_log 
+  where req["qtype"]='recipe_menus' and p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>'
+  group by p_day
+) ta join (
+  select p_day,count(*) as npv,count(distinct req["euid"]) as nuv 
+  from (
+    select a.*
+    from (
+      select *
+      from dh_server_log 
+      where req["qtype"]='recipe_menus' and p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>'
+    ) a join (
+      select euid 
+      from app_user
+      where p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>'
+    ) b on a.req["euid"]=b.euid
+  ) tmpt
+  group by p_day
+) tb on ta.p_day=tb.p_day
+
+首页-好友动态
+select ta.p_day,ta.opv,ta.ouv,tb.npv,tb.nuv
+from (
+  select p_day,count(*) as opv,count(distinct req["euid"]) as ouv 
+  from dh_server_log 
+  where req["qtype"]='view_my_feeds' and p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>'
+  group by p_day
+) ta join (
+  select p_day,count(*) as npv,count(distinct req["euid"]) as nuv 
+  from (
+    select a.*
+    from (
+      select *
+      from dh_server_log 
+      where req["qtype"]='view_my_feeds' and p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>'
+    ) a join (
+      select euid 
+      from app_user
+      where p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>'
+    ) b on a.req["euid"]=b.euid
+  ) tmpt
+  group by p_day
+) tb on ta.p_day=tb.p_day
+
+
+首页4个按钮分类流量
+
+select p_day,req["qtype"] as type,count(*),count(distinct req["euid"]) 
+from dh_server_log where p_day>=<<BEGIN_PARTITION>> and p_day<=<<END_PARTITION>> and (req["qtype"]='recipe_category'  or req["qtype"]='view_dish_homev2' or req["qtype"]='ranking_list_v1' or req["qtype"]='view_my_feeds' ) 
+group by p_day,req["qtype"] order by p_day,type limit 10000
+
+
+全部分类qtype有误：修改后的qtype recipe_category
+
+
+select a.p_day, 
+    CASE 
+        WHEN a.qtype='recipe_category' THEN '全部分类' 
+        WHEN a.qtype='view_dish_homev2' THEN '秀美食' 
+        WHEN a.qtype='activity_huodong_getlists' THEN '热门活动' 
+        WHEN a.qtype='recipe_menus' THEN '流行菜单' 
+        WHEN a.qtype='ranking_chef_list_v3' THEN '最火厨神' 
+        WHEN a.qtype='video_recipe' THEN '视频菜谱' 
+        WHEN a.qtype='view_group_quizlist' THEN '问答' 
+        WHEN a.qtype='9' THEN '一周热门' 
+        WHEN a.qtype='11' THEN '新人菜谱' 
+        WHEN a.qtype='all_type' THEN '汇总' 
+        ELSE '未知' 
+    END AS qtype, 
+    a.opv,a.ouv 
+from ( 
+    select p_day,req['qtype'] as qtype,count(*) as opv,count(distinct req['euid']) as ouv 
+    from  dh_server_log 
+    where p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>' and req['qtype'] in ('recipe_category','view_dish_homev2','activity_huodong_getlists','recipe_menus','ranking_chef_list_v3','video_recipe','view_group_quizlist')
+    group by p_day,req['qtype'] 
+    UNION ALL 
+    select p_day,req['obj'] as qtype,count(*) as opv,count(distinct req['euid']) as ouv 
+    from  dh_server_log 
+    where p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>' and req['qtype']='view_caipu_predefined_list' and req['obj'] in('9','11')  
+    group by p_day,req['obj'] 
+    UNION ALL 
+    select p_day,'all_type' as qtype,count(*) as opv,count(distinct req['euid']) as ouv 
+    from  dh_server_log  
+    where p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>' and (req['qtype'] in('recipe_category','view_dish_homev2','activity_huodong_getlists','recipe_menus','ranking_chef_list_v3','video_recipe','view_group_quizlist') or (req['qtype']='view_caipu_predefined_list' and req['obj'] in('9','11')))
+    group by p_day 
+) a 
+order by a.p_day,a.opv
+limit 10000
+   
+
+之前的
+
+select a.p_day, 
+    CASE 
+        WHEN a.qtype='home_all_category' THEN '全部分类' 
+        WHEN a.qtype='view_dish_homev2' THEN '秀美食' 
+        WHEN a.qtype='activity_huodong_getlists' THEN '热门活动' 
+        WHEN a.qtype='recipe_menus' THEN '流行菜单' 
+        WHEN a.qtype='ranking_chef_list_v3' THEN '最火厨神' 
+        WHEN a.qtype='video_recipe' THEN '视频菜谱' 
+        WHEN a.qtype='view_group_quizreplay' THEN '问答' 
+        WHEN a.qtype='9' THEN '一周热门' 
+        WHEN a.qtype='11' THEN '新人菜谱' 
+        WHEN a.qtype='all_type' THEN '汇总' 
+        ELSE '未知' 
+    END AS qtype, 
+    a.opv,a.ouv 
+from ( 
+    select p_day,req['qtype'] as qtype,count(*) as opv,count(distinct req['euid']) as ouv 
+    from  dh_server_log 
+    where p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>' and req['qtype'] in ('home_all_category','view_dish_homev2','activity_huodong_getlists','recipe_menus','ranking_chef_list_v3','video_recipe','view_group_quizreplay')
+    group by p_day,req['qtype'] 
+    UNION ALL 
+    select p_day,req['obj'] as qtype,count(*) as opv,count(distinct req['euid']) as ouv 
+    from  dh_server_log 
+    where p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>' and req['qtype']='view_caipu_predefined_list' and req['obj'] in('9','11')  //一周热门和新人菜谱用的同一个qtype，所以得用obj去区分他们
+    group by p_day,req['obj'] 
+    UNION ALL 
+    select p_day,'all_type' as qtype,count(*) as opv,count(distinct req['euid']) as ouv 
+    from  dh_server_log  
+    where p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>' and req['qtype'] in('home_all_category','view_dish_homev2','activity_huodong_getlists','recipe_menus','ranking_chef_list_v3','video_recipe','view_group_quizreplay') 
+    group by p_day 
+) a 
+order by a.p_day,a.opv
+limit 10000
+
+
+select req['obj']  from  dh_server_log  where p_day=20171128 and req['qtype']='view_caipu_predefined_list' group by req['obj']
+
+
+
+
+select doi.goods_id
+from dg_order_item 
+doi left outer join (
+        select order_id 
+        from dg_order 
+        where (parent_id=0 or parent_id='' or parent_id=order_id)and store_id<>7568765 and pay_flag=20 
+) do on doi.main_order_id=do.order_id 
+where do.order_id is not null 
+
+在DC导出所有A和A+的菜谱，包含 cook_id,菜谱名,标准菜谱名,创建时间
+
+ select cook_id,name,stdname,
+  CASE 
+        WHEN levelid=1 THEN 'A+' 
+        WHEN levelid=2 THEN 'A' 
+        ELSE '其他' 
+    END AS qtype, 
+ to_date(create_time)
+ from dg_cook 
+ where levelid<=2 and flag >=0 and to_date(create_time) >='2015'
+ order by to_date(create_time) 
+
+
+ select A,B,C from table_1 LATERAL VIEW explode(B) table1 as B
+
+ select interested_tags,count(distinct imei)
+ from dg_user_personalization
+ LATERAL VIEW explode(interested_tags) table1 as interested_tags
+ where to_date(create_time)='2017-11-26'
+ group by interested_tags
+
+
+
+兴趣标签分类统计占比
+
+  1、输出一个总量；
+  2、每天的增量：以imei为唯一标识；
+  3、统计分组汇总的标签数据
+    孕妇：100，占比10%
+    养生：120，占比12%
+
+
+select nn.type,nn.type_name,nn.num,nn.percent 
+from( 
+select b1.type,b1.type_name,b1.num,concat(round((b1.num/a1.total)*100,2),'%') as percent 
+from ( 
+     select count(*) as total,'1' as join_column 
+     from dg_user_personalization 
+) a1 join (
+    select t1.type,t1.type_name,t1.num,'1' as join_column 
+    from ( 
+       select 'birthday' as type,if(birthday='','未填',birthday) as type_name,count(*) as num 
+       from dg_user_personalization 
+       group by birthday 
+       UNION ALL 
+       select 'profession' as type, dgp.name as type_name,dg.num
+       from (
+             select profession,count(*) as num 
+             from dg_user_personalization 
+             group by profession 
+       ) dg join (
+             select id,name
+             from dg_profession
+       ) dgp on dg.profession=dgp.id
+       UNION ALL 
+       select 'gender' as type,if(gender='','未选',gender) as type_name,count(*) as num 
+       from dg_user_personalization 
+       group by gender 
+    ) t1 
+) b1 on a1.join_column=b1.join_column
+UNION ALL
+select 'interested_tags' as type,if(a.interest=0,'未选',a.interest) as type_name,a.type_num as num,concat(round((a.type_num/b.total)*100,2),'%') as percent 
+from ( 
+        select interest,count(*) as type_num ,'1' as join_column 
+        from ( 
+              select tm.imei,regexp_replace(regexp_replace(regexp_replace(tm.interested_tags,'\\\\[',''),'\\\\]',''),'\"','') as interested_tags 
+              from ( 
+                    select imei,interested_tags 
+                    from dg_user_personalization 
+              ) tm 
+        ) t LATERAL VIEW explode(split(t.interested_tags,',')) interests as interest 
+        group by interest 
+) a join ( 
+        select count(*) as total,'1' as join_column 
+        from dg_user_personalization 
+) b on a.join_column=b.join_column 
+where  a.interest<>'' 
+) nn
+
+
+
+
+
+目前DC后台关于「兴趣信息填写前置」相关的事件统计没有具体到页面，无法获取用户在某一具体页面的操作统计数据。
+辛苦将以下客户端事件按照不同参数进行拆分，并更新至DC后台  ～ 
+事件1：TUTORIAL_SKIPPED
+事件2：TUTORIAL_COMPLETED
+事件3：TUTORIAL_SHOWN
+
+
+select a.p_day,
+ CASE 
+        WHEN a.event_code='TUTORIAL_SHOWN'  THEN '兴趣页展示' 
+        WHEN a.event_code='TUTORIAL_SKIPPED' and  a.type=1  THEN '兴趣页跳过' 
+        WHEN a.event_code='TUTORIAL_COMPLETED' and  a.type=1  THEN '兴趣页完成' 
+        WHEN a.event_code='TUTORIAL_SKIPPED' and  a.type=2  THEN '性别页跳过' 
+        WHEN a.event_code='TUTORIAL_COMPLETED' and  a.type=2  THEN '性别页完成' 
+        WHEN a.event_code='TUTORIAL_COMPLETED' and  a.type=3  THEN '职业页完成' 
+        ELSE '其他' 
+    END AS type, a.pv,a.uv   
+from (
+      select p_day,event_code, get_json_object(param,'$.INDEX') as type,count(*) as pv,count(distinct imei) as uv
+      from dh_app_event
+      where p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>' and event_code in('TUTORIAL_COMPLETED','TUTORIAL_SKIPPED','TUTORIAL_SHOWN')
+      group by p_day, event_code, get_json_object(param,'$.INDEX')
+) a 
+
+
+
+TUTORIAL_COMPLETED      1       2149
+TUTORIAL_COMPLETED      2       23
+TUTORIAL_COMPLETED      3       40676
+TUTORIAL_SKIPPED        1       13923
+TUTORIAL_SKIPPED        2       475
+
+
+
+
+用户筛选时间范围为：7月1号——截止到今天，在豆果严选购买过商品的用户。
+筛选条件：排重后按照支付金额倒序排列，有手机号信息的用户，取前15000名。
+
+   select b.nickname,a.user_id,a.mobile, a.total_price
+   from (
+      select  t.user_id,t.mobile,t.total_price
+      from (
+         SELECT user_id,mobile,max(total_price)/100 AS total_price,ROW_NUMBER() OVER (PARTITION BY user_id order by user_id) as rn 
+         FROM dg_order 
+         WHERE (parent_id=0 OR parent_id='' OR parent_id=order_id) AND pay_flag=20  AND store_id<>7568765  and mobile<>'' and to_date(createtime) between  '2017-07-01' and '2017-11-28'
+         group by user_id,mobile
+      ) t
+      where t.rn=1
+   ) a join (
+      select user_id,nickname
+      from dg_user
+   ) b on a.user_id=b.user_id
+   order by total_price desc 
+   limit 15000
+
+
+
+
+   select statdate,sum(counts) from dd_user_behavior_stat where statdate between  '2016-12-29' and '2017-03-06' and  qtype='search_caipu' group by statdate ;
+
+      select statdate,sum(counts) from dd_user_behavior_stat where statdate ='2017-03-05' and  qtype='search_caipu';
+
+
+select req['page_num'],count(*) from  dh_server_log_by_hour where p_day=20171129 and req['qtype'] ='view_caipu_caidan_detail' and time>='2017-11-29 15:00:00' group by req['page_num'];
+
+
+select p_day,count(*)
+from dh_server_log
+where p_day  between  '20171121' and '20171128' and req['qtype']='search_caipu'
+group by p_day
+
+
+
+
+ select p_day,req['qtype'] as qtype from dh_server_log  where p_day=20171129 and req['srctype'] in ('2303') group by req['qtype']
+and sex <> '0'
+
+select t.id,t.sex,t.age,singleprofession
+from ( 
+        select id,sex,to_date(birthday) as age, 
+                regexp_replace(regexp_replace(regexp_replace(profession,'\\\\[',''),'\\\\]',''),'\"','') as profession
+        from dg_family_member 
+        where status=1 and weight <> '0' and height <> '0' 
+) t ATERAL VIEW explode(split(t.profession,',')) tablec as singleprofession 
+
+
+select dgup.user_id,dgup.interested_tags,if(dgup.gender='',if(dgfam.sex='',dgu.sex,dgfam.sex),dgup.gender),if(dgup.birthday='',if(dgfam.birthday='',dgu.birthday,dgfam.birthday),dgup.birthday),
+if(dgup.profession='',if(dgfam.profession='',dgu.profession,dgfam.profession),dgup.profession)
+from (
+    select user_id,gender,birthday,profession,interested_tags
+    from dg_user_personalization 
+) dgup left join (
+
+    select b.user_id,ex,a.birthday,a.profession
+    from (
+          select t.id,t.sex,t.age,singleprofession
+          from ( 
+                  select id,sex,to_date(birthday) as age, 
+                          regexp_replace(regexp_replace(regexp_replace(profession,'\\\\[',''),'\\\\]',''),'\"','') as profession
+                  from dg_family_member 
+                  where status=1 and weight <> '0' and height <> '0' 
+          ) t ATERAL VIEW explode(split(t.profession,',')) tablec as singleprofession 
+    ) a left join (
+         select id,name
+         from dg_family_tag
+    ) b on a.sex=b.id
+    left join (    
+     id,name 
+        from dg_profession
+    ) c on a.singleprofession=c.id
+) dgfam on dgup.user_id=dgfam.user_id
+left join (
+    select a.user_id,a.sex,b.birthday,b.profession
+    from (
+        select user_id,sex
+        from dg_user
+    ) a join (
+        select user_id,birthday,profession
+        from dg_userdetail
+    ) b on a.user_id=b.user_id
+) dgu on dgup.user_id=dgu.user_id
+
+
+select b.name
+from (
+  select profession from dg_family_member
+) a join (
+  select id,name
+  from dg_family_tag
+) b on a.profession=b.id
+group by b.name
+
+select sex from dg_family_member group by sex  dg_family_tag
+
+
+
+
+select count(*) from dg_user_personalization where user_id=0 and profession=0; group by profession    5685
+
+select count(*) from dg_user_personalization where user_id=0;   393889
+
+
+
+
+
+select dgup.user_id,dgup.interested_tags,if(dgup.gender='' and dgup.user_id<>'0',if(dgfam.sex is null,dgu.sex,dgfam.sex),dgup.gender) as gender,
+if(dgup.user_id<>'0' and dgup.birthday='',if(dgfam.birthday='未选',dgu.birthday,dgfam.birthday),dgup.birthday) as birthday,
+if(dgup.user_id<>'0' and dgup.profession='0',if(dgfam.profession ='',dgu.profession,dgfam.profession),dgup.profession) as profession
+from (
+    select user_id,gender,birthday,profession,interested_tags
+    from dg_user_personalization 
+) dgup left join (
+    select t1.user_id,t.sex,t.birthday,t.profession
+    from (
+            select a.family_id,b.name as sex,a.birthday, a.profession
+            from (
+                  select t.family_id,t.sex,t.birthday,t.profession
+                  from ( 
+                          select family_id,sex,
+                          CASE 
+                          WHEN  year(birthday) < '1970'  THEN '60后' 
+                          WHEN  year(birthday)  BETWEEN '1970' AND '1980'  THEN '70后' 
+                          WHEN  year(birthday)  BETWEEN '1980' AND '1985'  THEN '80后' 
+                          WHEN  year(birthday)  BETWEEN '1985' AND '1990'  THEN '85后' 
+                          WHEN  year(birthday)  BETWEEN '1990' AND '1995'  THEN '90后' 
+                          WHEN  year(birthday)  BETWEEN '1995' AND '2000'   THEN '95后' 
+                          WHEN  year(birthday)  >'2000'  THEN '00后' 
+                          ELSE '未选' 
+                          END AS birthday,
+                          profession, ROW_NUMBER() OVER (PARTITION BY family_id order by id) as rn 
+                          from dg_family_member 
+                          where status=1 and weight <> '0' and height <> '0' 
+                  ) t  
+                  where t.rn=1
+            ) a left join (
+                 select id,name
+                 from dg_family_tag
+            ) b on a.sex=b.id
+    ) t join (
+       select user_id,id
+       from dg_family
+    ) t1 on t.family_id=t1.id
+    group by t1.user_id,t.sex,t.birthday,t.profession
+) dgfam on dgup.user_id=dgfam.user_id
+left join (
+    select a.user_id,a.sex,b.birthday,b.profession
+    from (
+        select user_id,
+         CASE 
+        WHEN  sex = '' or sex='0' or sex='\'女' or sex ='<>' or sex ='s' THEN '女' 
+        WHEN  sex = '男' or sex='男\'' THEN '男' 
+        ELSE '' 
+        END AS sex
+        from dg_user
+    ) a join (
+        select user_id,
+        CASE 
+        WHEN  year(birthday) < '1970'  THEN '60后' 
+        WHEN  year(birthday)  BETWEEN '1970' AND '1980'  THEN '70后' 
+        WHEN  year(birthday)  BETWEEN '1980' AND '1985'  THEN '80后' 
+        WHEN  year(birthday)  BETWEEN '1985' AND '1990'  THEN '85后' 
+        WHEN  year(birthday)  BETWEEN '1990' AND '1995'  THEN '90后' 
+        WHEN  year(birthday)  BETWEEN '1995' AND '2000'   THEN '95后' 
+        WHEN  year(birthday)  >'2000'  THEN '00后' 
+        ELSE '' 
+        END AS birthday,
+        profession
+        from dg_userdetail
+    ) b on a.user_id=b.user_id
+) dgu on dgup.user_id=dgu.user_id
+
+
+「搜索结果召回课堂」功能上线后需针对使用新版本的用户统计下部分搜索词的搜索频率 。
+新版本号确定后会告知，辛苦提前安排开发 ～
+
+select p_day,req['obj'],count(*) as num
+from dh_server_log
+where p_day=20171214 and req['qtype']='search_caipu' and req['vers']>=683 and plat='API' and req['obj'] in('烘焙西点','私房教学','蛋糕','面包','甜品','饼干','特色美食','中餐','西餐','日料','外国菜','地方小吃','零食','酿酒','咖啡','婴儿辅食','视频菜谱','烘焙','烤箱食谱','下午茶','烤箱食谱','家常菜','小吃','酒','饮品','宝宝辅食','中国菜')
+group by p_day,req['obj']
+order by num
+
+烘焙西点
+私房教学
+蛋糕
+面包
+甜品
+饼干
+特色美食
+中餐
+西餐
+日料
+外国菜
+地方小吃
+零食
+酿酒
+咖啡
+婴儿辅食
+烘焙
+烤箱食谱
+下午茶
+烤箱食谱
+家常菜
+小吃
+酒
+饮品
+宝宝辅食
+中国菜
+
+
+select req['souc'] from dh_server_log where p_day=20171130  group by req['souc'];
+
+
+select dgu.user_id,u.nickname, dgc.cook_num,dgc.a_cook_num,dgc.b_cook_num,dgd.dishes_num,dus.fans_num,dle.class_num 
+from ( 
+       SELECT id as user_id 
+       FROM dh_tmp 
+) dgu left join ( 
+      select user_id,count(*) as cook_num , count(if(levelid<=2,1,NULL)) as a_cook_num, count(if(levelid=3,1,NULL)) as b_cook_num 
+      from dg_cook 
+      where to_date(create_time) BETWEEN '2017-11-01' AND '2017-11-30' and flag >= 1
+      group by user_id 
+) dgc on dgu.user_id=dgc.user_id 
+left join ( 
+     select userid,count(*) as fans_num 
+     from dg_friend  
+     where to_date(createdate) BETWEEN '2017-11-01' AND '2017-11-30' 
+     group by userid 
+) dus on dgu.user_id=dus.userid 
+left join ( 
+     select user_id,count(*) as dishes_num 
+     from dg_dish 
+     where to_date(createdate)  BETWEEN '2017-11-01' AND '2017-11-30' 
+     group by user_id 
+) dgd on dgu.user_id=dgd.user_id 
+left join (  
+     select user_id,count(*) as class_num 
+     from dg_live_enroll 
+     where status=2 and paytype = 'couponNoSettlement' and to_date(paytime) BETWEEN '2017-11-01' AND '2017-11-30' 
+     group by user_id 
+) dle on dgu.user_id=dle.user_id 
+left join ( 
+     select user_id,nickname 
+     from dg_user 
+) u on dgu.user_id=u.user_id
+
+
+
+ select req['srctype'] ,count(*),count(distinct req["euid"])  from dh_server_log where p_day=20171203 and req['qtype']='live_class_detail' group by req['srctype'];
+
+select req['qtype'] ,count(*),count(distinct req["euid"])  from dh_server_log where p_day=20171203 and req['qtype']='live_class_list';
+live_pay_detail课堂详情里的购买课程按钮
+live_class_detail//课堂详情   
+5101 编辑推荐的
+5102 feed 列表
+5600 编辑推荐的列表
+
+live_class_list  //首页课堂
+live_class_play
+live_pay_detail
+
+
+select statdate,sum(pv),sum(uv) from dd_serverlog_qtype_srctype_stat where statdate='2017-12-20' and qtype='live_class_detail' and srctype in(2801,2802,2803) group  by statdate;
+
+select p_day , count(distinct req["euid"])   from  dh_server_log where p_day=20171205 and req['qtype']='live_class_detail' and req['srctype'] in (5101,5102,5600) group by  p_day;  20171205        4697
+
+select p_day, count(*),count(distinct req["euid"])   from  dh_server_log where p_day>=20180101 and  p_day<=20180108 and req['qtype']='live_class_detail' and req['srctype']=5102 group by  p_day;
+20180108        1000    2086    2061
+20180108        2302    5596    5217
+20180108        5101    5179    3115
+20180108        5200    595     342
+20180108        5500    5       3
+20180108        2303    13948   10364
+20180108        5102    10643   3736
+20180108        5300    7       6
+20180108        5600    464     236
+20180108                99      91
+20180108        0       2995    1526
+20180108        2202    10      10
+20180108        3000    1539    316
+20180108        5100    220     61
+20180108        5103    1362    498
+20180108        5700    1       1
+
+select p_day , count(distinct req["euid"])   from  dh_server_log where p_day=20171205 and req['qtype'] not in ('live_class_detail') and req['qtype']='live_class_list' group by  p_day; 20171205        25839
+
+select a.p_day,count(distinct a.id)
+from (
+select p_day ,  req["euid"] as id from  dh_server_log where p_day=20171205 and  req['qtype']='live_class_list'
+) a join (
+select p_day ,  req["euid"] as id  from  dh_server_log where p_day=20171205 and req['qtype'] not in ('live_class_detail') 20171205        25839
+) b on a.id=b.id
+group by a.p_day
+
+select count(a.id)
+from (
+      select  req['imei']  as id from  dh_server_log where p_day BETWEEN 20171120 AND 20171126 and  req['qtype']='live_class_list' 
+      group by req['imei']
+      ) a join (
+      select  req['imei']  as id from  dh_server_log where p_day BETWEEN 20171127 AND 20171203 and  req['qtype']='live_class_list'
+       group by req['imei']
+) b on a.id=b.id
+19506
+
+select a.woker,count(distinct a.id)
+from (
+select  weekofyear(concat(substr(p_day,1,4),'-',substr(p_day,5,2),'-',substr(p_day,7,2))) as woker, req['imei']  as id from  dh_server_log where p_day BETWEEN 20171120 AND 20171203 and  req['qtype']='live_class_list' 
+) a
+group by a.woker
+
+47      308251
+48      344325
+
+
+app_user
+
+select a.time,count(distinct a.imei)
+from (
+   select to_date(time) as time, req['imei']  as imei from  dh_server_log where p_day BETWEEN 20171130 AND 20171205 and  req['qtype']='live_class_list' and req['imei']<>'' and req['imei'] <> '000000000000000'
+   group by to_date(time),req['imei']
+) a join (
+  select to_date(time) as time,imei 
+  from  app_user 
+  where p_day BETWEEN 20171130 AND 20171205 and imei<>'' and imei <> '000000000000000' 
+  group by to_date(time), imei
+) b on a.time=b.time and a.imei=b.imei
+group by a.time
+
+2017-11-30      4680
+2017-12-01      3996
+2017-12-02      4074
+2017-12-03      4889
+2017-12-04      4666
+2017-12-05      4771
+
+
+select to_date(time) as time, count(distinct req['imei'])  from  dh_server_log where p_day BETWEEN 20171130 AND 20171205 and  req['qtype']='live_class_list' and req['imei']<>'' and req['imei'] <> '000000000000000'
+group by to_date(time)
+
+2017-12-05      25809
+2017-12-01      25661
+2017-11-30      27158
+2017-12-02      26457
+2017-12-03      28595
+2017-12-04      26094
+
+ select to_date(time) as time,count(distinct imei) 
+  from  app_user 
+  where p_day BETWEEN 20171130 AND 20171205 and imei<>'' and imei <> '000000000000000' 
+  group by to_date(time)
+
+2017-11-30      17976
+2017-12-01      16045
+2017-12-02      18504
+2017-12-03      20346
+2017-12-04      18434
+2017-12-05      17944
+
+
+select  count(req['imei'])  from  dh_server_log where p_day BETWEEN 20171120 AND 20171126 and  req['qtype']='live_class_list' 308251
+
+select p_day ,   count(distinct req["euid"])   from  dh_server_log where p_day=20171205 and  req['qtype']='live_class_list'
+
+select p_day , count(distinct req["euid"])   from  dh_server_log where p_day=20171205 and req['qtype'] not in ('live_class_detail') and req['qtype']='live_class_list'
+
+select statdate,sum(pv),sum(uv) from dd_serverlog_qtype_srctype_stat where statdate between '2017-11-01' and '2017-11-30' and qtype='live_class_detail' group  by statdate order by statdate;
+
+select statdate,sum(pv),sum(uv) from dd_serverlog_qtype_srctype_stat where statdate between '2017-11-01' and '2017-11-30' and qtype in ('live_class_detail','live_class_list') group  by statdate order by statdate;
+
+select statdate,sum(pv),sum(uv) from dd_serverlog_qtype_srctype_stat where statdate between '2017-11-01' and '2017-11-30' and qtype='live_class_detail' and srctype='5600' group  by statdate order by statdate;
+
+select statdate,qtype,srctype,sum(pv) as pv,sum(uv) as uv from dd_serverlog_qtype_srctype_stat where statdate between '2017-12-02' and '2017-12-02' and client in (3,4) and qtype is not null and srctype is not null group by statdate,qtype,srctype order by statdate,qtype,srctype;
+
+
+麻烦帮我跑出一份12月3日（昨天）登录过豆果的北京 及 上海地区的用户名单。数据只需用户id即可。 北京和上海的用户id分开
+select city ,user_id from dwh_reg_user_logins_latest where p_day=20171203 and to_date(last_time)='2017-12-03' and city in ('北京','上海') group by city,user_id;
+
+dwh_reg_user_logins_latest  p_day 是每一天追加，为总共，查范围类的用last_time
+
+select user_id from dwh_reg_user_logins_latest where p_day=20180111 and to_date(last_time)>='2018-01-06' and to_date(last_time)<='2018-01-11'  and city ='北京' group by user_id;
+
+select to_date(last_time), city ,count(*) from dwh_reg_user_logins_latest where p_day=20171203 and to_date(last_time)='2017-12-03' and city in ('北京','上海') group by to_date(last_time), city;
+麻烦帮我跑出一份12月9日到12月11日连续3天登录过豆果的北京 及 上海地区的用户名单。数据只需用户id即可。 北京和上海的用户id分开，麻烦了。运营这边准备再梳理一部分北京上海的用户。
+
+麻烦帮忙导出一份1月11日至1月21日期间，连续登录两天以上的豆果美食的上海地区用户名单，只需跑出用户id即可。辛苦啦！
+
+
+select m.user_id,t.nickname
+from (
+  select user_id
+  from (
+    select t.user_id,ROW_NUMBER() OVER (PARTITION BY t.user_id order by t.time) as rn 
+    from (
+      select to_date(time) as time,user_id
+      from dh_app_logins 
+      where p_day  BETWEEN 20180125 AND 20180205  
+      group by to_date(time),user_id
+    ) t
+  ) a 
+  where a.rn>=2
+) m join (
+   select user_id 
+    from dwh_reg_user_logins_latest 
+    where p_day = 20180206  and city in('浙江','广州')
+) n on m.user_id=n.user_id
+join (
+    select user_id,nickname
+    from dg_user
+) t on m.user_id=t.user_id
+group by m.user_id
+
+
+麻烦帮忙跑出近两周内（2月19日-3月2日）期间登录过豆果app的上海、无锡、苏州、南通4个地区的用户。
+需求数据：
+1城市
+2用户id
+
+select count(*)
+from (
+      select user_id
+      from dh_app_logins 
+      where p_day  BETWEEN 20180223 AND 20180302 
+      group by user_id
+) m join (
+   select user_id 
+    from dwh_reg_user_logins_latest 
+    where p_day = 20180305  and city in('上海','无锡','苏州','南通')
+) n on m.user_id=n.user_id
+
+
+
+
+
+现需导出200份A类家常菜菜谱，时间节点为2017年10月1日~11月30日的全部A类家常菜菜谱
+需要的数据信息为：用户昵称，菜谱名称，菜谱链接三项
+http://www.douguo.com/cookbook/1630057.html
+
+select c.nickname,b.name,concat("http://www.douguo.com/cookbook/",b.cook_id,".html")
+from(
+    select cook_id
+    from dg_cook_categories
+    where categoryname='家常菜'
+) a join (
+   select name,cook_id,user_id
+   from dg_cook
+   where levelid=2 and flag >=1 and to_date(create_time)  BETWEEN '2017-10-01' AND '2017-11-30' 
+) b on a.cook_id=b.cook_id
+join (
+   select nickname,user_id
+   from dg_user
+) c on b.user_id=c.user_id
+limit 200
+
+
+
+select p_day,req['qtype'] as qtype,count(*) as opv,count(distinct req['euid']) as ouv 
+from  dh_server_log 
+where p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>' and req['qtype'] in ('view_group_quizreplay')
+group by p_day,req['qtype'] 
+
+
+
+select req['srctype'] from  dh_server_log where p_day=20171205 and req['qtype']='view_group_quizreplay' group by  req['srctype'];
+0     未知来源
+2303  菜谱首页
+3900  圈子详情
+4000  帖子发布
+1200  提醒消息列表
+3000  用户详情
+3200  帖子详情
+500   我的收藏
+
+0       32   未知来源
+2303    18   菜谱首页
+3900    344  圈子详情
+4000    18   帖子发布
+1200    21   提醒消息列表
+3000    64   用户详情
+3200    671  帖子详情
+500     2    的收藏
+
+select a.post_num,a. post_person_num,b.reply_num,b. reply_person_num,b.like_num,c.new_post_num,d.opv,d.ouv 
+from (
+  select count(*) as post_num,count(distinct user_id) as post_person_num,'id' as id
+  from dg_post
+  where to_date(createtime)='${END_DATE}' and group_id=40
+) a join (
+   select sum(like_num) as like_num,count(*) as reply_num,count(distinct user_id) as reply_person_num,'id' as id
+   from dg_reply
+   where to_date(createtime)='${END_DATE}' and group_id=40
+) b on a.id=b.id
+join (
+   select count(*) as new_post_num,'id' as id
+   from dg_group_member
+   where to_date(jointime) ='${END_DATE}' and group_id=40
+) c on c.id=a.id
+join (
+  select count(*) as opv,count(distinct req['euid']) as ouv ,'id' as id
+  from  dh_server_log 
+  where p_day ='${CUR_PARTITIONS}' and req['qtype'] ='view_group_quizreplay'
+) d on a.id=d.id
+
+//秀美食 view_dish_homev2   秀三餐 view_dish_tag  271早餐 272 午餐 273晚餐
+
+select req['qtype'],req['srctype'] from  dh_server_log where p_day=20171207 and req['qtype'] in('view_group_quizreplay',' view_dish_tag') group by req['qtype'],req['srctype'];
+select req['srctype'] , count(distinct req['euid']) from  dh_server_log where p_day=20171207 and req['qtype'] ='view_tuan_detail' group by req['srctype'] ;
+
+导出一下 1.24-1.28 5天的首页秀三餐模块的pv,uv数据。 和之前一样总pv，uv和每一帧的pv，uv的数据都需要。
+
+select p_day,
+ CASE 
+        WHEN req['obj']=271 THEN '早餐' 
+        WHEN req['obj']=272 THEN '午餐' 
+        WHEN req['obj']=273 THEN '晚餐' 
+        ELSE '未知' 
+    END AS obj, count(*),count(distinct req['euid']) 
+from  dh_server_log 
+where p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>' and req['qtype'] = 'view_dish_tag' and req['obj'] in(271,272,273) group by  p_day, req['obj'] order by obj,p_day 
+UNION ALL
+select p_day,'全部' as obj, count(*),count(distinct req['euid']) 
+from  dh_server_log 
+where p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>' and req['qtype'] = 'view_dish_tag'  group by  p_day order by p_day 
+
+日期            类型      pv       uv
+20171230        早餐     15266   5139
+20171231        早餐     11330   4103
+20180101        早餐     10903   3637
+20180102        早餐     8018    2557
+20171230        午餐     20980   6891
+20171231        午餐     17877   5722
+20180101        午餐     12304   4253
+20180102        午餐     9463    3210
+20171230        晚餐     29349   9569
+20171231        晚餐     25999   8452
+20180101        晚餐     10815   3873
+20180102        晚餐     14619   5205
+
+
+//新食材、菜谱同义词标签数据统计
+select name,synonym from dg_categories where flag>=0;
+select name,synonum from dg_ingredients where flag>=0;
+
+select count(*)
+from (
+  select name
+  from dg_stand_cookname 
+) a join (
+  select id as name 
+  from  dh_tmp
+) b on a.name=b.name         1340
+
+
+select count(*)
+from (
+    select a.name
+    from (
+      select name
+      from dg_stand_cookname 
+      UNION ALL
+      select id as name 
+      from  dh_tmp
+    ) a 
+) t
+
+    select a.name
+    from (
+      select name
+      from dg_stand_cookname 
+      UNION ALL
+      select id as name 
+      from  dh_tmp
+    ) a 
+    group by a.name
+
+select * 
+
+
+dg_stand_cookname   26368
+excel 1881
+
+并集 26909
+
+
+
+
+select t.name,t2.num
+from (
+    select a.name
+    from (
+      select name
+      from dg_stand_cookname 
+      UNION ALL
+      select id as name 
+      from  dh_tmp
+    ) a 
+    group by a.name
+) t left join (
+    select trim(keyword) as keyword,count(*) as num
+    from dwh_user_behavior 
+    where p_day between '20171101' and '20171207' and keyword <> '' and keyword is not null and qtype='search_caipu' 
+    group by trim(keyword) 
+) t1 on t.name=t1.keyword
+
+
+select req['srctype'], p_day,count(distinct req['euid']) from dh_server_log where p_day between 20171204 and 20171211 and req['qtype']='live_class_detail' and req['srctype'] in (0,5600) group by req['srctype'],p_day order by req['srctype'], p_day 
+
+
+tomcat 杀死进程
+
+kill -9 `ps -ef|grep tomcat|awk '{print $2}'`
+查找脚本
+
+find /opt/DATA/goldmine/src/ -name "*.sh" | xargs grep "dgcommunity"
+
+shell定时任务
+crontab -e
+
+加载数据
+load data local inpath "/home/dg-hadoop/lichang/mobile.log" overwrite into table dh_tmp
+加载分区数据
+load data local inpath '/opt/DATA/goldmine/src/daily_count/app_client_tmall_imei/data/$1' into table dwh_app_client_tmall_imei  partition (p_day='$2')
+
+列转行
+:1,$s/\n/,/gc
+
+输出指定内容
+cat new_my_test.log | grep 付款详情
+
+hadoop 
+hadoop  dfs -rmr hdfs://lichang02:8020/user/root/dd_server_log_srctype_dict
+
+本机上传文件到指定服务器
+scp -P 1863 -r /opt/DATA/goldmine/src/daily_count/app_client_tmall_imei/data/result_app_client_tmall_imei.log  lichang@192.168.1.219:/home/lichang/
+
+hive 的split函数切分要用[] 或者 \\ 转换  列如 split(request,'[?]')[0]  or split(request,'\\?')[0]
+
+dwh_reg_user_logins_latest  p_day 是每一天追加，为总共，查范围类的用last_time   只有这张表是累计追加
+
+vim 命令  
+显示行号  ：set number
+Ctrl+f 向下滚一屏    Ctrl+d 向下滚半屏 
+Ctrl+b 向上滚一屏    Ctrl+u 向上滚半屏
+G 最后一行  gg第一行
+
+M站  dh_wap_pv   主站 dh_pv
+
+查看分区信息 show partitions dh_wap_pv_new;
+
+测试环境   DC 废弃路径 以后重用  /datashow/toSunburstHomePage.do
+
+mysql 添加字段
+alter table  dd_app_tuan_order_sum_stat  add mall_article_uv int(11) NOT NULL DEFAULT 0 
+
+cat data/20180227_search_keyword_caipu.log | awk -F ',' '{print $2}'
+cat data/20180227_search_keyword_caipu.log | awk -F ',' '{print $2}' | xargs
+
+菜常菜,26875
+减肥菜谱,9701
+下饭菜,18018
+热门食材,13109
+快手菜,14495
+母婴菜谱,15422
+
+下饭菜,18018
+减肥菜谱,9701
+快手菜,14495
+母婴菜谱,15422
+热门食材,13109
+菜常菜,26875
+
+
+能帮我跑一下10月份，和11月份，购买课堂的用户重合率有多少吗
+
+select month(paytime),count(distinct user_id)
+from dg_live_enroll
+where status=2 AND to_date(paytime) BETWEEN '2017-10-01' AND '2017-11-31'
+group by  month(paytime)
+
+10      3934
+11      4294
+
+
+select count(*)
+from (
+    select user_id
+    from dg_live_enroll
+    where status=2 AND to_date(paytime) BETWEEN '2017-10-01' AND '2017-10-31'
+    group by user_id
+) a join (
+    select user_id
+    from dg_live_enroll
+    where status=2 AND to_date(paytime) BETWEEN '2017-11-01' AND '2017-11-31'
+    group by user_id
+) b on a.user_id=b.user_id
+
+10      3934
+11      4294
+重复购买 1617
+
+
+ 2015年1月-2017年11月每月平均单用户的发帖量、评论量
+ 1、圈圈发帖：
+月份，发帖量，发帖用户数
+2、评论量
+月份，评论量(评论指菜谱评论)，评论用户数
+
+select a.createdate,a.avg_post_num,b.avg_comment_num
+from (
+  select month(createtime) as createdate ,avg(distinct user_id) as avg_post_num
+  from  dg_post
+  where flag=1 and to_date(createtime)>='2017-01-01' and to_date(createtime)<='2017-11-30'
+  group by month(createtime)
+) a join (
+  select month(createdate) as createdate,avg(distinct userid) as avg_comment_num
+  from dg_cookcomment
+  where to_date(createdate)>='2017-01-01' and to_date(createdate)<='2017-11-30'
+  group by month(createdate)
+) b on a.createdate=b.createdate
+
+
+
+select a.createdate,a.post_num,a.uv,b.comment_num,b.uv
+from (
+  select month(createtime) as createdate ,count(*) as post_num,count(distinct user_id) as uv
+  from  dg_post
+  where flag=1 and to_date(createtime)>='2017-01-01' and to_date(createtime)<='2017-11-30'
+  group by month(createtime)
+) a join (
+  select month(createdate) as createdate,count(*) as comment_num,count(distinct userid) as uv
+  from dg_cookcomment
+  where to_date(createdate)>='2017-01-01' and to_date(createdate)<='2017-11-30'
+  group by month(createdate)
+) b on a.createdate=b.createdate
+月份    发帖数  发帖用户数 评论数  评论用户数
+1       4457    946     58783   20248
+2       8276    1047    46118   16652
+3       17106   2354    92458   22608
+4       16547   2890    101580  29631
+5       23860   1904    97193   27982
+6       25815   1937    86981   28831
+7       22219   1858    79361   28543
+8       18856   1908    76657   28231
+9       13345   1578    62966   23892
+10      15729   1927    53325   18945
+11      18407   1806    48779   8579
+
+
+
+
+select a.createdate,a.post_percent,b.com_percent
+from (
+  select t2.createdate,round((t2.post_num/t2.uv),1) as post_percent
+  from (
+    select month(createtime) as createdate ,count(*) as post_num,count(distinct user_id) as uv
+    from  dg_post
+    where flag=1 and to_date(createtime)>='2017-01-01' and to_date(createtime)<='2017-11-30'
+    group by month(createtime)
+  ) t2 
+) a join (
+  select t1.createdate,round((t1.comment_num/t1.uv),1) as com_percent
+  from (
+    select month(createdate) as createdate,count(*) as comment_num,count(distinct userid) as uv
+    from dg_cookcomment
+    where to_date(createdate)>='2017-01-01' and to_date(createdate)<='2017-11-30'
+    group by month(createdate)
+  ) t1 
+) b on a.createdate=b.createdate
+
+1       4.7     2.9
+2       7.9     2.8
+3       7.3     4.1
+4       5.7     3.4
+5       12.5    3.5
+6       13.3    3.0
+7       12.0    2.8
+8       9.9     2.7
+9       8.5     2.6
+10      8.2     2.8
+11      10.2    5.7
+
+
+
+select  url
+from dg_client_recommend 
+where  to_date(starttime) >='2017-12-14' and to_date(endtime) > '2017-12-14' 
+
+select to_date(create_time) as statdate, if(instr(request,'?')>0,regexp_extract(request,'(.*)\\\\?.*',1),request) as request,
+from dh_wap_pv 
+where p_day>=20171214 and p_day<=20171214 and request not rlike '.*getHeaderInfo.*' and (request rlike '/article/detail' or request rlike '/activity' or request rlike '/jump' or request rlike '/group/post') 
+
+
+
+需要导出6月1日-12月14日在严选购买过商品的用户信息
+  SELECT user_id
+  FROM dg_order
+  WHERE  (parent_id=0 OR parent_id='' OR parent_id=order_id) AND pay_flag=20  AND store_id<>7568765 and to_date(pay_time)  BETWEEN '2017-06-01' AND '2017-12-14'
+  GROUP BY user_id
+
+
+
+
+附件是西门子11月的广告排期和跳转链接，请帮忙查下每个广告位数据的一线城市占比,列如：http://m.douguo.com/jump/100/1672
+
+add file /usr/local/goldmine/hive/default/dg-lib/17monipdb.dat;
+add file /usr/local/goldmine/hive/default/dg-lib/dg-udf-0.0.1-SNAPSHOT-jar-with-dependencies.jar;
+create temporary function IpTocc as 'com.dg.dc.hive.udf.ip.UDFIpToArea';
+select  a.IpInfo[2],count(*)
+from (
+    select split(IpTocc(ip),'\t') as IpInfo
+    from dh_wap_pv 
+    where p_day in (20171105,20171108 ) and request rlike '/jump/100/1672'
+) a 
+group by  a.IpInfo[2]
+
+
+
+
+
+select req['obj'],count(*)
+from dh_server_log
+where p_day  between  '20170917' and '20171217' and req['qtype']='search_caipu'  and req['obj'] ='烘焙'
+group by req['obj']
+
+
+    select trim(keyword) as keyword,count(*) as num
+    from dwh_user_behavior 
+    where p_day between  '20170917' and '20171217' and keyword = '烘焙' and qtype='search_caipu' 
+    group by trim(keyword) 
+    烘焙    290975
+
+
+
+关键词润肠通便，清热去火，润肺止咳，感冒发烧，便秘，痛经，腹泻和健脾养胃这么关键词的菜谱和搜索数据
+select count(distinct obj_id), count(*) 
+from dwh_user_behavior 
+where p_day>=20170916 and p_day<=20171016 and qtype='search_caipu' 
+and keyword in ('润肠通便','清热去火','润肺止咳','感冒发烧','便秘','痛经','腹泻','健脾养胃')
+
+菜谱
+select count(distinct cook_id)
+from dg_cook_categories
+where categoryname in ('润肠通便','清热去火','润肺止咳','感冒发烧','便秘','痛经','腹泻','健脾养胃')
+
+
+
+
+现在安佳烘焙包销售项目需要导出近3个月所有搜藏烘焙菜谱，上传烘焙菜谱的用户数据，需要用户ID， 手机号等信息。
+select id from dg_categories where name='烘焙';
+select id from dg_categories where parentid=17;
+select m.user_id,n.mobile
+from (
+    select a.user_id
+    from (
+            select cook_id,user_id
+            from dg_cookcollect
+            where to_date(createtime)  between  '2017-09-17' and '2017-12-17' and flag>=0
+            UNION ALL
+            select cook_id,user_id 
+            from dg_cook
+            where to_date(create_time)  between  '2017-09-17' and '2017-12-17' and flag >= 1
+    ) a join (
+            select t1.cook_id 
+            from (
+            select id from dg_categories where parentid in (17,71,72,73,74,76,77,78,79,80,153,158,638,663)
+            ) t join (
+                select cook_id,category_id
+                from dg_cook_categories
+            ) t1 on t.id=t1.category_id
+    ) b on a.cook_id=b.cook_id
+    group by a.user_id
+) m join (
+   select user_id,mobile
+   from dg_user
+) n on m.user_id=n.user_id
+
+
+
+select n.pid, sum(m.click_times),sum(m.dishesnum),sum(m.collectsnum),sum(m.comm_num) \
+from ( \
+    select a2.cook_id,a1.pid \
+    from ( \
+      select name,pid from dg_recipeclassify where level=2 \
+      union all \
+      select d2.name,d1.pid \
+      from ( \
+        select id,name,level,pid \
+        from dg_recipeclassify where level=3 \
+      ) d2 left outer join ( \
+        select id,pid,name from dg_recipeclassify \
+      ) d1 on d2.pid=d1.id \
+    ) a1 join ( \
+       select cook_id, categoryname \
+       from dg_cook_categories \
+  ) a2 on a1.name=a2.categoryname \
+) n join ( \
+   select t1.cook_id, t1.name,t1.click_times,t1.dishesnum,t1.collectsnum,t2.comm_num \
+      from ( \
+          select cook_id,name,click_times,dishesnum,collectsnum \
+          from dg_cook \
+      ) t1 join ( \
+          select cookid,count(*) as comm_num \
+          from dg_cookcomment \
+          group by cookid \
+      ) t2 on t1.cook_id=t2.cookid \
+) m  on n.cook_id=m.cook_id \
+group by n.pid
+
+
+安佳烘焙礼包销售压力较大，计划给用户绑券，需要提取数据
+数据维度：
+近2个月在豆果上搜索过“烘焙小白”/“烘焙新手”/“简单烘焙”并且浏览这些菜谱数超过2个的用户（取20000个），
+select id from dg_categories where name in ('烘焙小白','烘焙新手','简单烘焙');
+
+548102,1668170
+
+如沟通，需要2017年1月1日-12月15日期间收藏+学做数量top50的菜谱，需要的菜谱内容字段如下：
+菜谱id、菜谱名称、菜谱链接、菜谱发布时间
+
+
+select a.cook_id,b.name,concat("http://www.douguo.com/cookbook/",b.cook_id,".html"),b.create_time
+from (
+    select cook_id ,count(*) as num
+    from dg_cookcollect
+    where to_date(createtime) between  '2017-01-01' and '2017-12-15' and flag>=0
+    group by cook_id
+    order by num  desc
+    limit 100
+) a join (
+    select cook_id,name,create_time
+    from dg_cook
+) b on a.cook_id=b.cook_id
+
+
+select a.cook_id,b.name,concat("http://www.douguo.com/cookbook/",b.cook_id,".html"),b.create_time
+from (
+    select cook_id ,count(*) as num
+    from  dg_dish
+    where to_date(createdate) between  '2017-01-01' and '2017-12-15' and flag>=0
+    group by cook_id
+    order by num desc 
+    limit 100   
+) a join (
+    select cook_id,name,create_time
+    from dg_cook
+) b on a.cook_id=b.cook_id
+
+
+
+
+select t1.imei,t1.user_id,t1.username,t1.nickname,t3.income, \
+if(t2.sex='',if(t3.sex is null or t3.sex='',t1.sex,t3.sex),t2.sex) as sex, \
+if(t3.birthday='',t1.birthday,t3.birthday) as birthday, \
+if(t2.generation ='',if(t3.generation='' or t3.generation is null,t1.generation,t3.generation),t2.generation) as generation, \
+if(t2.profession='0',if(t3.profession ='' or t3.profession is null or t3.profession='0',t1.profession,t3.profession),t2.profession) as profession, \
+t3.weight,t3.height,t3.aim,t2.interested_tags,t3.taboos,t3.taboosother,t3.chronicillness,t3.chronicillnessother, t3.bloodglucose,t3.bloodpressuremax, \
+t3.bloodpressuremin,t3.bloodlipid,t3.heartrate,t3.expenditure,t3.havenurse \
+from ( \
+        select a.user_id,c.imei,a.sex,a.nickname,a.username,b.birthday,b.profession \
+        from ( \
+            select user_id,nickname,username, \
+             CASE 
+            WHEN  sex = '' or sex='0' or sex='\'女' or sex ='<>' or sex ='s' THEN '女' \
+            WHEN  sex = '男' or sex='男\'' THEN '男'  \
+            ELSE '' \
+            END AS sex \
+            from dg_user \
+        ) a join ( \
+            select user_id,birthday, \
+            CASE  \
+            WHEN  year(birthday) < '1970'  THEN '60后' \
+            WHEN  year(birthday)  BETWEEN '1970' AND '1980'  THEN '70后' \
+            WHEN  year(birthday)  BETWEEN '1980' AND '1985'  THEN '80后' \
+            WHEN  year(birthday)  BETWEEN '1985' AND '1990'  THEN '85后' \
+            WHEN  year(birthday)  BETWEEN '1990' AND '1995'  THEN '90后' \
+            WHEN  year(birthday)  BETWEEN '1995' AND '2000'   THEN '95后' \
+            WHEN  year(birthday)  >'2000'  THEN '00后' \
+            ELSE '' \
+            END AS generation, \
+            profession \
+            from dg_userdetail \
+        ) b on a.user_id=b.user_id \
+        join( \
+          select imei,user_id \
+          from dwh_reg_user_logins_latest \
+          where p_day=${BEGIN_PARTITION} and imei<>'' and imei <> '000000000000000' and imei<>0 \
+        ) c on a.user_id=c.user_id \
+) t1  left join ( \
+      select imei,user_id,interested_tags,gender as sex,profession,birthday as generation \
+      from dg_user_personalization \
+      where user_id<>'' and user_id<>0 \
+) t2 on t1.user_id=t2.user_id \
+left join ( \
+ select t1.user_id,t.sex,t.birthday,a.generation,t.profession,t1.income,t1.expenditure,t1.havenurse,t.weight,t.height,t.aim,t.taboos,t.taboosother,t.chronicillness,t.chronicillnessother,\
+ t.bloodglucose,t.bloodpressuremax,t.bloodpressuremin,t.bloodlipid,t.heartrate \
+    from ( \
+            select a.family_id,b.name as sex,a.birthday, a.generation，a.profession,a.weight,a.height,a.aim,a.taboos,a.taboosother,a.chronicillness,a.chronicillnessother,a.bloodglucose, \
+            a.bloodpressuremax,a.bloodpressuremin,a.bloodlipid,a.heartrate \
+            from ( \
+                  select t.family_id,t.sex,t.birthday,t.generation,t.profession,t.weight,t.height,t.aim,t.taboos,t.taboosother,t.chronicillness,t.chronicillnessother,t.bloodglucose, \
+                  t.bloodpressuremax,t.bloodpressuremin,t.bloodlipid,t.heartrate \
+                  from ( \
+                          select family_id,sex,birthday,weight,height,aim,taboos,taboosother,chronicillness,chronicillnessother,bloodglucose, \
+                          bloodpressuremax,bloodpressuremin,bloodlipid,heartrate, \
+                          CASE \
+                          WHEN  year(birthday) < '1970'  THEN '60后' \
+                          WHEN  year(birthday)  BETWEEN '1970' AND '1980'  THEN '70后' \
+                          WHEN  year(birthday)  BETWEEN '1980' AND '1985'  THEN '80后' \
+                          WHEN  year(birthday)  BETWEEN '1985' AND '1990'  THEN '85后' \
+                          WHEN  year(birthday)  BETWEEN '1990' AND '1995'  THEN '90后' \
+                          WHEN  year(birthday)  BETWEEN '1995' AND '2000'   THEN '95后' \
+                          WHEN  year(birthday)  >'2000'  THEN '00后' \
+                          ELSE '' \
+                          END AS generation, \
+                          profession, ROW_NUMBER() OVER (PARTITION BY family_id order by id) as rn \
+                          from dg_family_member \
+                          where status=1 and weight <> '0' and height <> '0' \
+                  ) t  \
+                  where t.rn=1 \
+            ) a left join ( \
+                 select id,name \
+                 from dg_family_tag \
+            ) b on a.sex=b.id \
+    ) t join ( \
+       select user_id,id,income,expenditure,havenurse \
+       from dg_family \
+    ) t1 on t.family_id=t1.id \
+) t3 on t1.user_id=t3.user_id \
+UNION ALL \
+select imei,'' as user_id,'' as username,'' as nickname,'' as income,gender as sex, '' as birthday, \
+birthday as generation,profession,'' as weight,'' as height,'' as aim,interested_tags,'' as taboos,'' as taboosother,'' as chronicillness,'' as chronicillnessother, \
+ '' as bloodglucose,'' as bloodpressuremax,'' as bloodpressuremin,'' as bloodlipid,'' as heartrate,'' as expenditure,'' as havenurse \
+from dg_user_personalization \
+where user_id='' or user_id=0 \
+
+请帮忙导出12月18日至12月20日期间，连续3日上传作品的用户名单，只需要用户昵称和用户ID。
+select t.user_id,t1.nickname
+from (
+    select a.user_id
+    from (
+        select n.user_id,ROW_NUMBER() OVER (PARTITION BY n.user_id order by n.createdate) as rn 
+        from (
+            select user_id,to_date(createdate) as createdate
+            from dg_dish
+            where to_date(createdate) BETWEEN '2017-12-18' AND '2017-12-20' 
+        ) n 
+    )  a 
+    where a.rn >=3
+) t join (
+ SELECT user_id,nickname
+ FROM dg_user
+) t1 on t.user_id=t1.user_id
+group by t.user_id,t1.nickname
+
+
+CREATE EXTERNAL TABLE dwh_app_client_tmall_imei( 
+souc STRING, 
+imei STRING,
+ifa STRING,
+ip  STRING,
+brand STRING,
+device STRING,
+android_id STRING,
+mac STRING,
+sys STRING,
+reach STRING,
+carrier STRING,
+reso STRING,
+scale STRING,
+dname STRING,
+vers STRING)
+partitioned by (p_day bigint) 
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.columnar.ColumnarSerDe' 
+STORED AS RCFILE LOCATION '/user/hive/warehouse/dg/tables/dwh_app_client_tmall_imei' 
+
+
+
+
+ select count(*)
+        from ( 
+            select user_id,nickname,username, sex 
+            from dg_user 
+        ) a join ( 
+            select user_id,birthday, profession 
+            from dg_userdetail 
+        ) b on a.user_id=b.user_id 
+        join( 
+          select imei,user_id 
+          from dwh_reg_user_logins_latest 
+          where p_day=20171221 and imei<>'' and imei <> '000000000000000' and imei<>0 
+        ) c on a.user_id=c.user_id 
+
+
+select income
+from ( 
+  select a.family_id,b.name as sex,a.birthday,a.profession,a.weight,a.height,a.aim,a.taboos,a.taboosother,a.chronicillness,a.chronicillnessother,a.bloodglucose, 
+  a.bloodpressuremax,a.bloodpressuremin,a.bloodlipid,a.heartrate 
+  from ( 
+        select t.family_id,t.sex,t.birthday,t.profession,t.weight,t.height,t.aim,t.taboos,t.taboosother,t.chronicillness,t.chronicillnessother,t.bloodglucose, 
+        t.bloodpressuremax,t.bloodpressuremin,t.bloodlipid,t.heartrate 
+        from ( 
+                select family_id,sex,birthday,weight,height,aim,taboos,taboosother,chronicillness,chronicillnessother,bloodglucose, 
+                bloodpressuremax,bloodpressuremin,bloodlipid,heartrate,                
+                profession, ROW_NUMBER() OVER (PARTITION BY family_id order by id) as rn 
+                from dg_family_member 
+                where status=1 and weight <> '0' and height <> '0' 
+        ) t  
+        where t.rn=1 
+  ) a left join ( 
+       select id,name 
+       from dg_family_tag 
+  ) b on a.sex=b.id 
+) t join ( 
+select user_id,id,income,expenditure,havenurse 
+from dg_family 
+) t1 on t.family_id=t1.id
+group by income
+
+
+    select user_id,sex,income,generation,profession ,taboos
+    from dwh_reg_user_profile
+
+    select profession from dwh_reg_user_profile group by profession
+
+
+select a.name
+from (
+ select id,name 
+ from dg_family_tag 
+) a join (
+ select income
+ from dwh_reg_user_profile 
+) b on a.id=b.income
+group by a.name
+0～4000 每月
+12001～20000 每月
+20000以上每月
+4001～8000 每月
+8001～12000 每月
+
+
+select a.name
+from (
+ select id,name 
+ from dg_family_tag 
+) a join (
+   select profession from dwh_reg_user_profile 
+) b on a.id=b.profession
+group by a.name
+0～1500 每月
+0～4000 每月
+12001～20000 每月
+1501～3000 每月
+20000以上每月
+3001～4500 每月
+4001～8000 每月
+4501～6000 每月
+6000以上每月
+8001～12000 每月
+健身
+养生
+少油
+少盐
+少糖
+康复
+高血压
+
+select a.name
+from (
+ select id,name 
+ from dg_family_tag 
+) a join (
+   select taboos from dwh_reg_user_profile 
+) b on a.id=b.taboos
+group by a.name
+
+select count(*) from dg_family where income<>'' and income is not null
+select taboos from dwh_reg_user_profile group by taboos
+
+豆果搜索词TOP2000    9201 
+from dh_server_log 
+ where p_day=${CUR_PARTITIONS} and req[\"qtype\"]='search_caipu' and req[\"srctype\"]=200 
+ 搜索结果召回课堂   12377
+ from dh_server_log
+where p_day=20171220 and req['qtype']='search_caipu' and req['vers']>=683 and plat='API'
+
+select ds1.keyword,ds1.pvs,ds2.keyword,ds2.pvs 
+        from (
+                select trim(keyword) as keyword,count(*) as pvs,ROW_NUMBER() OVER (order by count(*) desc ) as ndx 
+                from dwh_user_behavior 
+                where p_day = ${CUR_PARTITIONS} and keyword <> '' and keyword is not null and qtype='search_caipu' 
+                group by trim(keyword) 
+                having pvs >=100 
+        ) ds1 left outer join (\
+                select req[\"obj\"] as keyword,count(*) as pvs ,ROW_NUMBER() OVER (order by count(*) desc ) as ndx 
+                from dh_server_log 
+                where p_day=${CUR_PARTITIONS} and req[\"qtype\"]='search_caipu' and req[\"srctype\"]=200 
+                group by req[\"obj\"] 
+        ) ds2 on ds1.ndx=ds2.ndx 
+        limit 2000
+搜索结果召回课堂
+select p_day,req['obj'],count(*)
+from dh_server_log
+where p_day=20171220 and req['qtype']='search_caipu' and req['vers']>=683 and plat='API' and req['obj'] in('烘焙西点','私房教学','蛋糕','面包','甜品','饼干','特色美食','中餐','西餐','日料','外国菜','地方小吃','零食','酿酒','咖啡','婴儿辅食','视频菜谱','烘焙','西点','家常菜','午餐','晚餐','中国菜','酒','饮品','宝宝辅食','辅食','小吃','下午茶','点心','烤箱食谱')
+group by p_day,req['obj']
+
+
+CREATE EXTERNAL TABLE `dwh_reg_user_profile`(
+imei string,
+user_id string ,   
+username string , 
+nickname string ,   
+income string,  
+sex string, 
+birthday string,
+generation string,
+profession string,
+weight string,
+height string,
+aim string,
+interested_tags string,
+taboos string,
+taboosother string,
+chronicillness string,
+chronicillnessother string,
+bloodglucose string,
+bloodpressuremax string,
+bloodpressuremin string,
+bloodlipid string,
+heartrate string,
+expenditure string,
+havenurse string)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.columnar.ColumnarSerDe'
+STORED AS RCFILE LOCATION '/user/hive/warehouse/user/tables/dwh_reg_user_profile';
+
+
+CREATE EXTERNAL TABLE dwh_tag_user_msg( 
+user_id STRING, 
+mobile STRING)
+partitioned by (p_day bigint) 
+row format delimited fields terminated by ','
+LINES TERMINATED BY '\n' 
+STORED AS textfile LOCATION '/user/hive/warehouse/dg/tables/dwh_tag_user_msg' 
+
+
+
+CREATE EXTERNAL TABLE `dwh_wap_pv_url_stat`(
+request string,
+pv bigint ,   
+uv bigint )
+partitioned by (p_day bigint)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.columnar.ColumnarSerDe'
+STORED AS RCFILE LOCATION '/user/hive/warehouse/user/tables/dwh_wap_pv_url_stat';
+
+
+CREATE EXTERNAL TABLE `dwh_wap_pv_url_stat`(
+type string,
+type_name string ,   
+value string )
+ partitioned by (p_day bigint)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.columnar.ColumnarSerDe'
+STORED AS RCFILE LOCATION '/user/hive/warehouse/user/tables/dwh_app_type_imei';
+
+
+菜谱征集：dg_huodong cate=2代表为菜谱征集
+菜谱征集下的菜谱：dg_pull_item item_status=2代表露出
+
+select pull_id,count(distinct cook_id) as cnum
+from dg_pull_item 
+where item_status=2 and to_date(create_time) between '2016-09-01' and '2016-09-25'
+group by pull_id
+order by cnum desc
+limit 10000
+
+
+select 'sex' as type, t2.sex,count(*)
+from (
+    select ddt.user_id,ddt.tag_id
+    from (
+      select user_id,tag_id
+      from dg_dish_tagdetail 
+    ) ddt join (
+      select dish_tag_id
+      from dg_huodong_content
+      where huodong_id=22 
+    ) dhc on ddt.tag_id=dhc.dish_tag_id
+) t1 join (
+    select user_id,sex
+    from dwh_reg_user_profile
+) t2 on t1.user_id=t2.user_id
+group by t2.sex
+UNION ALL 
+select 'generation' as generation, t2.generation,count(*)
+from (
+    select ddt.user_id,ddt.tag_id
+    from (
+      select user_id,tag_id
+      from dg_dish_tagdetail 
+    ) ddt join (
+      select dish_tag_id
+      from dg_huodong_content
+      where huodong_id=22 
+    ) dhc on ddt.tag_id=dhc.dish_tag_id
+) t1 join (
+    select user_id,generation
+    from dwh_reg_user_profile
+) t2 on t1.user_id=t2.user_id
+group by t2.generation
+UNION ALL 
+select 'generation' as generation, t2.generation,count(*)
+from (
+    select ddt.user_id,ddt.tag_id
+    from (
+      select user_id,tag_id
+      from dg_dish_tagdetail 
+    ) ddt join (
+      select dish_tag_id
+      from dg_huodong_content
+      where huodong_id=22 
+    ) dhc on ddt.tag_id=dhc.dish_tag_id
+) t1 join (
+    select user_id,generation
+    from dwh_reg_user_profile
+) t2 on t1.user_id=t2.user_id
+group by t2.generation
+
+
+drop table if exists temp5;
+create table temp5 as 
+select t1.user_id,t2.sex,t2.income,t2.generation,t2.profession 
+from (
+    select ddt.user_id,ddt.tag_id
+    from (
+      select user_id,tag_id
+      from dg_dish_tagdetail 
+    ) ddt join (
+      select dish_tag_id
+      from dg_huodong_content
+      where huodong_id=22 
+    ) dhc on ddt.tag_id=dhc.dish_tag_id
+) t1 join (
+    select user_id,sex,income,generation,profession ,taboos
+    from  
+) t2 on t1.user_id=t2.user_id
+
+
+select 'sex' as type, sex,count(*)
+from temp5
+UNION ALL 
+select 'income' as type, income,count(*)
+from temp5
+UNION ALL 
+select 'generation' as type, generation,count(*)
+from temp5
+UNION ALL 
+select 'profession' as type, profession,count(*)
+from temp5
+
+
+
+
+CREATE EXTERNAL TABLE `dwh_app_type_imei`(
+type string,
+type_name string ,   
+value string )
+ partitioned by (p_type bigint)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.columnar.ColumnarSerDe'
+STORED AS RCFILE LOCATION '/user/hive/warehouse/user/tables/dwh_app_type_imei';
+
+
+
+select a.user_id,c.imei,a.nickname,a.username,b.birthday,b.profession
+        from ( 
+                select user_id,nickname,username
+                from dg_user  
+                where user_id in('1011645','45072','2538938','37619','20804632') 
+        ) a join ( 
+                select user_id,birthday,    
+                        profession 
+                from dg_userdetail 
+        ) b on a.user_id=b.user_id join( 
+                select imei,user_id 
+                from dwh_reg_user_logins_latest 
+                where p_day=20171225
+        ) c on a.user_id=c.user_id 
+
+
+        select a.user_id,c.imei,a.nickname,a.username,b.birthday,b.profession
+        from ( 
+                select user_id,nickname,username
+                from dg_user  
+                where user_id in('1011645','45072','2538938','37619','20804632') 
+        ) a join ( 
+                select user_id,birthday,    
+                        profession 
+                from dg_userdetail 
+        ) b on a.user_id=b.user_id join( 
+                select imei,user_id 
+                from dwh_reg_user_logins_latest 
+                where p_day=20171225 and imei<>'' and imei <> '000000000000000' and imei<>0 
+        ) c on a.user_id=c.user_id 
+
+
+   select 'chronicillness' as type,  b.name as type_name,a.num
+   from (
+       select singlechronicillness ,count(*) as num
+       from ( 
+              select regexp_replace(regexp_replace(regexp_replace(chronicillness,'\\\\[',''),'\\\\]',''),'\"','') as chronicillness
+              from  dwh_reg_user_profile
+              where   chronicillness<>'' and chronicillness is not null and chronicillness<>'[]'
+       ) t 
+       LATERAL VIEW explode(split(t.chronicillness,',')) tableb as singlechronicillness 
+       group by singlechronicillness
+   ) a join (
+        select id,name 
+        from dg_family_tag 
+        where status=1 
+   ) b on a.singlechronicillness =b.id
+
+
+   18073
+
+
+  select count(*)
+   from (
+       select t.sex, singlechronicillness ,count(*) as num
+       from ( 
+              select sex, regexp_replace(regexp_replace(regexp_replace(chronicillness,'\\\\[',''),'\\\\]',''),'\"','') as chronicillness
+              from  dwh_reg_user_profile
+              where   chronicillness<>'' and chronicillness is not null and chronicillness<>'[]'
+       ) t 
+       LATERAL VIEW explode(split(t.chronicillness,',')) tableb as singlechronicillness 
+       group by singlechronicillness,t.sex
+   ) a join (
+        select id,name 
+        from dg_family_tag 
+        where status=1 
+   ) b on a.singlechronicillness =b.id
+
+
+
+              兴趣和省份
+              select interest,count(*) as num \
+              from ( \
+                    select province,regexp_replace(regexp_replace(regexp_replace(interested_tags,'\\\\[',''),'\\\\]',''),'\"','') as interested_tags \
+                    from dwh_reg_user_profile\
+                     where  interested_tags<>'' and interested_tags is not null and interested_tags<>'0'
+              ) tm \
+              LATERAL VIEW explode(split(tm.interested_tags,',')) interests as interest \
+              group by interest\
+
+
+
+              兴趣、年龄  
+              select interest,tm.generation,count(*) as num \
+              from ( \
+                    select generation,regexp_replace(regexp_replace(regexp_replace(interested_tags,'\\\\[',''),'\\\\]',''),'\"','') as interested_tags \
+                    from dwh_reg_user_profile\
+                     where  interested_tags<>'' and interested_tags is not null and interested_tags<>'0'
+              ) tm \
+              LATERAL VIEW explode(split(tm.interested_tags,',')) interests as interest \
+              group by interest,tm.generation\
+
+
+
+疾病和性别
+
+
+select count(*)
+from dwh_reg_user_profile
+where  interested_tags<>'' and interested_tags is not null and interested_tags<>'0' and province<>'' 982914
+select count(*)
+from dwh_reg_user_profile
+where  interested_tags<>'' and interested_tags is not null and interested_tags<>'0'  1003074
+
+
+
+
+
+
+
+select t1.total,t.num
+from (
+  select count(distinct a.user_id) as num,'1' as joinColumn
+  from (
+      select user_id
+      from dwh_reg_user_profile
+      where  city='青岛'
+  ) a join (
+      SELECT user_id, to_date(last_time) as last_time    
+      FROM dwh_reg_user_logins_latest
+      WHERE p_day>='20171213' and p_day<='20171227'   
+  ) b on a.user_id=b.user_id
+) t join (
+     select count(*) as total,'1' as joinColumn
+      from dwh_reg_user_profile
+      where  city='青岛'
+) t1 on t.joinColumn=t1.joinColumn
+
+ 105178  97024
+
+
+
+ta.parentid=1  '菜系'
+ta.parentid=2  '烹饪方法'
+ta.parentid=3  '口味'
+ta.parentid=4  '菜式'
+ta.parentid=7  '场景'
+ta.parentid=8  '人群'
+ta.parentid=9  '功效'
+ta.parentid=10 '疾病'
+ta.parentid=15 '中国菜'
+ta.parentid=16 '外国菜'
+
+
+调料 dg_cook_ingredients  ingredienttype 1主料 2次要主料 3辅料 4 调味料
+
+TOP 10 调料(作品数据) 
+select b.ingredientname,count(*) as num
+from (
+   select cook_id 
+   from dg_dish
+) a join (
+   select ingredientname,cook_id
+   from dg_cook_ingredients
+   where ingredienttype=3
+) b on a.cook_id=b.cook_id
+group by b.ingredientname
+order by num desc 
+limit 100
+
+
+TOP10 烹调方法(A类及以上菜谱)
+select b.name,count(*) as num
+from (
+    select cook_id 
+    from dg_cook
+    where  levelid<=2
+) a join (
+    select t.name,t1.cook_id 
+    from (
+    select name,id from dg_categories where parentid=2
+    ) t join (
+        select cook_id,category_id
+        from dg_cook_categories
+    ) t1 on t.id=t1.category_id
+) b on a.cook_id=b.cook_id
+group by b.name
+order by  num desc 
+limit 100
+
+TOP10 功效(菜谱标签)
+select a.name,count(*) as num
+from (
+    select t.name,t1.cook_id 
+    from (
+    select name,id from dg_categories where parentid=9
+    ) t join (
+        select cook_id,category_id
+        from dg_cook_categories
+    ) t1 on t.id=t1.category_id
+) a join (
+     select cook_id 
+     from dg_cook
+) b on a.cook_id=b.cook_id
+ group by a.name
+ order by num desc 
+ limit 100;
+
+
+
+膳食
+
+select t.birthday,count(*) as num
+from (
+    select birthday , ROW_NUMBER() OVER (PARTITION BY family_id order by id) as rn 
+    from dg_family_member 
+    where status=1 and weight <> '0' and height <> '0' 
+) t  
+where t.rn=1 
+group by t.birthday
+order by num desc 
+limit 50
+
+
+
+select  t.birthday,count(*) as num
+from (
+    select if(b.birthday='' or b.birthday is null,a.birthday,b.birthday) as birthday
+    from (
+        select user_id,birthday
+         from dg_userdetail 
+    ) a left join (
+          select tb.user_id,ta.birthday
+          from (
+                select t.family_id, t.birthday
+                from (
+                    select family_id, birthday , ROW_NUMBER() OVER (PARTITION BY family_id order by id) as rn 
+                    from dg_family_member 
+                    where status=1 and weight <> '0' and height <> '0' 
+                ) t  
+                where t.rn=1 
+          )  ta join (
+                select user_id,id from dg_family 
+          )  tb on ta.family_id=tb.id
+    ) b on a.user_id=b.user_id
+) t
+group by t.birthday
+order by num desc 
+limit 50
+
+豆果美食内容数据解析
+
+
+
+select to_date(createdate) as createdate,  count(*) as user_friend_num 
+from dg_friend 
+where to_date(createdate)>='2017-11-02' and to_date(createdate)<='2018-01-02'
+group by to_date(createdate)
+order by createdate desc 
+
+select to_date(createdate) as createdate,count(*),count(distinct userid) as user_friend_num 
+from dg_friend 
+where to_date(createdate)>='2017-11-02' and to_date(createdate)<='2018-01-02'
+group by to_date(createdate)
+order by createdate 
+
+INSERT INTO dd_app_tuan_stat(list_pv,list_uv,detail_pv,detail_uv,order_pv,pay_sign_pv,pay_success_pv,taun_uv,statdate) VALUES($query);
+
+query_view_tuan_lists="select count(*),count(distinct concat(req[\"mac\"],req[\"imei\"],req[\"ifa\"])) from dh_server_log where p_day=${BEGIN_DATE} and (req[\"qtype\"]='view_tuan_lists' or req[\"qtype\"]='view_tuan_li
+sts_by_tag' or req[\"qtype\"]='view_featureproductsl' or req[\"qtype\"]='view_mall_index') and plat='API'"
+
+query_view_tuan_detail="select count(*),count(distinct concat(req[\"mac\"],req[\"imei\"],req[\"ifa\"])) from dh_server_log where p_day=${BEGIN_DATE} and req[\"qtype\"]='view_tuan_detail' and plat='API'"
+
+query_view_tuan_local_lists="select count(distinct req['euid']) from  dh_server_log where p_day=${BEGIN_DATE} and req['qtype'] ='view_tuan_local_lists'"
+
+
+select  req['euid'] as user_id
+from dh_server_log
+where  p_day='20180102' and req['qtype'] in ('view_tuan_local_lists','view_tuan_detail') and plat='API' and (req['qtype']='view_tuan_lists' or req['qtype']='view_tuan_lists_by_tag' or req['qtype']='view_featureproductsl' or req['qtype']='view_mall_index')
+group by req['euid']
+
+select  count(distinct req['imei'])
+from dh_server_log
+where  p_day='20180102' and req['qtype'] in ('view_tuan_local_lists','view_tuan_detail','view_tuan_lists','view_tuan_lists_by_tag','view_featureproductsl','view_mall_index') and plat='API'
+17584
+
+
+
+根据相关运营规划，我想要一些膳食管理的数据：
+
+2、1周内使用该功能的用户特征数据：自己的数据已经家庭成员的数据；
+3、该功能每周的用户使用数；
+
+select count(*),count(distinct req['uid']) from dh_server_log where p_day>=20171225 and  p_day<=20180102 and req['qtype']='family_plan_home'
+26047   13529
+
+
+
+
+20171227 到20180102
+pv       uv
+26047   13529
+
+select p_day,req['obj'],count(*) as num
+from dh_server_log
+where p_day=20171214 and req['qtype']='search_caipu' and req['vers']>=683 and plat='API' and req['obj'] in('烘焙小白','烘焙新手','简单烘焙')
+group by p_day,req['obj']
+order by num
+
+
+
+select req['obj'],count(*) as num
+from dh_server_log
+where p_day>=20171101 and p_day<=20180102 and req['qtype']='search_caipu' and plat='API' and req['obj'] in('烘焙小白','烘焙新手','简单烘焙')
+group by req['obj']
+
+
+ select a.id,a.user_id,regexp_extract(a.url,'id=([0-9]+)',1) as goods_id
+         from (
+              select id,user_id,regexp_extract(content, 'recipes://(.*?)(\" target)', 1) as url
+              from dg_article_data
+              where regexp_extract(content, 'recipes://(.*?)(\" target)', 0)<>''
+         ) a 
+
+
+regexp_extract('https://detail.tmall.com/item.htm?spm=608.7065813.ne.1.Ni3rsN&id=522228774076&tracelog=fromnonactive','id=([0-9]+)',0),    -- id=522228774076
+regexp_extract('https://detail.tmall.com/item.htm?spm=608.7065813.ne.1.Ni3rsN&id=522228774076&tracelog=fromnonactive','id=([0-9]+)',1),    -- 522228774076
+ 
+regexp_extract('http://a.m.taobao.com/i41915173660.htm','i([0-9]+)',0),            -- i41915173660
+regexp_extract('http://a.m.taobao.com/i41915173660.htm','i([0-9]+)',1)             -- 41915173660
+
+
+/cookbook/699488.html?src=c_more
+/cookbook/1255103.html?f=www
+/cookbook/737198.html
+/recipe/mip/1131338
+/cookbook/13642.html
+/recipe/mip/1171404
+/cookbook/192779.html?f=baid&src=c_more
+/cookbook/1626435.html?f=detail_861111
+/show/pv/
+/cookbook/1503631.html?f=wap&src=c_more
+
+http://m.douguo.com/activity/rushtemplate/loadview/11936?ysh=0
+
+select a.p_day
+  CASE 
+      WHEN  a.id='11936' THEN '网红甜品' 
+      WHEN  a.id='12016' THEN '优质新课' 
+      WHEN  a.id='12021' THEN '怀念的味道' 
+      WHEN  a.id='11997' THEN '面包show' 
+      WHEN  a.id='11865' THEN '零食专题' 
+      WHEN  a.id='11935' THEN '情人节' 
+      WHEN  a.id='11994' THEN '年味儿' 
+      WHEN  a.id='11790' THEN '主食爱好者' 
+      WHEN  a.id='11755' THEN '小白课堂' 
+      WHEN  a.id='11771' THEN '中餐top5' 
+      WHEN  a.id='11800' THEN '烘焙top6' 
+      ELSE '其他' 
+  END AS type ,count(*) pv,count(distinct a.ip) as uv
+from (
+    select p_day,ip,regexp_extract(request,'loadview/([0-9]+)',1) as id 
+    from dh_wap_pv
+    where p_day between  '20180125' and '20180207' and request rlike 'activity/rushtemplate/loadview/[0-9]+'
+) a 
+where  a.id in ('11936','12016','12021','11997','11865','11935','11994','11790','11755','11771','11800')
+group p_day,a.id
+order by a.p_day,pv desc
+
+
+select count(*),count(distinct a.ip)
+from (
+    select t.ip,t.request
+    from (
+      select ip, split(request,'\\?')[0] as request
+      from dh_wap_pv
+      where p_day=20180103
+    ) t
+    group by t.ip,t.request
+) a
+
+
+7255431 525293
+4908859 525293
+4908859,525293
+
+
+
+
+http://m.douguo.com/activity/zhike/indexadpA?id=3000 
+http://m.douguo.com/activity/rushtemplate/loadview/11731?ysh=0&open=0&mz_ca=2067620&mz_sp=7BuSf&mz_sb=1 
+http://m.douguo.com/activity/zhike/indexadpA?id=3016 
+http://m.douguo.com/jump/100/1889 
+
+rlike 'http://om\\.douguo\\.com/cookbook/[0-9]*\\.html\\?f=sm.*' 
+
+top5的ip段，每天访问的url记录。从12月20日，到今天
+select n.p_day,n.parse_ip,n.request,n.pv,n.uv
+from (
+    select t.p_day,t.parse_ip,t.request,t.pv,t.uv,ROW_NUMBER() OVER (PARTITION BY t.p_day,t.parse_ip order by t.pv desc) as rn
+    from (
+      select a.p_day,b.parse_ip,b.request,count(*) as pv,count(distinct b.ip) as uv
+      from (
+          select nnt.p_day,nnt.parse_ip,nnt.num,nnt.uv 
+          from ( 
+              select nt.p_day,nt.parse_ip,nt.num,nt.uv,ROW_NUMBER() OVER (PARTITION BY nt.p_day order by nt.num desc) as rn 
+              from (
+                    select a.p_day,a.parse_ip,count(*) as num,count(distinct a.ip) as uv 
+                    from (
+                        select p_day,ip,regexp_extract(ip,'(\\d+\\.\\d+\\.\\d+)\\.(\\d+)',1) as parse_ip
+                        from dh_wap_pv
+                        where  p_day=20180107 and (request rlike '/activity/' or request rlike '/jump/')
+                    ) a
+                    group by a.p_day,a.parse_ip   
+               ) nt 
+         ) nnt 
+         where nnt.rn <=10           
+      ) a join (
+              select p_day,request,ip,regexp_extract(ip,'(\\d+\\.\\d+\\.\\d+)\\.(\\d+)',1) as parse_ip
+              from dh_wap_pv
+              where  p_day=20180107 and  (request rlike '/activity/' or  request rlike '/jump/')
+      ) b on a.p_day=b.p_day and a.parse_ip=b.parse_ip
+      group by a.p_day,b.parse_ip,b.request
+    ) t
+) n 
+ where rn <=10
+
+
+网红甜品  http://m.douguo.com/activity/rushtemplate/loadview/11936?ysh=0
+优质新课  http://m.douguo.com/activity/rushtemplate/loadview/12016?ysh=0
+怀念的味道 http://m.douguo.com/activity/rushtemplate/loadview/12021?ysh=0
+面包show  http://m.douguo.com/activity/rushtemplate/loadview/11997?ysh=0
+零食专题  http://m.douguo.com/activity/rushtemplate/loadview/11865?ysh=0
+情人节 http://m.douguo.com/activity/rushtemplate/loadview/11935?ysh=0
+年味儿 http://m.douguo.com/activity/rushtemplate/loadview/11994?ysh=0
+主食爱好者 http://m.douguo.com/activity/rushtemplate/loadview/11790?ysh=0
+小白课堂  http://m.douguo.com/activity/rushtemplate/loadview/11755?ysh=0
+中餐top5  http://m.douguo.com/activity/rushtemplate/loadview/11771?ysh=0
+烘焙top6  http://m.douguo.com/activity/rushtemplate/loadview/11800?ysh=0
+
+
+select p_day,request,ip,regexp_extract(ip,'(\\d+\\.\\d+\\.\\d+)\\.(\\d+)',1) as parse_ip
+              from dh_wap_pv
+              where  p_day=20180107 and  (request rlike '/activity/rushtemplate/loadview/([0-9])+')
+
+
+
+select count(if(a.num>=1 and a.num<=10,1,null)),count(if(a.num>=11 and a.num<=20,1,null)),count(if(a.num>=21 and a.num<=30,1,null)),
+count(if(a.num>=31 and a.num<=50,1,null)),count(if(a.num>=51 and a.num<=100,1,null)),count(if(a.num>=101,1,null))
+from (
+    select userid,count(*) as num
+    from dg_friend
+    where to_date(createdate)='2018-01-05'
+    group by userid
+) a 
+
+
+21462721        2023
+21462651        1940
+17476027        126
+
+
+shell 模板
+
+SCRIPT_NAME=$0
+echo ${SCRIPT_NAME}
+
+echo "================= ${SCRIPT_NAME} start === `date "+%Y-%m-%d %H:%M:%S"`================="
+
+### 1. set workdir
+WORK_DIR=`dirname ${SCRIPT_NAME}`
+echo ${WORK_DIR}
+cd ${WORK_DIR}
+
+### 2. args check
+if [ $# -eq 0 ]
+ then
+   CUR_DATE=`date -d "-1 day"  +%Y-%m-%d`
+   CUR_PARTITION=`date -d "-1 day"  +%Y%m%d`
+   BEGIN_PARTITION=`date -d "-1 day"  +%Y%m%d`
+   END_PARTITION=`date -d "-1 day"  +%Y%m%d`
+   BEGIN_DATE=`date -d "-1 day"  +%Y-%m-%d`
+   END_DATE=`date -d "-1 day"  +%Y-%m-%d`
+elif [ $# -eq 1 ]
+ then
+   format_day=`echo $1|grep -o '[0-9]\{8\}'`
+   format_hour=`echo $1|grep -o '[0-9]\{2\}$'`
+   CUR_DATE=`date -d "$format_day" +%Y-%m-%d`
+   CUR_PARTITION=`date -d "$format_day" +%Y%m%d`
+   LAST_MONTH=`date -d "${format_day} -1 month" +%Y%m`
+   BEGIN_DATE=`date -d "${format_day}"  +%Y-%m-%d`
+   END_DATE=`date -d "${format_day}"  +%Y-%m-%d`
+   BEGIN_PARTITION=`date -d "${format_day}"  +%Y%m%d`
+   END_PARTITION=`date -d "${format_day}"  +%Y%m%d`
+ else
+        echo "the args is wrong ,you should give it like '20170718'"
+        exit 1;
+fi
+
+echo "CUR_DATE=${CUR_DATE}"
+echo "CUR_PARTITION=${CUR_PARTITION}"
+echo "LAST_MONTH=${LAST_MONTH}"
+echo "BEGIN_PARTITION=${BEGIN_PARTITION}"
+echo "END_PARTITION=${END_PARTITION}"
+echo "BEGIN_DATE=${BEGIN_DATE}"
+echo "END_DATE=${END_DATE}"
+
+### 3. body
+
+
+
+
+
+echo "================= ${SCRIPT_NAME} end === `date "+%Y-%m-%d %H:%M:%S"`================="
+
+
+select count(distinct req['euid'])
+from dh_server_log
+where p_day=20180110 and req['souc']=4
+
+513306
+
+select count(distinct req['euid'])
+from dh_server_log
+where p_day=20180110 and req['souc']=4 and req['imei'] <> '000000000000000' and req['imei'] <> '' and req['imei'] is not null
+512701
+
+
+
+所有菜谱作者在近一个月（20171211-20180111）登录的用户id数据
+select  a.user_id
+from (
+     select user_id
+     from dwh_reg_user_logins_latest
+     where p_day=20180111 and to_date(last_time)>='2017-12-11' and to_date(last_time)<='2018-01-11'
+) a join (
+     select user_id
+     from dg_cook
+) b on a.user_id=b.user_id
+group by a.user_id
+
+49881
+
+select count(distinct user_id)
+from dg_cook
+
+200399
+
+
+
+
+
+select ta.time, tb.type, ta.obj_id, tb.name, ta.pv, ta.uv, tb.collects, tb.comments, tb.dishs 
+from ( 
+        select to_date(time) as time,req['qtype'] as qtype,req['obj'] as obj_id,count(*) as pv,count(distinct req['euid']) as uv 
+        from dh_server_log 
+        where p_day>=20180109 and p_day<=20180109
+                and req['qtype'] in ('view_caipu_detail','live_class_detail','view_dish_tag','view_caipu_caidan_detail','view_article') 
+                and req['srctype'] in ('2302') 
+        group by to_date(time),req['qtype'],req['obj']  
+) ta join ( 
+       select 'view_dish_tag' as qtype, '作品征集' as type, id as obj_id, name, 0 as collects, 0 as comments, 0 as dishs 
+        from dg_dish_tag 
+        where id not in (271,272,273) 
+) tb on ta.qtype=tb.qtype and ta.obj_id=tb.obj_id 
+where ta.pv >= 300 
+order by tb.type, ta.obj_id 
+limit 10000
+
+ select to_date(time) as time,req['qtype'] as qtype,req['obj'] as obj_id,count(*) as pv,count(distinct req['euid']) as uv 
+        from dh_server_log 
+        where p_day>=20180109 and p_day<=20180109 and req['qtype'] ='view_dish_tag' and req['srctype'] in ('2302') 
+        group by to_date(time),req['qtype'],req['obj']  
+
+
+
+
+
+select doi.goods_id,count(*) as pays,count(distinct user_id) as pay_uids,sum(doi.goods_num) as goods,\
+sum(if(((store_goods_price * goods_num) - dg_subsidy - store_subsidy) < 0,0,((store_goods_price * goods_num) - dg_subsidy - store_subsidy))) as moneys \
+from dg_order_item doi left outer join (\
+        select order_id \
+        from dg_order \
+        where to_date(pay_time)='${BEGIN_DATE}' and (parent_id=0 or parent_id='' or parent_id=order_id) \
+                and store_id<>7568765 and pay_flag=20 \
+) do on doi.main_order_id=do.order_id \
+where do.order_id is not null \
+group by doi.goods_id \
+
+
+
+
+select to_date(pay_time) as statdate,count(*) as pays,sum(total_price) as moneys \
+from dg_order \
+where to_date(pay_time)='${BEGIN_DATE}' and hour(createtime)<='${STAT_VALUE}' \
+        and (parent_id=0 or parent_id='')\
+        and store_id<>7568765 \
+        and pay_flag=20 \
+group by to_date(pay_time) \
+
+
+SELECT tuan_id,max(tuan_name) as tuan_name,sum(clicks) as clicks,sum(uids) as uids,sum(orders) as orders,
+                 sum(pays) as pays,sum(pay_uids) as pay_uids,sum(goods) as goods,sum(moneys) as moneys 
+                 FROM `dd_app_tuan_product_stat` WHERE statdate="2018-01-14" group by tuan_id 
+
+
+
+
+select province,count(*) as num,count(distinct imei)
+from dwh_reg_user_profile
+gorup by province
+order by num desc 
+
+
+
+
+    query="select if(imei regexp '[0-9]{15}',imei,null) as imei,
+      CASE 
+        WHEN souc=3 THEN 'iOS' 
+        WHEN souc=4 THEN 'Android' 
+        ELSE 'other' 
+    END AS souc , dname,brand,sys,
+      brand,device,android_id,mac,sys,dname,vers \
+       from dwh_app_client_tmall_imei \
+       where p_day='20171218' 
+       limit 10"
+
+
+select imei,ifa,ip,brand,device,android_id,mac,sys,reach,carrier,reso,scale,dname,vers \
+       from dwh_app_client_tmall_imei \
+       where p_day='20170812' and souc=4
+       limit 10
+
+select
+      CASE 
+        WHEN souc=3 THEN 'iOS' 
+        WHEN souc=4 THEN 'Android' 
+      ELSE 'other',
+        if(regexp '[0-9]{15}',imei,null) as imei,dname,brand,sys, reso, scale, carrier ,ifa ,android_id , vers                 
+       from dwh_app_client_tmall_imei 
+       where p_day='20170812' 
+souc, imei,dname,brand,sys, reso, scale, carrier ,ifa ,android_id , vers 
+
+
+
+评论数据
+
+select qq.date,qq.cooknum,qq.all_cmmt_num,qq.robot_cmmt_num,qq.user_cmmt_num,qq.robot_cook_num,ww.robot_cmmt_cook_all_num 
+from (
+  select n.date,n.cooknum,n.all_cmmt_num,m.robot_cmmt_num,n.all_cmmt_num-m.robot_cmmt_num  as user_cmmt_num,m.robot_cook_num 
+  from (
+    select to_date(createdate) as date,count(distinct commentid) as all_cmmt_num,count(distinct cookid) as cooknum 
+    from dg_cookcomment
+    where to_date(createdate) between '2018-01-01' and '2018-01-15' and flag>=0 
+    group by to_date(createdate) 
+  ) n left join (
+    select b.date,count(distinct b.id) as robot_cmmt_num,count(distinct b.cookid) as robot_cook_num 
+    from (
+      select user_id
+      from dg_user_false
+    ) a join (
+      select to_date(createdate) as date,commentid as id,userid,cookid 
+      from dg_cookcomment
+      where to_date(createdate) between '2018-01-01' and '2018-01-15' and flag>=0
+    ) b on a.user_id=b.userid 
+    group by b.date 
+  ) m on m.date=n.date 
+) qq left join (
+  select bb.date,count(distinct bb.id) as robot_cmmt_cook_all_num
+  from (
+    select b.cookid
+    from (
+      select user_id
+      from dg_user_false
+    ) a join (
+      select to_date(createdate) as date,commentid as id,userid,cookid 
+      from dg_cookcomment
+      where to_date(createdate) between '2018-01-01' and '2018-01-15' and flag>=0
+    ) b on a.user_id=b.userid 
+  ) aa join (
+    select to_date(createdate) as date,commentid as id,cookid 
+    from dg_cookcomment
+    where to_date(createdate) between '2018-01-01' and '2018-01-15' and flag>=0
+  ) bb on aa.cookid=bb.cookid
+  group by bb.date 
+) ww on qq.date=ww.date 
+order by qq.date desc 
+limit 100;
+
+
+select user_id,count(*) as pay_num
+from dg_live_enroll 
+where status=2 and paytype<>'couponNoSettlement'  and isrobot<>1 
+group by user_id
+order by pay_num desc
+limit 100
+
+            SELECT user_id, count(*) as payno
+            FROM dg_live_enroll
+            WHERE status=2 AND to_date(paytime) BETWEEN '2017-06-01' AND '2017-08-31'
+            GROUP BY user_id
+
+
+
+b.imei,c.client,c.dname,b.user_id ,b.username,b.nickname,e.registerdate,c.last_time,a.orderNum,a.pay_num,d.fans_num,d.dishes_num,d.cookcollect_num,d.friends_num,d.recipes_num,
+b.province,b.city,b.income,b.sex,b.birthday,b.generation, b.profession,b.weight,b.height,b.interested_tags         
+username                                                      
+nickname                                                      
+province                                                
+city                                                      
+income                                                  
+sex                                                       
+birthday                                                     
+generation                                                   
+profession                                               
+weight                                                     
+height                                                     
+aim                                                      
+interested_tags                                             
+taboos                                                      
+taboosother                                               
+chronicillness                                               
+chronicillnessother                                          
+bloodglucose                                                
+bloodpressuremax                                            
+bloodpressuremin                                              
+bloodlipid              
+heartrate                                                    
+expenditure,havenurse 
+
+1. iOS or Android
+9. 手机型号信息
+
+
+select a.user_id,b.cook_num,a.pay_Num
+from (
+  select user_id,count(if(status=2,1,null)) as pay_Num
+  from dg_live_enroll 
+  where status>=1 and paytype<>'couponNoSettlement'  and isrobot<>1 
+  group by user_id
+  order by pay_num desc
+  limit 100
+) a left join (
+  select user_id,count(*) as cook_num
+  from dg_cook
+  where flag >= 1
+  group by user_id
+) b on a.user_id=b.user_id
+order by a.pay_Num desc 
+limit 100
+
+
+select user_id,count(*)
+from dg_order 
+where parent_id=0 or parent_id='' or parent_id=order_id
+and store_id<>7568765 and pay_flag=20 
+group by user_id
+
+
+
+ dg_user
+ dg_userdetail
+ dg_user_personalization 
+ dwh_reg_user_logins_latest
+ dg_family_member
+ dg_family
+ dg_family_tag
+
+
+用户路径分析统计
+select b.view_url,count(*) as num
+from (
+      select a.imei,concat_ws(',', collect_list(a.qtype)) as view_url
+      from (
+       select req['imei'] as imei ,req['qtype'] as qtype,ROW_NUMBER() OVER (PARTITION BY req['imei'] order by time) as rn 
+       from dh_server_log
+       where p_day=20180115 and req['qtype'] not in ('user_unreadmsg','view_app_c','set_device_token') and req['imei'] <>'' and req['imei'] <> '000000000000000'
+      ) a 
+      where rn >=1
+      group by a.imei
+) b 
+group by b.view_url
+order by num desc
+limit 30
+
+
+
+
+2017年购买所有购买的人
+select a.user_id,a.num,b.mobile
+from (
+      select user_id,count(*) as num
+      from dg_order 
+      where to_date(pay_time)>='2017-01-01' and pay_time<='2017-12-31'  and (parent_id=0 or parent_id='' or parent_id=order_id) 
+      and store_id<>7568765 and pay_flag=20 
+      group by user_id
+) a join (
+      SELECT user_id,nickname,mobile
+      FROM dg_user
+) b on a.user_id=b.user_id
+order by a.num desc 
+
+
+select t.user_id,t2.nickname,t.num
+from (
+    select c.user_id ,sum(c.num) as num
+    from (
+        select b.user_id,b.num
+        from (
+            select a.user_id,a.num,ROW_NUMBER() OVER (PARTITION BY a.user_id order by a.createdate) as rn 
+            from (
+                select to_date(createdate) as createdate,user_id,count(*) as num
+                from dg_dish 
+                where to_date(createdate)  BETWEEN '2017-12-01' AND '2018-01-16' 
+                group by to_date(createdate),user_id
+            ) a  where a.num>=5
+        ) b where rn >=10
+    ) c 
+    group by c.user_id
+) t join (
+    select user_id,nickname
+    from dg_user
+) t2 on t.user_id=t2.user_id
+order by t.num desc 
+
+请帮忙导出一下12月1日至1月16日期间，累计10天上传过作品（累计10天，不用连续），并且每日上传作品数≥5的用户数据。
+select nn.user_id,t2.nickname,mm.num
+from (
+  select user_id
+  from (
+      select a.createdate,a.user_id,a.num,ROW_NUMBER() OVER (PARTITION BY a.user_id order by a.createdate) as rn 
+      from (
+          select to_date(createdate) as createdate,user_id,count(*) as num
+          from dg_dish 
+          where to_date(createdate)  BETWEEN '2017-12-01' AND '2018-01-16' 
+          group by to_date(createdate),user_id
+      ) a 
+      where a.num>=5
+  ) b 
+  where rn>=10
+) nn join (
+          select user_id,count(*) as num
+          from dg_dish 
+          where to_date(createdate)  BETWEEN '2017-12-01' AND '2018-01-16' 
+          group by user_id
+) mm on nn.user_id=mm.user_id
+join (
+    select user_id,nickname
+    from dg_user
+) t2 on t.user_id=t2.user_id
+order by t.num desc 
+
+
+
+
+
+view_caipu_detail,search_caipu,view_my_ads,app_push_stat,personalized_home,home_personalize_distribute_recipe,view_app_c,view_app_s,view_zuopin_detail,live_nicoscript,view_user_info,view_caipu_caidan_detail,action_fav_caipu,view_main_index,view_dish_learned,view_user_favorites,view_dish_tag,
+view_article,live_class_list,view_caipu_predefined_list,live_class_detail,view_activity_list,view_group_indexv2,view_group_postreplies,view_my_feeds,action_like_dish,view_group_postdetail,view_mall_index,view_tuan_local_lists,view_tuan_detail,action_cart_refresh,view_group_posts,recipe_menus,recipe_category,view_tuan_lists,action_share_add_credit,action_cart_list,view_dish_homev2,view_dish_tags,post_create_zuopin,view_user_favorites_tags,live_class_play,family_plan_home,action_upload_user_photo,view_user_tuan_order_lists,view_group_list,product_keywordsearch,family_caipu_recommend,view_binded_apps,live_pay_detail,view_group_userposts,comment_caipu,view_store_coupon_lists,view_user_bind_mobile,action_cart_delete,view_order_detail
+
+
+
+ select t.qtype, t1.qtype_name
+         from (
+                select req['qtype'] as qtype 
+                from dh_server_log
+                where p_day=20180115 
+                and req['qtype'] in ('view_caipu_detail','search_caipu','view_my_ads','app_push_stat','personalized_home','home_personalize_distribute_recipe','view_app_c','view_app_s','view_zuopin_detail',
+                'live_nicoscript','view_user_info','view_caipu_caidan_detail','action_fav_caipu','view_main_index','view_dish_learned','view_user_favorites','view_dish_tag','view_article','live_class_list',
+                'live_class_detail','view_activity_list','view_group_indexv2','view_group_postreplies','view_my_feeds','action_like_dish','view_group_postdetail','view_mall_index',
+                'view_tuan_local_lists','view_tuan_detail','action_cart_refresh','view_group_posts','recipe_menus','recipe_category','view_tuan_lists','action_share_add_credit','action_cart_list','view_dish_homev2',
+                'view_dish_tags','post_create_zuopin','view_user_favorites_tags','live_class_play','family_plan_home','action_upload_user_photo','view_user_tuan_order_lists','view_group_list','product_keywordsearch',
+                'family_caipu_recommend','view_binded_apps','live_pay_detail','view_group_userposts','comment_caipu','view_store_coupon_lists','view_user_bind_mobile','action_cart_delete','view_order_detail')
+                 and req['qtype'] is not null and req['qtype']<>''
+                 and req['imei'] not in ('000000000000000','0','00000000','0000000000000000','00000000-0000-0000-0000-000000000000','')  and req['imei'] is not null 
+                 group by req['qtype']
+        ) t join (
+         select qtype,qtype_name
+         from dd_server_log_qtype_dict
+       ) t1 on t.qtype=t1.qtype
+
+
+
+  未加C用户(非达人用户， is_vip<1)
+  取90天登陆的用户；
+  作品是》=40个赞 或者 发过3篇A类菜谱过的
+
+昵称  ID  个人主页的链接（pc） 性别  电话或邮箱 所在省市  A类菜谱数 菜谱总数  作品数 生日  粉丝数
+
+select t1.user_id,t3.nickname,t3.sex,t5.birthday,t3.email,t3.mobile,t3.indexpage,t7.province,t7.city,t6.a_cook_num,t4.recipes_num,t4.dishes_num,t4.fans_num
+from (
+      select t1.user_id
+      from (
+        select dish_id, count(*) as fav_num
+        from dg_dishfav
+        group by dish_id 
+        having fav_num>=40
+      ) t join (
+        select user_id,dish_id
+        from dg_dish
+      ) t1 on t.dish_id=t1.dish_id
+      UNION ALL
+      select a.user_id
+      from (
+         select user_id,count(*) as cook_num
+         from dg_cook 
+         where flag >= 1 and levelid<=2
+         group by user_id
+         having cook_num >3
+      ) a
+      group by user_id
+) t1 join (
+      select user_id
+      from dh_app_logins 
+      where p_day  BETWEEN 20171101 AND 20180122      
+) t2 on t1.user_id=t2.user_id
+join (
+     select user_id,nickname,sex,email,mobile,concat('http://www.douguo.com/u/',username,'.html') AS indexpage
+     from dg_user
+     where is_vip<1
+) t3 on t1.user_id=t3.user_id
+join (
+     select user_id ,fans_num,dishes_num,recipes_num
+     from dg_user_status
+) t4 on t1.user_id=t4.user_id
+join (
+     select user_id,birthday
+     from birthday
+) t5 on t1.user_id=t5.user_id
+join (
+     select user_id,count(*) as a_cook_num
+     from dg_cook 
+     where flag >= 1 and levelid<=2
+     group by user_id
+) t6 on t1.user=t6.user_id
+join (
+    select user_id,province,city 
+    from dwh_reg_user_logins_latest
+    where p_day=20180122
+) t7 on t1.user_id=t7.user_id
+
+
+status=2  支付成功的
+status>=1 有效订单
+
+
+select a.user_id,if(a.mobile is null,0,a.mobile) as mobile,a.payNum
+from (
+    select t.user_id,t2.mobile,t1.payNum
+    from(
+        select user_id,count(*) as payNum
+        from dg_live_enroll 
+        where to_date(paytime) between '2017-01-01' and '2017-12-31' and status=2 and paytype<>'couponNoSettlement'  and isrobot<>1 
+        group by user_id
+    ) t1 join(
+        select mobile,user_id
+        from dg_user
+    ) t2 on t1.user_id=t2.user_id
+) a left outer join (
+    select user_id
+    from dg_order 
+    where to_date(pay_time)>='2017-01-01' and pay_time<='2017-12-31'  and (parent_id=0 or parent_id='' or parent_id=order_id) 
+    and store_id<>7568765 and pay_flag=20 
+    group by user_id
+) b on a.user_id=b.user_id
+where b.user_id is null
+
+select a.* from A 
+a left outer join B b 
+on a.uid=b.uid and a.goods=b.goods 
+where b.uid is null and b.goods is null;
+personalized_home
+view_app_c
+view_app_s
+view_my_ads
+
+
+ select count(*)
+ from (
+        select imei,regexp_replace(regexp_replace(regexp_replace(interested_tags,'\\\\[',''),'\\\\]',''),'\"','') as interested_tags
+        from dg_user_personalization 
+        where  interested_tags<>'' and interested_tags is not null and interested_tags<>'[]'
+ )  a
+LATERAL VIEW explode(split(tm.interested_tags,',')) interests as interest 
+where interest ='宝宝餐' or interest ='孕妇'
+group by a.imei 
+846785
+
+select count(distinct imei)
+from dg_user_personalization
+854841
+2409282
+
+        select count(*) from dg_user_personalization where user_id<>0 and user_id<>'';
+         809889   793821
+       select count(*) from dg_user_personalization;
+          2544360 
+
+        select interest,count(*) as num \
+              from ( \
+                    select regexp_replace(regexp_replace(regexp_replace(interested_tags,'\\\\[',''),'\\\\]',''),'\"','') as interested_tags \
+                    from dwh_reg_user_profile\
+                     where  interested_tags<>'' and interested_tags is not null and interested_tags<>'[]'
+              ) tm \
+              LATERAL VIEW explode(split(tm.interested_tags,',')) interests as interest \
+              group by interest \
+                order by num desc"
+2024
+
+
+      select count(*)
+      from (
+          select user_id,count(*) as cook_num
+          from dg_cook 
+          where flag >= 1 and levelid<=2
+          group by user_id
+          having cook_num >3
+      ) a
+      3408
+
+      select count(*)
+      from (
+           select dish_id, count(*) as fav_num
+           from dg_dishfav
+           group by dish_id 
+           having fav_num>=50
+      ) t join (
+          select user_id,dish_id
+          from dg_dish
+      ) t1 on t.dish_id=t1.dish_id
+      373069
+
+
+      select count(distinct a.user_id)
+      from (
+          select user_id,count(*) as cook_num
+          from dg_cook 
+          where flag >= 1 and levelid<=2
+          group by user_id
+          having cook_num >6
+      ) a
+
+
+
+set io.sort.mb=10; \
+set hive.map.aggr=true; \
+set mapreduce.task.io.sort.mb=10; \
+set hive.groupby.skewindata=true; \
+set hive.auto.convert.join=false; \
+set mapred.child.java.opts=-Xmx512m;\
+set mapreduce.reduce.shuffle.memory.limit.percent=0.1;\
+set hive.exec.dynamic.partition.mode=nonstrict;
+select t1.user_id,t3.nickname,t3.sex,t5.birthday,t3.email,t3.mobile,t3.indexpage,t7.province,t7.city,t6.a_cook_num,t4.recipes_num,t4.dishes_num,t4.fans_num
+from (
+    select c.user_id
+    from (
+      select nn.user_id 
+      from(
+        select t1.user_id,count(*) as num
+        from (
+           select dish_id, count(*) as fav_num
+           from dg_dishfav
+           group by dish_id 
+           having fav_num>=40
+        ) t join (
+          select user_id,dish_id
+          from dg_dish
+        ) t1 on t.dish_id=t1.dish_id
+        group by t1.user_id
+       having num>6
+      ) nn
+      UNION ALL
+      select a.user_id
+      from (
+          select user_id,count(*) as cook_num
+          from dg_cook 
+          where flag >= 1 and levelid<=2
+          group by user_id
+          having cook_num >4
+      ) a
+    ) c
+    group by c.user_id
+) t1 join (
+      select user_id
+      from dh_app_logins 
+      where p_day  BETWEEN 20180101 AND 20180122 and user_id<>'' and user_id<>0 and user_id is not null
+      group by user_id     
+) t2 on t1.user_id=t2.user_id
+join (
+     select user_id,nickname,sex,email,mobile,concat('http://www.douguo.com/u/',username,'.html') AS indexpage
+     from dg_user
+     where is_vip<1
+) t3 on t1.user_id=t3.user_id
+join (
+     select user_id ,fans_num,dishes_num,recipes_num
+     from dg_user_status
+) t4 on t1.user_id=t4.user_id
+join (
+     select user_id,birthday
+     from dg_userdetail
+) t5 on t1.user_id=t5.user_id
+join (
+     select user_id,count(*) as a_cook_num
+     from dg_cook 
+     where flag >= 1 and levelid<=2
+     group by user_id
+) t6 on t1.user_id=t6.user_id
+join (
+    select user_id,province,city 
+    from dwh_reg_user_logins_latest
+    where p_day=20180122
+) t7 on t1.user_id=t7.user_id
+
+
+
+为了整合优化严选搜索栏，现需要数据组同学统计一级搜索页“热门搜索”和“全部分类”模块中各tab的PV/UV
+select req['obj'],count(*)
+from dh_server_log
+where p_day=20180124 and req['qtype']='product_keywordsearch' and  req['obj'] in (207,44,45,37)
+group by req['obj']
+
+
+
+select hour(time) as time,count(*),count(distinct req['uid']) 
+from dh_server_log 
+where p_day=20180128
+group by hour(time)
+order by time
+
+
+近一个月、搜索过的关键词中含有 ’烘焙’ 字样的、浏览过相关菜谱个数>=2个的、排除已经发放过优惠券的、IOS最新用户前2w
+
+select req['obj'],count(*)
+from dh_server_log
+where p_day  between  '20170917' and '20171217' and req['qtype']='search_caipu'  and req['obj'] ='烘焙'
+group by req['obj']
+
+
+
+select p_day,
+    CASE 
+      WHEN  req['obj']='55' THEN '营养健康' 
+      WHEN  req['obj']='54' THEN '特色小吃' 
+      WHEN  req['obj']='53' THEN '料理' 
+      WHEN  req['obj']='52' THEN '饮品' 
+      WHEN  req['obj']='51' THEN '装饰蛋糕' 
+      WHEN  req['obj']='50' THEN '饼干糖果' 
+      WHEN  req['obj']='20' THEN '甜点' 
+      WHEN  req['obj']='19' THEN '面包' 
+      ELSE '其他' 
+    END AS obj ,count(*),count(distinct req['uid'])
+from dh_server_log
+where p_day between  '20180125' and '20180207'   and req['qtype']='live_class_list' and req['obj'] in('55','54','53','52','51','50','20','19')
+group by p_day,req['obj']
+
+
+
+
+        select p_day, req['qtype'] as en_qtype,  count(*) as pv, count(distinct req['euid']) as uv 
+        from dh_server_log 
+        where p_day between 20180203 and 20180203 and req['qtype']='view_caipu_predefined_list' and req['obj'] in (9,11,15,16,17) and  req['srctype'] = '2305' 
+        group by p_day, req['qtype'] 
+
+
+
+        H5页面链接参数记上 vs=2305
+#       app原生界面使用qtype统计，暂无法记srctype(vs)
+#       H5: 视频菜谱:video_recipe, 热门活动:activity_huodong_getlists
+#       1、全部分类(菜谱分类)  qtype：recipe_category
+#       2、本周热门（原一周热门）  qtype:view_caipu_predefined_list  obj=9//
+#       3、视频菜谱  video_recipe，H5页面
+#       4、一周新菜（原新人菜谱）qtype:view_caipu_predefined_list  obj=11//
+#       5、秀美食  qtype:view_dish_homev2
+#       6、最火厨神qtype:view_ranking_recommend_user
+#       7、热门活动 H5页面  qtype:activity_huodong_getlists
+
+#       快手菜  qtype:view_caipu_predefined_list , obj=15//
+#       下饭菜qtype:view_caipu_predefined_list , obj=16//
+#       母婴食谱qtype:view_caipu_predefined_list , obj=17//
+
+
+
+需要按照他们的豆果昵称，跑出相应的豆果ID，豆果主页，以及1月30日以后的A类菜谱数量等3项信息
+还是跑我们三班的数据，一共是跑从1月30日到今天的，接近300个人的主页链接，全部菜谱数，A类菜谱数，登录次数和作品数
+
+
+
+select a.user_id,a.nickname,a.indexpage,b.cook_num,b.a_cook_numc.dish_num,d.login_num
+from (
+    select b.user_id,a.nickname,b.indexpage,b.mobile
+    from (
+        select id as nickname
+        from dh_tmp
+        group by id
+    ) a left join (
+        SELECT user_id,nickname,mobile,concat('http://www.douguo.com/u/',username,'.html') AS indexpage
+        FROM dg_user 
+    ) b on a.nickname=b.nickname
+) a left join (
+      select user_id,count(*) as cook_num，count(if(levelid<=2,1,null)) as a_cook_num
+      from dg_cook 
+      where to_date(create_time) BETWEEN '2018-01-31' AND '2018-02-05'
+      group by user_id 
+) b on a.user_id=b.user_id
+left join (
+      select user_id,count(*) as dish_num
+      from dg_dish 
+      where to_date(createdate)>='2018-01-31' and to_date(createdate)<='2018-02-05' and flag>=1 
+) c on c.user_id=a.user_id
+left join (
+    select t.user_id,MAX(ROW_NUMBER() OVER (PARTITION BY t.user_id order by t.time)) as login_num
+    from (
+      select to_date(time) as time,user_id
+      from dh_app_logins 
+      where p_day  BETWEEN 20180131 AND 20180205  
+      group by to_date(time),user_id
+    ) t
+    group by t.user_id
+) d on a.user_id=d.user_id
+
+
+
+
+select a.user_id,b.nickname,b.indexpage,a.name,a.one_cook_time,e.two_cook_time,f.registerdate,a.cook_num,c.dish_num,c.pv,c.total_num
+from (
+      select tdc.user_id,min(tdc.statdate)  as  one_cook_time,min(tdc.name) as name,count(*) as cook_num
+      from (
+              select to_date(create_time) as statdate,user_id,cook_id,name 
+              from dg_cook 
+              where flag>=0 and to_date(create_time) BETWEEN '2018-01-22' AND '2018-02-04'
+      ) tdc left outer join (
+              select user_id 
+              from dg_cook 
+              where flag>=0 and to_date(create_time) < '2018-01-22' 
+              group by user_id 
+      ) tdcfst on tdc.user_id=tdcfst.user_id 
+      where tdcfst.user_id is null 
+      group by user_id
+) a left join(
+      SELECT user_id,nickname,concat('http://www.douguo.com/u/',username,'.html') AS indexpage
+      FROM dg_user 
+) b on a.user_id=b.user_id
+left join (
+    select user_id,sum(dishs) as dish_num,sum(pv) as pv,sum(comments)+sum(collects) as total_num
+    from dwh_cook 
+    where p_day BETWEEN '20180122' AND 20180205  
+) c on a.user_id=c.user_id
+left join (
+      select user_id
+      from dg_order 
+      where to_date(pay_time) BETWEEN '2018-01-22' AND '2018-02-04' and (parent_id=0 or parent_id='' or parent_id=order_id) 
+      and store_id<>7568765 and pay_flag=20 
+      group by user_id
+) d on a.user_id=d.user_id
+left join (
+    select a.user_id,a.statdate as two_cook_time
+    from (
+        select to_date(create_time) as statdate,user_id,ROW_NUMBER() OVER (PARTITION BY user_id order by to_date(create_time)) as rn
+        from dg_cook 
+        where flag>=0 and to_date(create_time) BETWEEN '2018-01-22' AND '2018-02-04'
+        group by to_date(create_time)
+    ) a
+    where rn=2
+) e on a.user_id=e.user_id
+left join (
+    SELECT user_id, to_date(registerdate) as registerdate
+    FROM dg_userdetail
+) f on a.user_id=f.user_id
+
+
+select a.user_id,a.one_cook_time,e.two_cook_time
+from (
+      select tdc.user_id,min(tdc.statdate)  as  one_cook_time
+      from (
+              select to_date(create_time) as statdate,user_id,cook_id,name 
+              from dg_cook 
+              where flag>=0 and to_date(create_time) BETWEEN '2018-01-22' AND '2018-02-04'
+      ) tdc left outer join (
+              select user_id 
+              from dg_cook 
+              where flag>=0 and to_date(create_time) < '2018-01-22' 
+              group by user_id 
+      ) tdcfst on tdc.user_id=tdcfst.user_id 
+      where tdcfst.user_id is null 
+      group by user_id
+) a left join (
+    select a.user_id,a.statdate as two_cook_time
+    from (
+        select to_date(create_time) as statdate,user_id,ROW_NUMBER() OVER (PARTITION BY user_id order by to_date(create_time)) as rn
+        from dg_cook 
+        where flag>=0 and to_date(create_time) BETWEEN '2018-01-22' AND '2018-02-04'
+        group by to_date(create_time),user_id
+    ) a
+    where rn=2
+) e on a.user_id=e.user_id
+
+
+
+select t.type,t.num
+from (
+      select '注册人数' as type, count(distinct user_id) as num
+      from dg_userdetail 
+      where  to_date(registerdate)  BETWEEN '$BEGIN_DATE' AND '$END_DATE'
+      union all
+      select '上传菜谱人数',count(distinct a.user_id) as num
+      from (
+          select  user_id
+          from dg_userdetail 
+          where  to_date(registerdate)  BETWEEN '$BEGIN_DATE' AND '$END_DATE'  
+          group by user_id
+      ) a join (
+          select user_id
+          from dg_cook 
+          where flag>=0 and to_date(create_time) BETWEEN '$BEGIN_DATE' AND '$END_DATE'
+      ) b on a.user_id=b.user_id 
+      union all
+      select '二次更新菜谱人数' as type，count(distinct a.user_id) as num
+      from (
+          select  user_id
+          from dg_userdetail 
+          where  to_date(registerdate)  BETWEEN '$BEGIN_DATE' AND '$END_DATE'  
+          group by user_id
+      ) a join (
+          select user_id
+          from dg_cook 
+          where flag>=0 and to_date(create_time) BETWEEN '$BEGIN_DATE' AND '$END_DATE'
+      ) b on a.user_id=b.user_id 
+      join (
+          select user_id
+          from dg_cook 
+          where flag>=0 and to_date(create_time) BETWEEN '2018-01-25' AND '2018-02-07'
+      ) c on a.user_id=c.user_id
+) t
+
+
+
+
+select a.user_id,b.cook_num,b.a_cook_num,c.login_num,d.dishes_num ,if(e.user_id is null,'未观看','观看')
+from (
+  select  id as user_id
+  from dh_tmp
+) a left join (
+      select user_id, count(*) as cook_num,count(if(levelid<=2,1,NULL)) as a_cook_num
+      from dg_cook 
+      where flag>=0 and to_date(create_time) BETWEEN '2018-01-30' AND '2018-02-08'
+      group by user_id 
+) b on a.user_id=b.user_id
+left join (
+     select bm.user_id,MAX(bm.rn) as login_num
+     from (
+       select am.user_id,ROW_NUMBER() OVER (PARTITION BY am.user_id order by am.time) as rn
+       from (
+          select to_date(time) as time,user_id
+          from dh_app_logins 
+          where p_day  BETWEEN 20180130 AND 20180208  
+          group by to_date(time), user_id
+       ) am
+     ) bm
+) c on a.user_id=c.user_id 
+left join (
+     select user_id,count(*) as dishes_num 
+     from dg_dish 
+     where to_date(createdate)  BETWEEN '2018-01-30' AND '2018-02-08' 
+     group by user_id 
+) d on a.user_id=d.user_id
+left join (
+   select req['uid'] as user_id
+   from dh_server_log
+   where p_day BETWEEN '20180207' AND '20180208' and req['qtype']='live_class_play' and resnum='1' and req['obj']='1152'
+   group by req['uid'] 
+) e on a.user_id=e.user_id
+
+
+菜谱分类的#母婴#大类目下，所有菜谱的曝光量总和。
+pid=9为母婴
+
+select n.pid, sum(m.click_times),sum(m.dishesnum),sum(m.collectsnum),sum(m.comm_num) \
+from ( \
+    select a2.cook_id,a1.pid \
+    from ( \
+      select name,pid from dg_recipeclassify where level=2 \
+      union all \
+      select d2.name,d1.pid \
+      from ( \
+        select id,name,level,pid \
+        from dg_recipeclassify where level=3 \
+      ) d2 left outer join ( \
+        select id,pid,name from dg_recipeclassify \
+      ) d1 on d2.pid=d1.id \
+    ) a1 join ( \
+       select cook_id, categoryname \
+       from dg_cook_categories \
+  ) a2 on a1.name=a2.categoryname \
+) n join ( \
+   select t1.cook_id, t1.name,t1.click_times,t1.dishesnum,t1.collectsnum,t2.comm_num \
+      from ( \
+          select cook_id,name,click_times,dishesnum,collectsnum \
+          from dg_cook \
+      ) t1 join ( \
+          select cookid,count(*) as comm_num \
+          from dg_cookcomment \
+          group by cookid \
+      ) t2 on t1.cook_id=t2.cookid \
+) m  on n.cook_id=m.cook_id \
+group by n.pid
+
+
+
+select count(distinct m.cook_id)
+from ( \
+    select a2.cook_id,a1.pid \
+    from ( \
+      select name,pid from dg_recipeclassify where level=2 \
+      union all \
+      select d2.name,d1.pid \
+      from ( \
+        select id,name,level,pid \
+        from dg_recipeclassify where level=3 \
+      ) d2 left outer join ( \
+        select id,pid,name from dg_recipeclassify \
+      ) d1 on d2.pid=d1.id \
+    ) a1 join ( \
+       select cook_id, categoryname 
+       from dg_cook_categories 
+  ) a2 on a1.name=a2.categoryname 
+) n join ( 
+          select cook_id,name,click_times,dishesnum,collectsnum 
+          from dg_cook 
+) m  on n.cook_id=m.cook_id 
+where  n.pid=9
+
+2034
+
+select m.name,m.click_times
+from ( \
+    select a2.cook_id,a1.pid \
+    from ( \
+      select name,pid from dg_recipeclassify where level=2 \
+      union all \
+      select d2.name,d1.pid \
+      from ( \
+        select id,name,level,pid \
+        from dg_recipeclassify where level=3 \
+      ) d2 left outer join ( \
+        select id,pid,name from dg_recipeclassify \
+      ) d1 on d2.pid=d1.id \
+    ) a1 join ( \
+       select cook_id, categoryname 
+       from dg_cook_categories 
+  ) a2 on a1.name=a2.categoryname 
+  where a1.pid=9
+) n join ( 
+          select cook_id,name,click_times
+          from dg_cook 
+) m  on n.cook_id=m.cook_id 
+order by m.click_times desc
+limit 10
+
+
+
+
+
+附件是西门子11月的广告排期和跳转链接，请帮忙查下每个广告位数据的一线城市占比,列如：http://m.douguo.com/jump/100/1672
+
+add file /usr/local/goldmine/hive/default/dg-lib/17monipdb.dat;
+add file /usr/local/goldmine/hive/default/dg-lib/dg-udf-0.0.1-SNAPSHOT-jar-with-dependencies.jar;
+create temporary function IpTocc as 'com.dg.dc.hive.udf.ip.UDFIpToArea';
+select  a.IpInfo[2],count(*)
+from (
+    select split(IpTocc(ip),'\t') as IpInfo
+    from dh_wap_pv 
+    where p_day in (20171105,20171108 ) and request rlike '/jump/100/1672'
+) a 
+group by  a.IpInfo[2]
+
+申请海外用户数据：每个国家以及每个国家独立设备数量
+dh_app_logins, 2017-1-1到现在, ip去重
+
+add file /usr/local/goldmine/hive/default/dg-lib/17monipdb.dat;
+add file /usr/local/goldmine/hive/default/dg-lib/dg-udf-0.0.1-SNAPSHOT-jar-with-dependencies.jar;
+create temporary function IpTocc as 'com.dg.dc.hive.udf.ip.UDFIpToArea';
+select count(*)
+from (
+      select split(IpTocc(a.ip),'\t') as IpInfo
+      from (
+        select c.ip
+        from (
+            select uid,max(ip) as ip
+            from dh_app_logins
+            where p_day BETWEEN '20170101' AND '20180226'
+            group by uid
+        ) c 
+        group by c.ip
+      ) a
+) b 
+where b.IpInfo[0]<>'中国'
+
+
+/opt/DATA/goldmine/src/daily_count/time_stat/dsl_ext_kwRate/data
+
+
+
+select count(if(mobile<>'' or mobile is not null,1 ,null)) as has_num,count(if(mobile is null or mobile='',1,null)) as is_num
+from dg_user
+
+
+select count(if(b.mobile<>'' or mobile is not null,1 ,null)) as has_num,count(if(b.mobile is null or mobile='',1,null)) as is_num
+from (
+select user_id
+ from dwh_reg_user_logins_latest
+ where  p_day=20180226 and to_date(last_time) BETWEEN '2017-01-01' AND '2018-02-26'
+) a join (
+   select user_id,mobile
+   from dg_user
+) b on a.user_id=b.user_id
+
+
+
+
+
+
+获取按登录方式的用户占比
+select req['login_method'],count(*)
+from dh_server_log
+where p_day BETWEEN '20180126' AND '20180226' and req['qtype']='app_login'
+group by req['login_method'],req['uid']  
+
+
+
+
+
+分类-热门数据的统计
+菜谱分类下热门里按2级标签分类，把三级的包含进二级 ，dh_server_log 里的srctype=400代表从菜谱分类入口进来的
+按16热门食材 18家常菜
+select '${END_PARTITION}',concat_ws(',', collect_list(cast(t.num as STRING))) as nums
+from (
+        select a.id, count(*) as num \
+        from ( \
+                      select id,name from dg_recipeclassify where level=2 and id in(16,18,660,661,21,680) and sortnum<1000000 \
+                      union all \
+                      select pid as id,name \
+                      from dg_recipeclassify where level=3 and pid in(16,18,660,661,21,680) and sortnum<1000000 \
+                ) a join ( \
+                     select req['obj'] as keyword \
+                     from dh_server_log \
+                     where p_day BETWEEN '${BEGIN_PARTITION}' AND '${END_PARTITION}' and req['qtype']='search_caipu' and req['srctype']=400 \
+                ) b on a.name=b.keyword \
+        group by a.id
+        order by a.id 
+) t
+
+
+        select a.id, count(*) as num \
+        from ( \
+                      select id,name from dg_recipeclassify where level=2 and id in(16,18,660,661,21,680) and sortnum<1000000 \
+                      union all \
+                      select pid as id,name \
+                      from dg_recipeclassify where level=3 and pid in(16,18,660,661,21,680) and sortnum<1000000 \
+                ) a join ( \
+                     select req['obj'] as keyword \
+                     from dh_server_log \
+                     where p_day BETWEEN '${BEGIN_PARTITION}' AND '${END_PARTITION}' and req['qtype']='search_caipu' and req['srctype']=400 \
+                ) b on a.name=b.keyword \
+        group by a.id
+
+
+16      热门食材        2       1
+17      早餐    2       1
+18      家常菜  2       1
+19      川菜    2       1
+20      东北菜  2       1
+21      减肥食谱        2       1
+645     水果    2       1
+659     家常菜  2       1
+660     下饭菜  2       1
+661     快手菜  2       1
+680     母婴食谱        2  
+
+
+
+16,18,660,661,21,680
+
+热门食材 16,29968
+家常菜 18,7189
+下饭菜 660,5296
+母婴食谱 680,15988
+快手菜 661,12117
+
+ select id,name from dg_recipeclassify where pid=9
+  select name,pid from dg_recipeclassify where level=2 \
+  select * from dg_recipeclassify where name='热门';
+
+脚本名称,脚本完整路径,任务名称,日期,耗时,预期最小耗时,预期最大耗时,JOB执行时间
+王予宽<wangyukuan@douguo.com>
+
+
+
+
+select b.user_id,b.nickname,a.mobile
+from (
+    select id as mobile
+    from dh_tmp
+    group by id
+) a left join (
+   select user_id,nickname,mobile
+   from dg_user
+) b on a.mobile=b.mobile
+
+
+
+
+select name from dg_recipeclassify where level=2 and id in(16,18,660,661,680) and sortnum>1000000 
+union all 
+select name 
+from dg_recipeclassify where level=3 and pid in(16,18,660,661,680) and sortnum>1000000 
+group by name
+
+
+
+
+
+
+select a.*,b.avg_consum_time 
+from (  
+   select * from dd_shell_job_monitor    
+   where statudate=?
+  )a join ( 
+  select shell_name,avg(consum_time) as avg_consum_time from dd_shell_job_monitor where statudate BETWEEN ? AND ?   group by shell_name
+  ) b on a.shell_name=b.shell_name
+   order by a.consum_time DESC 
+
+
+//1.麻烦帮忙导出 3月5日0点-14点期间 搜索关键词“女生节” 以及点击搜索栏热词“女生节” 数据。
+  2.并且导出 3月5日0点-14点期间 搜索关键词 虾仁，鸡蛋，汤，月子餐，披萨，意大利面，东北菜，牛肉，鸡胸肉，粥，湘菜，蛋糕，家常菜，面包，饺子，红烧肉，凉菜，快手菜。以及点击这些搜索栏热词的数据。
+
+   select req['obj'],count(*) as pv,count(distinct req['euid']) as uv
+   from dh_server_log
+   where p_day between '20180305' and '20180307'  and req['qtype']='search_caipu' and req['obj'] in('女生节','虾仁','鸡蛋','汤','月子餐','披萨','意大利面','东北菜','牛肉','鸡胸肉','粥','湘菜','蛋糕','家常菜','面包','饺子','红烧肉','凉菜','快手菜')  and req['srctype'] in(200 ,201 ,202 ,203)
+   group by p_day,req['obj']
+
+
+
+   select * from dh_server_log where req['qtype']='ptag_products' and p_day=20180306 and req['obj']=97 limit 5;
+
+
+//豆果严选横滑栏pv统计
+   select
+       CASE 
+        WHEN req['obj']='28' THEN '烘焙美厨' 
+        WHEN req['obj']='121' THEN '时令生鲜' 
+        WHEN req['obj']='34' THEN '厨具厨电' 
+        WHEN req['obj']='118' THEN '品质家居' 
+        WHEN req['obj']='125' THEN '养生汤料' 
+        WHEN req['obj']='132' THEN '粮油调味' 
+        ELSE '未知' 
+    END AS qtype,  count(*)
+   from dh_server_log
+   where p_day=20180306 and req['qtype']='ptag_products' and req['obj'] in (28,34,121,118,125,132)
+   group by req['obj']
+
+
+
+
+菜谱详情的qtype =view_caipu_detail
+
+qtype  video_recipe
+hot  最热
+new 最新
+hongbei 烘焙
+miaochu 家常炒厨
+baibaicai 宝宝菜
+xican 西餐
+
+
+视频达人单独维护的表
+dg_recommend_tag_recipe    2010库  type == videouser  status == 1  content_id 里面保存的是user_id
+
+select count(*) from dg_recommend_tag_recipe where type = 'videouser'  and status = 1 
+
+
+视频菜谱的取法  取出菜谱cook_id
+ select * from dg_videos where flag > 0 and typeid = 4 limit 10;
+
+
+
+视频菜谱分类标签下点击
+ select 
+    CASE 
+        WHEN  req['obj']='hot' THEN '最热' 
+        WHEN  req['obj']='new' THEN '最新' 
+        WHEN  req['obj']='hongbei' THEN '烘焙' 
+        WHEN  req['obj']='miaochu' THEN '家常' 
+        WHEN  req['obj']='baobaocai' THEN '宝宝菜' 
+        WHEN  req['obj']='xican' THEN '西餐'
+        WHEN  req['obj']='1' THEN '异国'
+        ELSE '未知' 
+    END AS obj, count(*)
+ from dh_server_log
+ where p_day BETWEEN '20180121' AND '20180127'  and req['qtype']='video_recipe' 
+ group by req['obj']
+
+
+
+
+
+
+上传过视频的用户有多少
+
+ select count(distinct user_id) from dg_videos where flag > 0 and typeid = 4
+
+
+
+申请视频菜谱相关数据：
+
+时间段：1月21日-1月27日；
+1 日均pv多少？
+2 一天中平均每小时pv分布情况？
+3 并发最高多少？
+
+select hour(a.time),count(*)
+from (
+    select  time,req['obj'] as cook_id
+    from dh_server_log
+    where p_day BETWEEN '20180121' AND '20180127' and req['qtype']='view_caipu_detail'
+) a join (
+    select cook_id from dg_videos where flag > 0 and typeid = 4
+) b on a.cook_id=b.cook_id
+group by  hour(a.time)
+
+
+
+视频菜谱总量多少？有哪些分类标签？各分类分别多少视频菜谱？
+
+select count(distinct cook_id) from dg_videos where flag > 0 and typeid = 4
+
+
+select a.categoryname,count(*)
+from(
+      select categoryname,cook_id
+      from dg_cook_categories
+) a join (
+     select  cook_id from dg_videos where flag > 0 and typeid = 4
+) b on a.cook_id=b.cook_id
+group by a.categoryname
+
+
+
+
+
+ 视频达人  后台维护的   32
+
+ 上传视频菜谱的用户   181
+
+ 视频菜谱总量  8036
+
+
+
+标签分类下的数据
+类型        pv
+宝宝菜      5922
+最新     7544
+最热     98124
+异国       38054
+烘焙  11768
+西餐   2948
+家常 30206
+
+
+
+
+
+
+
+select b.keyworld,concat(round((b.num/a.total)*100,2),'%')
+from (
+   select count(*) as total,'1' as id 
+   from dh_server_log 
+   where p_day ='20180308'  and req['qtype']='search_caipu'  
+) a join (
+   select req['obj'] as keyworld,count(*) as num,'1' as id 
+   from dh_server_log 
+   where p_day ='20180308'  and req['qtype']='search_caipu' and req['obj'] in('家常菜','下饭菜','快手菜','土豆','豆腐','茄子','可乐鸡翅','红烧肉','宫保鸡丁') 
+   group by req['obj']
+) b on a.id=b.id
+
+
+select a.p_day,b.keyworld,concat(round((b.num/a.total)*100,2),'%')
+from (
+   select p_day,count(*) as total,'1' as id 
+   from dh_server_log 
+   where p_day BETWEEN '20180301' AND '20180308'  and req['qtype']='search_caipu' 
+   group by p_day 
+) a join (
+   select p_day,req['obj'] as keyworld,count(*) as num,'1' as id 
+   from dh_server_log 
+   where p_day BETWEEN '20180301' AND '20180308'  and req['qtype']='search_caipu' and req['obj'] in('家常菜','下饭菜','快手菜','土豆','豆腐','茄子','可乐鸡翅','红烧肉','宫保鸡丁') 
+   group by p_day,req['obj']
+) b on a.id=b.id and a.p_day=b.p_day
+
+
+
+select p_day,
+       CASE 
+        WHEN qtype='live_class_detail' THEN '课堂详情' 
+        WHEN qtype='live_pay_detail' THEN '付款详情'  
+        ELSE '其他' 
+       END AS qtype,pv
+from dwh_qtype_stat
+where p_day between '20180222' and '20180308' and qtype in('live_class_detail','live_pay_detail')
+order by p_day 
+
+
+select p_day,qtype,pv
+from dwh_qtype_stat
+where p_day='20180308' and qtype in("live_class_detail","live_pay_detail")
+
+
+
+http://m.douguo.com/jump/100/1965
+
+  select *
+  from dh_wap_pv
+  where  p_day=20180311 and request rlike '/jump/100/1965'
+
+
+
+//中国菜和外国菜的占比   http://acp.douguo.net/login豆果后花园的菜系里
+15 中国菜      49738
+16 外国菜      16084
+17 烘焙      54425
+  select t.parentid,count(distinct t1.cook_id)
+  from (
+       select id, parentid  from dg_categories where parentid in (15,16,17)
+  ) t join (
+      select cook_id,category_id
+      from dg_cook_categories
+  ) t1 on t.id=t1.category_id
+  group by t.parentid
+
+
+  select t.name,count(distinct t1.cook_id)
+  from (
+       select id,name  from dg_categories where parentid =16
+  ) t join (
+      select cook_id,category_id
+      from dg_cook_categories
+  ) t1 on t.id=t1.category_id
+  group by t.name
+
+
+
+
+
+
+运营位数据分析
+
+'index' =>array('name'=>'首页焦点图','pos'=>[1,2,3,4,5,6,7,8,9]),
+'feed'  =>array('name'=>'首页列表','pos'=>[4,8,14,18,22]),
+'storeindex'=>array('name'=>'严选焦点图','pos'=>[1,2,3,4,5,6]),
+'panicbuying'=>array('name'=>'抢购专区','pos'=>[1,2,3]),
+'recommend'=>array('name'=>'为你推荐','pos'=>[1,2,3,4,5,6,7,8])
+
+
+
+
+//一会统计一个，每天课堂的动销数据？就是每天有多少课程在卖
+select a.paytime,a.pv,a.uv,b.class_num
+from (
+    select  to_date(paytime) as paytime,count(*) pv,count(distinct class_id) as uv,'1' as id
+    from  dg_live_enroll
+    where status=2 AND to_date(paytime)  BETWEEN '2018-03-14' AND '2018-03-21'
+    GROUP BY to_date(paytime)
+) a join (
+    select count(*) as class_num ,'1' as id  from  dg_live_class
+) b on a.id=b.id 
+order by a.pv
+
+
+新增注册用户统计 dd_reg_user_stat
+作品统计     dd_dish_sum_stat
+菜谱数            dd_cook_sum_stat
+
+
+
+select 
+    CASE 
+        WHEN a.qtype_sub='1' THEN '菜谱' 
+        WHEN a.qtype_sub='2' THEN '作品' 
+        WHEN a.qtype_sub='3' THEN '菜单' 
+        WHEN a.qtype_sub='4' THEN '排行榜' 
+        WHEN a.qtype_sub='5' THEN '活动' 
+        WHEN a.qtype_sub='6' THEN '话题' 
+        WHEN a.qtype_sub='7' THEN '优食汇商品' 
+        WHEN a.qtype_sub='8' THEN '优食汇商品' 
+        WHEN a.qtype_sub='9' THEN '帖子' 
+        WHEN a.qtype_sub='10' THEN '应用' 
+        WHEN a.qtype_sub='11' THEN '网页' 
+        WHEN a.qtype_sub='12' THEN '优食汇店铺' 
+        WHEN a.qtype_sub='13' THEN '用户' 
+        WHEN a.qtype_sub='14' THEN '菜谱快照' 
+        WHEN a.qtype_sub='15' THEN '作品快照'
+        WHEN a.qtype_sub='16' THEN '课程分享' 
+        WHEN a.qtype_sub='17' THEN '生活号'  
+        ELSE '其他' 
+    END AS qtype_sub,
+    CASE 
+        WHEN a.cmmt='1' THEN '微信' 
+        WHEN a.cmmt='2' THEN '朋友圈' 
+        WHEN a.cmmt='3' THEN '微博' 
+        WHEN a.cmmt='4' THEN 'QQ好友' 
+        WHEN a.cmmt='5' THEN 'QQ空间' 
+        ELSE '其他' 
+    END AS cmmt,count(*)
+from (
+    select req['qtype_sub'] as qtype_sub, regexp_extract(cmmt,'cid:([0-9]+)',1) as cmmt
+    from dh_server_log where p_day=20180322 and  req["qtype"]='action_share_add_credit'
+) a 
+group by a.qtype_sub,a.cmmt 
+
+qtype_sub //分享内容类型。1-菜谱；2-作品；3-菜单；4-排行榜；5-活动；6-话题；7-优食汇商品；8-优食汇商品优惠；9-帖子；10-应用；11-网页；12-优食汇店铺；13-用户；14-菜谱快照；15-作品快照；16-课程分享 17 生活号
+
+
+
+//现需附件中提供的不同功效标签下的A类菜谱数、菜谱总数，还请帮忙尽快反馈
+
+select a.category_id,a.categoryname, count(*) , count(if(b.levelid<=2,1,NULL)) as a_cook_num
+from(
+      select category_id ,cook_id,categoryname
+      from dg_cook_categories
+      where category_id in(50468, 50469 ,327 ,329 ,331 ,334, 335 ,336 ,337, 341, 342 ,343 ,344, 345, 346, 347, 348 ,349, 583, 353, 354 ,355, 356, 357, 358, 359 ,361, 362, 364, 365)
+) a join (
+      select cook_id,levelid
+      from dg_cook 
+       where flag >= 1
+) b on a.cook_id=b.cook_id
+group by a.category_id,a.categoryname
+
+
+
+select a.user_id,a.nickname,a.indexpage,b.cook_num,b.a_cook_numc.dish_num,d.login_num
+from (
+    select b.user_id,a.nickname,b.indexpage,b.mobile
+    from (
+        select id as nickname
+        from dh_tmp
+        group by id
+    ) a left join (
+        SELECT user_id,nickname,sex,email,mobile,concat('http://www.douguo.com/u/',username,'.html') AS indexpage
+        FROM dg_user 
+    ) b on a.nickname=b.nickname
+) a left join (
+      select user_id,count(*) as cook_num，count(if(levelid<=2,1,null)) as a_cook_num
+      from dg_cook 
+      where to_date(create_time) BETWEEN '2018-01-31' AND '2018-02-05'
+      group by user_id 
+) b on a.user_id=b.user_id
+left join (
+      select user_id,count(*) as dish_num
+      from dg_dish 
+      where to_date(createdate)>='2018-01-31' and to_date(createdate)<='2018-02-05' and flag>=1 
+) c on c.user_id=a.user_id
+left join (
+    select t.user_id,MAX(ROW_NUMBER() OVER (PARTITION BY t.user_id order by t.time)) as login_num
+    from (
+      select to_date(time) as time,user_id
+      from dh_app_logins 
+      where p_day  BETWEEN 20180131 AND 20180205  
+      group by to_date(time),user_id
+    ) t
+    group by t.user_id
+) d on a.user_id=d.user_id
+left join (
+    select user_id,sex,email,mobile,
+    from dg_user
+)
+
+
+未加C用户(非达人用户， is_vip<1)
+1、未加C认证的用户
+2、3个月内在豆果产出过两篇以上A类菜谱的
+3、与三班不重复的用户（附件中有三班用户ID，需要辛苦帮忙去重）
+
+豆果ID，豆果昵称，性别，生日，省市，电话号码，邮箱地址，豆果主页，最后登录时间，粉丝数量，发布过的菜谱数量，A类菜谱数量,B类菜谱数量,登录次数
+
+
+
+这个统计出来才是好物推荐的uv
+
+select count(*),count(distinct imei) 
+from (
+  select req["obj"] as article_id,req["euid"] as euid,req["imei"] as imei 
+  from dh_server_log  
+  where p_day=20180325 and p_day<=20180325  and req["qtype"]='view_article' and plat='API' 
+) dsl join (
+  select id as article_id 
+  from dg_article_data 
+  where flag=0 and goodquality=1 and user_id=49706 
+) dad on dsl.article_id=dad.article_id
+
+
+
+
+
+select '${dday}',count(distinct cur.user_id) as cs \
+from (\
+        select distinct user_id \
+        from dg_order \
+        where to_date(createtime) >= '${CUR_DATE}' and to_date(createtime) <= '${CUR_DATE}' \
+                and (parent_id=0 or parent_id='' or parent_id=order_id) and store_id<>7568765 and pay_flag=20 \
+) cur left join (\
+        select user_id \
+        from dg_order \
+        where to_date(createtime) >= '${!begin_date}' and to_date(createtime) <= '${END_DATE}' \
+                and (parent_id=0 or parent_id='' or parent_id=order_id) and store_id<>7568765 and pay_flag=20 \
+) dtmall on cur.user_id=dtmall.user_id
+
+
+
+//商品动销率    卖出的商品/上架商品
+select a.num,b.pay_num,c.art_uv
+from (
+    select count(*) as num,'1' as col
+    from dg_goods
+    where sell_flag=1 
+) a join (
+    select count(disctinct goods_id) as pay_num,'1' as col
+    from dg_order_item doi left outer join (
+            select order_id 
+            from dg_order 
+            where to_date(pay_time)='${BEGIN_DATE}' and (parent_id=0 or parent_id='' or parent_id=order_id) 
+                    and store_id<>7568765 and pay_flag=20 
+    ) do on doi.main_order_id=do.order_id 
+    where do.order_id is not null 
+) b on a.col=b.col
+join (
+    select count(distinct imei) as art_uv,'1' as col
+    from (
+        select req["obj"] as article_id,req["euid"] as euid,req["imei"] as imei 
+        from dh_server_log  
+        where p_day>=20180325 and p_day<=20180325  and req["qtype"]='view_article' and plat='API' 
+      ) dsl join (
+        select id as article_id 
+        from dg_article_data 
+        where flag=0 and goodquality=1 and user_id=49706 
+      ) dad on dsl.article_id=dad.article_id
+) c on a.col=c.col 
+
+
+
+insert into dd_hiveadmin_job(job_name,uid,hql,hql_template,status,job_type,query_type,job_type_content,stat_begin_time,stat_end_time,job_start_time,update_time,create_time) values (?,?,?,?,?,?,?,?,?,?,?,?,?)
+
+
+
+如之前沟通，飞利浦那边需要给出5000道菜谱名称，每道菜名需要同时满足 场景+种类+菜系 三个分类（见附件）。
+举例：
+
+
+select t.categoryname,t.cname,t.dname,concat_ws('!', collect_list(t.name))
+from (
+    select a.categoryname,c.cname,d.dname,b.name,ROW_NUMBER() OVER (PARTITION BY a.categoryname,c.cname,d.dname order by b.rank desc) as rn 
+    from(
+          select cook_id,categoryname
+          from dg_cook_categories
+          where category_id in (298,299,301)
+    ) a join (
+          select cook_id,name,rank
+          from dg_cook
+          where flag >= 1 
+    ) b on a.cook_id=b.cook_id
+    join (
+          select cook_id,categoryname as cname
+          from dg_cook_categories
+          where category_id in (202,30,203,205,208,211,212,213,214,625,215,206,207,623,657,509,603,210,306)
+    ) c on c.cook_id=b.cook_id
+    join (
+          select cook_id,categoryname as dname
+          from dg_cook_categories
+          where category_id in (50440,31,32,33,34,35,36,37,38,40,587,574,41,39,57,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56)
+    ) d on d.cook_id=c.cook_id
+) t 
+where rn<10
+group by t.categoryname,t.cname,t.dname
+
+
+未加C用户(非达人用户， is_vip<1)
+1、未加C认证的用户
+2、3个月内在豆果产出过两篇以上A类菜谱的
+3、与三班不重复的用户（附件中有三班用户ID，需要辛苦帮忙去重）
+
+豆果ID，豆果昵称，性别，生日，省市，电话号码，邮箱地址，豆果主页，最后登录时间，粉丝数量，发布过的菜谱数量，A类菜谱数量,B类菜谱数量,登录次数
+
+豆果ID,豆果昵称,性别,邮箱,电话,豆果主页,生日,省份,城市,最后登录时间,总菜谱数,菜谱数,A菜谱数,B菜谱数,总作品数,作品数,粉丝数,登录次数
+select m.user_id,m.nickname,m.sex,m.email,m.mobile,m.indexpage,t5.birthday,t4.province,t4.city,t4.last_time,n.total_cook_num,m.cook_num,m.a_cook_num,m.b_cook_num,n.total_dish_num,t7.dish_num,n.fans_num,t6.login_num
+from (
+      select t1.user_id,t1.nickname,t1.sex,t1.email,t1.mobile,t1.indexpage,t2.cook_num,t2.a_cook_num,t2.b_cook_num
+      from (
+           select user_id,nickname,sex,email,mobile,concat('http://www.douguo.com/u/',username,'.html') AS indexpage
+           from dg_user
+       where is_vip<1
+      ) t1 join (
+           select user_id,count(*) as cook_num,count(if(levelid<=2,1,null)) as a_cook_num,count(if(levelid=3,1,null)) as b_cook_num 
+           from dg_cook
+           where flag >= 1  AND  to_date(create_time)  between '2018-03-26' and '2018-03-26'
+           group by user_id
+           having a_cook_num>='2'
+      ) t2 on t1.user_id=t2.user_id 
+      join (
+           select user_id
+           from dh_tmp_user
+           where p_type='four_id'
+      ) t3 on t1.user_id=t3.user_id
+) m left join (
+     select user_id ,fans_num, recipes_num as total_cook_num,dishes_num as total_dish_num
+     from dg_user_status
+) n on m.user_id=n.user_id
+left join (
+    select user_id,province,city,to_date(last_time) as last_time 
+    from dwh_reg_user_logins_latest
+    where p_day='20180326'
+) t4 on m.user_id=t4.user_id
+left join (
+     select user_id,birthday
+     from dg_userdetail
+) t5 on m.user_id=t5.user_id
+left join (
+     select bm.user_id,MAX(bm.rn) as login_num
+     from (
+       select am.user_id,ROW_NUMBER() OVER (PARTITION BY am.user_id order by am.time) as rn
+       from (
+          select to_date(time) as time,user_id
+          from dh_app_logins 
+          where p_day  BETWEEN '20180326' AND '20180326'  
+          group by to_date(time), user_id
+       ) am
+     ) bm
+     group by bm.user_id
+) t6 on m.user_id=t6.user_id 
+left join (
+    select user_id,count(*) as dish_num
+    from dg_dish 
+where to_date(createdate)  BETWEEN '2018-03-26' AND '2018-03-26' 
+    group by user_id
+) t7 on m.user_id=t7.user_id
+limit 10000
+
+
+
+
+
+减肥减脂   view_caipu_caidan_detail
+热门活动
+
+
+首页横滑栏icon统计
+
+功能                qtype
+菜谱分类         recipe_category
+本周热门        view_caipu_predefined_list   id:9
+视频菜谱        video_recipe
+一周新菜        view_caipu_predefined_list    id:11
+精品菜单        recipe_menus
+秀美食          view_dish_homev2   
+最火厨神        ranking_chef_list_v3
+热门活动        activity_huodong_getlists
+减肥减脂        view_caipu_caidan_detail
+
+
+
+
+
+select a.p_day, 
+    CASE 
+        WHEN a.qtype='recipe_category' THEN '全部分类' 
+        WHEN a.qtype='view_dish_homev2' THEN '秀美食' 
+        WHEN a.qtype='activity_huodong_getlists' THEN '热门活动' 
+        WHEN a.qtype='recipe_menus' THEN '流行菜单' 
+        WHEN a.qtype='ranking_chef_list_v3' THEN '最火厨神' 
+        WHEN a.qtype='video_recipe' THEN '视频菜谱' 
+        WHEN a.qtype='view_group_quizlist' THEN '问答' 
+        WHEN a.qtype='9' THEN '一周热门' 
+        WHEN a.qtype='11' THEN '新人菜谱' 
+        WHEN a.qtype='all_type' THEN '汇总' 
+        ELSE '未知' 
+    END AS qtype, 
+    a.opv,a.ouv 
+from ( 
+    select req['qtype'] as qtype
+    from  dh_server_log 
+    where p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>' and req['qtype'] 
+    group by req['qtype'] 
+    UNION ALL 
+    select p_day,req['obj'] as qtype,count(*) as opv,count(distinct req['euid']) as ouv 
+    from  dh_server_log 
+    where p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>' and req['qtype']='view_caipu_predefined_list' and req['obj'] in('9','11')  
+    group by p_day,req['obj'] 
+) a 
+order by a.p_day,a.opv
+limit 10000
+
+
+
+
+select a.p_day, 
+    CASE 
+        WHEN a.qtype='recipe_category' THEN '全部分类' 
+        WHEN a.qtype='view_dish_homev2' THEN '秀美食' 
+        WHEN a.qtype='activity_huodong_getlists' THEN '热门活动' 
+        WHEN a.qtype='recipe_menus' THEN '流行菜单' 
+        WHEN a.qtype='ranking_chef_list_v3' THEN '最火厨神' 
+        WHEN a.qtype='video_recipe' THEN '视频菜谱' 
+        WHEN a.qtype='view_group_quizlist' THEN '问答' 
+        WHEN a.qtype='9' THEN '一周热门' 
+        WHEN a.qtype='11' THEN '新人菜谱' 
+        WHEN a.qtype='all_type' THEN '汇总' 
+        ELSE '未知' 
+    END AS qtype, 
+    a.opv,a.ouv 
+from ( 
+    select p_day,req['qtype'] as qtype,count(*) as opv,count(distinct req['euid']) as ouv 
+    from  dh_server_log 
+    where p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>' and req['qtype'] in ('recipe_category','view_dish_homev2','activity_huodong_getlists','recipe_menus','ranking_chef_list_v3','video_recipe','view_group_quizlist')
+    group by p_day,req['qtype'] 
+    UNION ALL 
+    select p_day,req['obj'] as qtype,count(*) as opv,count(distinct req['euid']) as ouv 
+    from  dh_server_log 
+    where p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>' and req['qtype']='view_caipu_predefined_list' and req['obj'] in('9','11')  
+    group by p_day,req['obj'] 
+    UNION ALL 
+    select p_day,'all_type' as qtype,count(*) as opv,count(distinct req['euid']) as ouv 
+    from  dh_server_log  
+    where p_day between '<<BEGIN_PARTITION>>' and '<<END_PARTITION>>' and (req['qtype'] in('recipe_category','view_dish_homev2','activity_huodong_getlists','recipe_menus','ranking_chef_list_v3','video_recipe','view_group_quizlist') or (req['qtype']='view_caipu_predefined_list' and req['obj'] in('9','11')))
+    group by p_day 
+) a 
+order by a.p_day,a.opv
+limit 10000
+
+
+
+
+
+
+
+select t.categoryname,t.cname,t.dname,concat_ws('!', collect_list(t.name))
+from (
+    select a.categoryname,c.cname,d.dname,b.name,ROW_NUMBER() OVER (PARTITION BY a.categoryname,c.cname,d.dname order by b.rank desc) as rn 
+    from(
+          select cook_id,categoryname
+          from dg_cook_categories
+          where category_id in (298,299,301)
+    ) a join (
+          select cook_id,name,rank
+          from dg_cook
+          where flag >= 1 
+    ) b on a.cook_id=b.cook_id
+    join (
+          select cook_id,categoryname as cname
+          from dg_cook_categories
+          where category_id in (202,30,203,205,208,211,212,213,214,625,215,206,207,623,657,509,603,210,306)
+    ) c on c.cook_id=b.cook_id
+    join (
+          select cook_id,categoryname as dname
+          from dg_cook_categories
+          where category_id in (1940,1592,1594,1394,1389,1460,1392,1390,1595,1596,1597,1598,1461,1600,1601,1602,1941,1603,1962,1955,1959,1395,1396,1397,1462,1464,1605,1606,1466,1604,1479,1478,1480,1481,1447,1446,1445,1475,1477,1474,1473,1472,1471,1470,1469,1468,1467,1476,1444,1443,1428,1427,1426,1425,1424,1423,1422,1421,1420,1419,1418,1417,1429,1430,1442,1441,1440,1439,1438,1437,1436,1435,1434,1433,1432,1431,1416)
+    ) d on d.cook_id=c.cook_id
+) t 
+where rn<10
+group by t.categoryname,t.cname,t.dname
+
+
+如先前沟通，紧急需要准备“食疗养生”标签下的所有A类菜谱数据，具体详情需求在附件表格中，辛苦帮尽快给到~
+名称  菜谱名称  菜谱链接  菜谱类型  是否有“查看详情分析
+
+
+select a.categoryname,b.name,b.cook_url,if(d.cook_id is null,'图文','视频') as cook_type,if(c.cook_id is null,'否','是')
+from (
+          select cook_id,categoryname 
+          from dg_cook_categories
+          where categoryname in ('补钙食谱','对抗雾霾','润肠通便','明目','润肺止咳','痛经','祛湿','保肝补血','抗癌','滋阴壮阳','调节内分泌','补肾','秋冬进补','消暑解渴','清热去火','健脾养胃','消食','提高免疫','驱寒暖身','养发
+','减压','降血压','降血脂','降血糖','骨质疏松','便秘','腹泻','贫血','口腔溃疡','感冒发烧','痛风','感冒发烧','贫血','干眼症','对抗雾霾','补锌食谱','补铁食谱','脂肪肝','便秘','口腔溃疡','夜盲症','皮炎','失眠','骨质疏松','降血脂
+','降血糖','降血压','腹泻','补碘食谱','补硒食谱','消暑解渴','健脾养胃','滋阴壮阳','防辐射','增进食欲','祛湿','补钙食谱','润肠通便','明目','抗癌','润肺止咳','痛经','清热去火','提高免疫','养心','补肾','减压','下奶','消食','增肌
+增重','养发','调节内分泌',
+          '回奶','保肝补血','秋冬进补','驱寒暖身','增强记忆力') 
+) a join (
+          select cook_id,name,concat('http://www.douguo.com/cookbook/',cook_id,'.html') as cook_url
+          from dg_cook
+          where flag >= 1 and levelid<=2
+) b on a.cook_id=b.cook_id
+left join (
+    select cook_id
+    from dg_cook_nutrient
+    group by cook_id
+) c on a.cook_id=c.cook_id
+left join (
+    select cook_id from dg_videos where flag > 0 and typeid = 4
+) d on a.cook_id=d.cook_id
+

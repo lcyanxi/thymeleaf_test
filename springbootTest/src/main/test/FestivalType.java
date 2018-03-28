@@ -14,7 +14,7 @@ public class FestivalType extends UDF {
     private HashMap<String,String> festivalMap = new HashMap<String, String>();
 
     public FestivalType() throws Exception {
-        InputStreamReader propFile = new InputStreamReader(getClass().getClassLoader().getResourceAsStream("festival_date.properties"), "UTF-8");
+        InputStreamReader propFile = new InputStreamReader(getClass().getClassLoader().getResourceAsStream("festival_date.properties"), "GBK");
         Properties prop = new Properties();
         prop.load(propFile);
         for(Object key:prop.keySet()) {

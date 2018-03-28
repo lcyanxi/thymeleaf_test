@@ -10,7 +10,7 @@ import java.util.List;
  * Created by lichang on 2018/3/5
  */
 public class User implements Serializable {
-    private String id;
+    private int id;
     private String nickname;
     private String username;
     private String sex;
@@ -25,11 +25,11 @@ public class User implements Serializable {
 
     private List<Role> roles;
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

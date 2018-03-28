@@ -21,12 +21,14 @@ import org.springframework.web.bind.annotation.RestController;
 @EnableCaching
 @ServletComponentScan
 public class Application {
+/*
     @Bean
     public Runnable createRunnable() {
         return () -> {
             System.out.println("Spring boot is running ...");
         };
     }
+*/
 
     @Bean
     public EmbeddedServletContainerFactory servletContainer() {

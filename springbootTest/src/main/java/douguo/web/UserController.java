@@ -23,19 +23,21 @@ public class UserController {
 
     @RequestMapping(value = "/register",method = RequestMethod.POST)
     public String register(@RequestParam String username,@RequestParam String nickname,@RequestParam String email,
-        @RequestParam String password){
+        @RequestParam String password, String sex){
         User user=new User();
-        user.setId(ToolRandoms.randomCode8());
+        user.setId(Integer.parseInt(ToolRandoms.randomCode8()));
         user.setUsername(username);
         user.setNickname(nickname);
         user.setPassword(password);
         user.setEmail(email);
+        user.setSex(sex);
         user.setRegisterTime(new Date());
 
+        System.out.println(user);
         userService.register(user);
 
 
 
-        return "";
+        return "pages/index";
     }
 }
