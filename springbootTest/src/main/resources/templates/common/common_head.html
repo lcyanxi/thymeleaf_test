@@ -122,7 +122,7 @@
                                 </div>
                             </ul>
                         </li>
-<!--                        <li class="dropdown grid">
+                        <li class="dropdown grid">
                             <a href="#" class="dropdown-toggle list1" data-toggle="dropdown">特别优惠 <b class="caret"></b></a>
                             <ul class="dropdown-menu multi-column columns-4">
                                 <div class="row">
@@ -172,12 +172,25 @@
                                     </div>
                                 </div>
                             </ul>
-                        </li>-->
-                        <li class="dropdown grid">
-                            <a th:href="@{/toIndent}" href="../pages/indent.html" class="dropdown-toggle list1" >收货地址<b class="caret"></b></a>
                         </li>
                         <li class="dropdown grid">
-                            <a th:href="@{/orderInfo}" href="../pages/orderInfo.html" class="dropdown-toggle list1">个人中心</a>
+                            <a  class="dropdown-toggle list1" data-toggle="dropdown">个人中心<b class="caret"></b></a>
+                            <ul class="dropdown-menu multi-column columns-4">
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <a th:href="@{/orderInfo}" href="../pages/orderInfo.html"><h4>个人信息</h4></a>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <a th:href="@{/orderInfo}" href="../pages/orderInfo.html"><h4>收货地址信息</h4></a>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <a th:href="@{/orderInfo}" href="../pages/orderInfo.html"><h4>订单中心</h4></a>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <a th:href="@{/orderInfo}" href="../pages/orderInfo.html"><h4>我的购物车</h4></a>
+                                    </div>
+                                </div>
+                            </ul>
                         </li>
                     </ul>
                     <!--/.navbar-collapse-->

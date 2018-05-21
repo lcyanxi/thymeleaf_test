@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Account</title>
+    <!-- Custom Theme files -->
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="keywords" content=""/>
+    <script type="application/x-javascript"> addEventListener("load", function () {
+        setTimeout(hideURLbar, 0);
+    }, false);
+
+    function hideURLbar() {
+        window.scrollTo(0, 1);
+    } </script>
+    <!-- //Custom Theme files -->
+    <link th:href="@{/page/css/bootstrap.css}" href="../../static/page/css/bootstrap.css" type="text/css"
+          rel="stylesheet" media="all"/>
+    <link th:href="@{/page/css/style.css}" href="../../static/page/css/style.css" type="text/css" rel="stylesheet"
+          media="all"/>
+    <!-- js -->
+    <script th:src="@{/page/js/jquery.min.js}" src="../../static/page/js/jquery.min.js"></script>
+    <script th:src="@{/page/js/bootstrap-3.1.1.min.js}" type="text/javascript"
+            src="../../static/page/js/bootstrap-3.1.1.min.js"></script>
+    <!-- //js -->
+    <!-- cart -->
+    <script th:src="@{/page/js/simpleCart.min.js}" src="../../static/page/js/simpleCart.min.js"></script>
+    <!-- cart -->
+</head>
+<body>
+<!--header-->
+<div th:replace="common/common_head :: head"></div>
+<!--//header-->
+<!--account-->
+<div class="account">
+    <div class="container">
+        <div class="register">
+            <form th:action="@{/user/register}" method="post">
+                <div class="register-top-grid">
+                    <h3>个人信息</h3>
+                    <div class="input">
+                        <span>姓名:</span>
+                        <input type="text" name="username"/>
+                    </div>
+                    <div class="input">
+                        <span>昵称:</span>
+                        <input type="text" name="nickname"/>
+                    </div>
+                    <div class="select">
+                        <span>性别:</span>
+                       <select name="sex">
+                           <option value="man" selected="selected">男</option>
+                           <option value="woman">女</option>
+                       </select>
+                    </div>
+                    <div class="select">
+                        <span>电话号码:</span>
+                        <input type="text" name="nickname"/>
+                    </div>
+                    <div class="input">
+                        <span>邮箱<label>*</label></span>
+                        <input type="text" name="email"/>
+                    </div>
+                    <a class="news-letter" href="#">
+                        <label class="checkbox"><input type="checkbox" name="checkbox" checked=""/><i> </i>注册通讯录</label>
+                    </a>
+                    <div class="select">
+                        <span>注册日期:</span>
+                        <input type="text" name="nickname"/>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="clearfix"></div>
+                <div class="register-but">
+                    <input type="submit" value="提交修改"/>
+                    <div class="clearfix"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!--//account-->
+<!--footer-->
+<div th:replace="common/common_footer :: footer"></div>
+</body>
+</html>
