@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Indent</title>
+    <!-- Custom Theme files -->
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="keywords" content=""/>
+    <!-- //Custom Theme files -->
+    <link th:href="@{/page/css/bootstrap.css}" href="../../static/page/css/bootstrap.css" type="text/css"
+          rel="stylesheet" media="all"/>
+    <link th:href="@{/page/css/style.css}" href="../../static/page/css/style.css" type="text/css" rel="stylesheet"
+          media="all"/>
+
+
+    <script type="text/javascript" th:src="@{/js/jquery.js}" src="../../static/js/jquery.js"></script>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/indent.css}" href="../../static/css/indent.css">
+    <script type="text/javascript" th:src="@{/js/indent.js}" src="../../static/js/indent.js"></script>
+    <script type="text/javascript" th:src="@{/js/geo.js}" src="../../static/js/geo.js"></script>
+    <script type="text/javascript" th:src="@{/js/jquery.cookie.js}" src="../../static/js/jquery.cookie.js"></script>
+
+</head>
+<body>
+<!--header-->
+<div th:replace="common/common_head :: head"></div>
+<!--//header-->
+<!-- main -->
+<div id="indent-main">
+    <form th:action="@{/order/create}" action="" id="indent-create" method="post">
+        <h3 class="indentHd">填写并核对订单信息</h3>
+        <div id="userAddId">
+            <p class="indentTitle">收货人信息：</p>
+            <ul class="indentAll">
+                <li class="indentUser">
+                    <div class="label">
+                        <b>*</b>
+                        收货人:
+                    </div>
+                    <input type="text" placeholder="请填写收货人姓名" id="IU-name"/>
+                    <span class="iuErr">请填写收货人姓名</span>
+                </li>
+                <li class="indentAddress">
+                    <div class="label">
+                        <b>*</b>
+                        所在地区:
+                    </div>
+                    <select class="select" name="province" id="s1">
+                        <option></option>
+                    </select>
+                    <select class="select" name="city" id="s2">
+                        <option></option>
+                    </select>
+                    <select class="select" name="town" id="s3">
+                        <option></option>
+                    </select>
+                    <option value=""></option>
+                    </select>
+                </li>
+                <li class="fullAddress">
+                    <div class="label">
+                        <b>*</b>
+                        详细地址:
+                    </div>
+                    <div class="FA-field">
+                        <span class="sheng"></span>
+                        <span class="shi"></span>
+                        <span class="xian"></span>
+                        <input type="text" placeholder="请直接填写街道等详细地址" id="IU-address"/>
+                    </div>
+                    <span class="faErr">请您填写完整的地区信息</span>
+                </li>
+                <li class="indent-phone">
+                    <div class="label">
+                        <b>*</b>
+                        手机号码:
+                    </div>
+                    <input type="text" placeholder="11位手机号码" id="IU-phone"/>
+                    <span class="ipErr">请您填写手机号码或固定电话</span>
+                </li>
+            </ul>
+            <button type="button" id="save" onclick="saveaddress()">保存收货人信息</button>
+            <button type="button" id="close" onclick="closemodel()">关闭</button>
+        </div>
+        <!-- 订单信息 -->
+        <ul class="indentContent">
+            <li id="addparent">
+                <div class="userInfo">
+                    收货人信息:
+                    <a href="#" class="amend" id="amend">[修改]</a>
+                </div>
+                <div class="userAddress" th:each="address,addressStat:${addresses}">
+                    <input type="radio" th:if="${addressStat.index==0}" checked="checked" th:value="${address.addid}"
+                           name="addid">
+                    <input type="radio" th:if="${addressStat.index!=0}" th:value="${address.addid}"
+                           name="addid">
+                    <span class="f-name" th:text="${address.addname}"></span>
+                    <span class="f-phone" th:text="${address.addphone}">13526547895</span>
+                    <span class="f-shi" th:text="${address.address}"></span>
+                </div>
+            </li>
+            <li>
+                <div class="userPrice">
+                    支付及配送方式:
+                    <a href="#" class="amend">[修改]</a>
+                </div>
+                <p class="pay">在线支付</p>
+                <div class="UP-indent">
+                    <p>订单一</p>
+                    <div class="shunfeng">
+                        <div><span>顺丰速运</span>负责配送</div>
+                        <p>下单后尽快为您发货</p>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="userInfo">
+                    发票信息:
+                    <a href="#" class="amend">[修改]</a>
+                </div>
+                <div class="bill">
+                    暂不需要发票
+                </div>
+            </li>
+            <li>
+                <div class="userInfo">
+                    商品信息:
+                    <a href="#" class="amend">[修改]</a>
+                </div>
+                <a th:href="@{/cart/all}" href="cart.html" class="goto-cart">返回购物车</a>
+                <p>商品下单后尽快为您发货</p>
+                <!-- 购物车详情 -->
+                <div>
+                    <div class="ci-title">
+                        <input type="checkbox" value="" checked="checked" disabled="disabled">
+                        <div class="ci-name">商品名称</div>
+                        <div>单价</div>
+                        <div>返现</div>
+                        <div>库存状态</div>
+                        <div>数量</div>
+                        <div>小计</div>
+                    </div>
+                </div>
+                <!-- 复制 -->
+                <div th:each="cartinfo,cartinfoStat:${cartinfos}">
+                    <div class="ci-title">
+                        <input type="checkbox" name="cartid" th:value="${cartinfo.cartid}" checked="checked"
+                               readonly="readonly">
+                        <div class="ci-name" th:text="${cartinfo.proname}">商品名称</div>
+                        <div th:text="${cartinfo.price}">单价</div>
+                        <div>0.00</div>
+                        <div>有库存</div>
+                        <div th:text="${cartinfo.num}">0</div>
+                        <div th:text="${cartinfo.total}">0.00</div>
+                    </div>
+                </div>
+            </li>
+            <li class="last-li">
+                <div class="account">应付金额:<span id="gross" th:text="${total}"></span></div>
+                &nbsp;&nbsp;
+                <button type="submit" id="sumbit">提交订单</button>
+            </li>
+        </ul>
+    </form>
+</div>
+
+<!--footer-->
+<div th:replace="common/common_footer :: footer"></div>
+</body>
+</html>

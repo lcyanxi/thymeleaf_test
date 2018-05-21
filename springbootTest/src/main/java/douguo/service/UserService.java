@@ -1,10 +1,8 @@
 package douguo.service;
 
 import douguo.bean.User;
-import douguo.config.shiro.SecurityService;
 import douguo.dao.UserDao;
 import douguo.util.MD5Util;
-import douguo.util.ToolRandoms;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,8 +18,8 @@ public class UserService {
     @Autowired
     private UserDao userDao;
 
-    @Autowired
-    private SecurityService securityService;
+    //@Autowired
+    //private SecurityService securityService;
 
     public List<User> getByMap(Map<String,Object> map) {
         return userDao.getByMap(map);

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 /**
  * Created by lichang on 2018/3/6
  */
-@RestController
+//@RestController
 public class LoginController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -31,7 +31,7 @@ public class LoginController {
             subject.login(token);
         } catch (AuthenticationException e) {
             e.printStackTrace();
-            //            rediect.addFlashAttribute("errorText", "您的账号或密码输入错误!");
+            System.out.println("登录失败");
             return "{\"Msg\":\"您的账号或密码输入错误\",\"state\":\"failed\"}";
         }
         return "{\"Msg\":\"登陆成功\",\"state\":\"success\"}";

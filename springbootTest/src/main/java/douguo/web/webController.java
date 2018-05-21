@@ -2,11 +2,13 @@ package douguo.web;
 
 import douguo.mapper.UserMapper;
 import douguo.model.Info;
+import douguo.model.OrderInfo;
 import douguo.model.UserEntity;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -54,10 +56,32 @@ public class webController {
         return "home";
     }
 
-/*    @RequestMapping(value = "/login",method = RequestMethod.POST)
+    @RequestMapping(value = "/login",method = RequestMethod.POST)
     public String login() {
         return "index";
-    }*/
+    }
+
+
+    @RequestMapping(value = "/toIndent",method = RequestMethod.GET)
+    public String toIndentPage() {
+        return "pages/indent";
+    }
+
+    @RequestMapping(value = "/myCart",method = RequestMethod.GET)
+    public String toMyCart() {
+        return "pages/myCart";
+    }
+    @RequestMapping(value = "/orderInfo",method = RequestMethod.GET)
+    public String toOrderInfo(Model model) {
+       for (int i=0;i<5;i++){
+           OrderInfo orderInfo=new OrderInfo();
+           orderInfo.setAddname("商品"+i);
+           orderInfo.setImage("");
+       }
+
+        return "pages/orderInfo";
+    }
+
     @RequestMapping(value = "/index",method = RequestMethod.GET)
     public String toIndex() {
         return "index";
@@ -87,8 +111,8 @@ public class webController {
         return "pages/products";
     }
 
-    @RequestMapping(value = "/tableDemoAjax",method = RequestMethod.POST)
-    @ResponseBody
+   // @RequestMapping(value = "/tableDemoAjax",method = RequestMethod.POST)
+    //@ResponseBody
     public String tableDemoAjax(@RequestParam String aoData) {
         System.out.println("enter tableDemoAjax");
         System.out.println("aoData--->"+aoData);
