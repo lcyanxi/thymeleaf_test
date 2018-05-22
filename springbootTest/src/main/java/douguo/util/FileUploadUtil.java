@@ -41,7 +41,8 @@ public class FileUploadUtil {
                 //给权限
                 file.setReadable(true, false);
 
-                return IMAGE_UPLOAD_DOMAIN + saveName + "_src.png";
+                //return IMAGE_UPLOAD_DOMAIN + saveName + "_src.png";
+                return saveName + "_src.png";
             }
 
 

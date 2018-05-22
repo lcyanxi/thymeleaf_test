@@ -23,7 +23,7 @@
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="false"></button>
                         <h4 class="modal-title">
-                            商品管理
+                            订单处理中心
                         </h4>
                     </div>
                     <!--头部位置显示栏 结束-->
@@ -41,10 +41,10 @@
                             </th>
                             <th>图片</th>
                             <th>商品名称</th>
-                            <th>价格</th>
-                            <th class="hidden-phone">颜色</th>
-                            <th class="hidden-phone">尺寸</th>
+                            <th>数量</th>
+                            <th class="hidden-phone">总价</th>
                             <th class="hidden-phone">创建时间</th>
+                            <th class="hidden-phone">支付状态</th>
                             <th class="hidden-phone">操作</th>
                         </tr>
                         </thead>
@@ -107,11 +107,11 @@
 
                     <section class="panel">
                         <div class="panel-body">
-                            <form role="form" id="add_product" class="form-horizontal tasi-form" enctype="multipart/form-data" method="post">
+                            <form role="form" id="add_staff" class="form-horizontal tasi-form" enctype="multipart/form-data" method="post">
                                 <div class="form-group has-success">
                                     <label class="col-lg-4 control-label">上传商品图片</label>
                                     <div class="col-lg-8">
-                                        <input type="file" class="" name="image" id="iamge"/>
+                                        <input type="file" class="" name="upload-file" id="upload-file"/>
                                     </div>
                                 </div>
 
@@ -169,10 +169,11 @@
                                         </button>
                                     </div>
                                     <div class="col-xs-6 col-lg-6">
-                                        <button id="add_product_button" class="btn btn-primary" type="button">添加</button>
+                                        <button id="add_staff_button" class="btn btn-primary" type="button">添加</button>
                                         <h4 id="message" class="help-block text-danger text-center"></h4>
                                     </div>
                                 </div>
+
                             </form>
                         </div>
                     </section>
@@ -243,28 +244,60 @@
 <script th:src="@{/js/jquery.dataTables.min.js}" src="../static/js/jquery.dataTables.min.js"></script>
 <script th:src="@{/js/DT_bootstrap.js}" src="../static/js/DT_bootstrap.js"></script>
 <script th:src="@{/js/dynamic-table.js}" src="../static/js/dynamic-table.js"></script>
-<script th:src="@{/js/jquery.form.js}" src="../static/js/jquery.form.js"></script>
 
 <!--script for 提示框-->
 <script th:src="@{/js/xcConfirm.js}" src="../static/js/xcConfirm.js"></script>
 
 <script type="text/javascript">
+    // 上传设置
+    var options = {
+        // 规定把请求发送到那个URL
+        url: "/product/add_product.do",
+        // 请求方式
+        type: "post",
+        // 服务器响应的数据类型
+        dataType: "json",
+        // 请求成功时执行的回调函数
+        success: function(data, status, xhr) {
+            // 图片显示地址
+            alert("添加陈宫")
+          //  $("#allUrl").attr("src", data.path);
+        }
+    };
 
+    $("#add_staff").ajaxSubmit(options);
     //添加后台管理员
-    $('#add_product_button').click(function () {
-        alert("aaaa")
-        $("#add_product").ajaxSubmit({
-            url : "/product/add_product.do",
-            type : "post",
-            dataType : 'json',
-            success : function(data) {
-                alert("设置成功！");
+/*    $('#add_staff_button').click(function () {
+        $.ajax({
+            url: "/product/add_product.do",
+            type: "POST",
+            async: false,
+            data: {
+                image: $("#upload-file").val(),
+                pname: $("#pname").val(),
+                price: $("#price").val(),
+                color: $("#color").val(),
+                weight: $("#weight").val()
             },
-            error : function(data) {
-                alert("error:" + data.responseText);
+            timeout: 30000,       //超时时间
+            dataType: "json",     //返回的数据类型
+            success: function (data) {
+                window.wxc.xcConfirm(data.message, window.wxc.xcConfirm.typeEnum.info, {
+                    onOk: function () {
+                        if (data.status == 1) {
+                            location.reload();
+                        }
+                    }
+                });
+            },
+            complete: function (XMLHttpRequest, status) {
+                //发送失败
+                if (status == "timeout") {
+                    $("#message").text("发送超时请重发");
+                }
             }
         });
-    });
+    });*/
 </script>
 
 </body>
