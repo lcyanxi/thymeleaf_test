@@ -27,8 +27,6 @@
                         </h4>
                     </div>
                     <!--头部位置显示栏 结束-->
-
-
                     <table class="table table-striped border-top" id="sample_1">
                         <!--头部显示所包含的内容-->
                         <thead>
@@ -39,6 +37,7 @@
                                     <i class="icon-plus"></i>
                                 </button>
                             </th>
+                            <th hidden></th>
                             <th>图片</th>
                             <th>商品名称</th>
                             <th>价格</th>
@@ -52,15 +51,16 @@
 
                         <!--显示每个员工的详细信息-->
                         <tbody id="tbody">
-                        <tr class="odd gradeX" th:each="staffInfo,iterStat:${stafflist}">
+                        <tr class="odd gradeX" th:each="product,iterStat:${data}">
                             <td></td>
-                            <th><img th:src="${staffInfo.sAvatar}" width="35" height="35"/></th>
-                            <th th:text="${staffInfo.sId}"></th>
-                            <td th:text="${staffInfo.sName}"></td>
-                            <td th:text="${staffInfo.sPhone}"></td>
-                            <td class="hidden-phone" th:text="${staffInfo.rName}"></td>
-                            <td class="center hidden-phone"
-                                th:text="${#dates.format(staffInfo.sEnter, 'yyyy-MM-dd')}"></td>
+                            <td hidden></td>
+                            <td th:text="${product.pid}"></td>
+                            <th><img th:src="${product.image}"  width="35" height="35"/></th>
+                            <th th:text="${product.pname}"></th>
+                            <td th:text="${product.price}"></td>
+                            <td th:text="${product.color}"></td>
+                            <td th:text="${product.weight}"></td>
+                            <td th:text="${product.statdate}"></td>
                             <td>
                                 <button class="btn btn-primary btn-xs" onclick="editInfo(this)"
                                         th:id="${iterStat.index}" data-toggle="modal"
@@ -68,8 +68,8 @@
                                     <i class="icon-pencil"></i></button>
 
                                 &nbsp;&nbsp;&nbsp;&nbsp;
-                                <button class="btn btn-danger btn-xs" onclick="delete_staff(this)"
-                                        th:id="${staffInfo.sId}">
+                                <button class="btn btn-danger btn-xs" onclick="delete_product(this)"
+                                        th:id="${product.pid}">
                                     <i class="icon-trash "></i></button>
                             </td>
                         </tr>
@@ -137,11 +137,11 @@
                                     <label class="col-lg-4 control-label">颜色</label>
                                     <div class="col-lg-8">
                                         <select class="form-control m-bot15" id="color" name="color">
-                                            <option value="operator">咖啡色</option>
-                                            <option value="admin">白色</option>
-                                            <option value="custome">粉红色</option>
-                                            <option value="vip">橘黄色</option>
-                                            <option value="test">蓝色</option>
+                                            <option value="brown">咖啡色</option>
+                                            <option value="white">白色</option>
+                                            <option value="pink">粉红色</option>
+                                            <option value="orange">橘黄色</option>
+                                            <option value="blue">蓝色</option>
                                         </select>
                                     </div>
                                 </div>
@@ -151,14 +151,14 @@
                                     <label class="control-label col-lg-4">尺寸</label>
                                     <div class="col-lg-8">
                                         <select class="form-control m-bot15" id="weight" name="weight">
-                                            <option value="5">5寸</option>
-                                            <option value="6">6寸</option>
-                                            <option value="7">7寸</option>
-                                            <option value="8">8寸</option>
-                                            <option value="10">10寸</option>
-                                            <option value="12">12寸</option>
-                                            <option value="15">15寸</option>
-                                            <option value="20">20寸</option>
+                                            <option value="5寸">5寸</option>
+                                            <option value="6寸">6寸</option>
+                                            <option value="7寸">7寸</option>
+                                            <option value="8寸">8寸</option>
+                                            <option value="10寸">10寸</option>
+                                            <option value="12寸">12寸</option>
+                                            <option value="15寸">15寸</option>
+                                            <option value="20寸">20寸</option>
                                         </select>
                                     </div>
                                 </div>
@@ -185,7 +185,7 @@
 </div><!--添加员工 modal完-->
 
 <!-- 更新 员工模态框（Modal） -->
-<div class="modal fade" id="update_staff_myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+<div class="modal fade" id="update_product_myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
      aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -195,29 +195,60 @@
                     &times;
                 </button>
                 <h4 class="modal-title" id="myModalLabel">
-                    更改员工操作
+                    更新商品操作
                 </h4>
             </div>
             <!--更新员工头部-->
 
             <!--显示的员工编号-->
             <div class="modal-body">
-                <label class="control-label col-lg-4">商品名称：</label>
+                <label class="control-label col-lg-4">商品图片：</label>
                 <div class="col-lg-8">
-                    <p><span id="update_sId"></span></p>
+                    <p><span id="update_image"></span></p>
                 </div>
             </div>
-            <!--显示的员工编号结束-->
 
+
+            <div class="modal-body">
+                <label class="control-label col-lg-4">商品名称：</label>
+                <div class="col-lg-8">
+                    <p><span id="update_pname"></span></p>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <label class="control-label col-lg-4">价格：</label>
+                <div class="col-lg-8">
+                    <p><span id="update_price"></span></p>
+                </div>
+            </div>
 
             <!--员工的角色分配-->
             <div class="modal-body">
-                <label class="control-label col-lg-4">角色分配</label>
+                <label class="control-label col-lg-4">颜色</label>
                 <div class="col-lg-8">
-                    <select class="form-control m-bot15" id="update_rName">
-                        <option>操作员</option>
-                        <option>管理员</option>
-                        <option>决策员</option>
+                    <select class="form-control m-bot15" id="update_color">
+                        <option value="brown">咖啡色</option>
+                        <option value="white">白色</option>
+                        <option value="pink">粉红色</option>
+                        <option value="orange">橘黄色</option>
+                        <option value="blue">蓝色</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <label class="control-label col-lg-4">尺寸</label>
+                <div class="col-lg-8">
+                    <select class="form-control m-bot15" id="update_weight">
+                        <option value="5寸">5寸</option>
+                        <option value="6寸">6寸</option>
+                        <option value="7寸">7寸</option>
+                        <option value="8寸">8寸</option>
+                        <option value="10寸">10寸</option>
+                        <option value="12寸">12寸</option>
+                        <option value="15寸">15寸</option>
+                        <option value="20寸">20寸</option>
                     </select>
                 </div>
             </div>
@@ -252,19 +283,93 @@
 
     //添加后台管理员
     $('#add_product_button').click(function () {
-        alert("aaaa")
         $("#add_product").ajaxSubmit({
             url : "/product/add_product.do",
             type : "post",
             dataType : 'json',
             success : function(data) {
-                alert("设置成功！");
+                window.wxc.xcConfirm(data.message, window.wxc.xcConfirm.typeEnum.info, {
+                    onOk: function () {
+                        if (data.status == 1) {
+                            location.reload();
+                        }
+                    }
+                });
             },
             error : function(data) {
-                alert("error:" + data.responseText);
+                //发送失败
+                if (status == "timeout") {
+                    $("#message").text("发送超时请重发");
+                }
             }
         });
     });
+
+    //删除商品操作
+    function delete_product(obj) {
+        var group = $(obj).attr("id");
+        var txt = "您确定要删除商品ID为" + group + "的商品？";
+        window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.confirm, {
+            onOk: function () {
+                $.get("/product/deleteProduct", {pid: group}, function (data) {
+                    window.wxc.xcConfirm(data.message, window.wxc.xcConfirm.typeEnum.info, {
+                        onOk: function () {
+                            if (data.status == 1) {
+                                location.reload();
+                            }
+                        }
+                    });
+
+                });
+            }
+        });
+    }
+
+    //触发更新staff模态框的同时调用此方法  -----用于模态框传值
+    function editInfo(obj) {
+        var id = $(obj).attr("id");
+        //获取表格中的一行数据
+
+        var table = $("#sample_1").DataTable();
+        var image = table.row(id).data()[1];
+       // var pname = table.row(id).data()[2];
+       // var price = table.row(id).data()[3];
+        var color = table.row(id).data()[4];
+        var weight = table.row(id).data()[5];
+
+
+        //向模态框中传值
+/*        $('#update_image').val(image);*/
+       // $('#update_pname').val(pname);
+        $('#update_price').val(price);
+        $('#update_color').val(color);
+        $('#update_weight').val(weight);
+        $('#update_product_myModal').modal('show');
+    }
+
+
+    //更新员工操作
+    function update_staff() {
+        //获取模态框数据
+        var sId = $('#update_sId').html();
+        var rName = $('#update_rName').val();
+        $.ajax({
+            type: "POST",
+            url: "/staffs/updatestaff",
+            data: {
+                sId: sId,
+                rName: rName
+            },
+            dataType: 'json',
+            success: function (data) {
+                window.wxc.xcConfirm(data.message, window.wxc.xcConfirm.typeEnum.info, {
+                    onOk: function () {
+                        location.reload();
+                    }
+                });
+            }
+        });
+    }
 </script>
 
 </body>

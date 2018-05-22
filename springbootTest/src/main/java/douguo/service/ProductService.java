@@ -5,6 +5,8 @@ import douguo.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service("productService")
 public class ProductService {
 
@@ -14,5 +16,13 @@ public class ProductService {
 
     public void addProduct(Product product){
          productMapper.addProduct(product);
+    }
+
+    public List<Product> findAllProduct(){
+        return  productMapper.findAllProductList();
+    }
+
+    public int deleteProductById(int pid){
+        return productMapper.deleteProductById(pid);
     }
 }

@@ -1,6 +1,5 @@
 package douguo.model;
 
-import java.util.Date;
 
 public class Product {
     private int pid;

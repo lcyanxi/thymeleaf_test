@@ -5,7 +5,7 @@ public interface constent {
     /**
      * 图片上传路径地址
      */
-    String IMAGEUPLOADPATH = "E:\\lichang\\image";
+    String IMAGEUPLOADPATH = "E:\\李常毕业设计\\代码\\thymeleaf_test\\springbootTest\\src\\main\\resources\\static\\upImage";
 
     /**
      * 图片上传的域名前缀
