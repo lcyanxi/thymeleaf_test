@@ -6,8 +6,16 @@
 <head>
     <meta http-equiv="Content-Type" content="multipart/form-data; charset=utf-8" />
     <div th:replace="/common/common_css :: common_css"></div>
-    <link th:href="@{/css/extra.css}" rel="stylesheet" href="../static/css/extra.css"/>
-    <link th:href="@{/css/animate.css}" rel="stylesheet" href="../static/css/animate.css"/>
+    <script th:src="@{/js/jquery-1.8.3.min.js}" src="../static/js/jquery-1.8.3.min.js"></script>
+    <script th:src="@{/js/bootstrap.min.js}" src="../static/js/bootstrap.min.js"></script>
+    <script th:src="@{/js/jquery.dataTables.min.js}" src="../static/js/jquery.dataTables.min.js"></script>
+    <!--<script th:src="@{/js/DT_bootstrap.js}" src="../static/js/DT_bootstrap.js"></script>-->
+    <script th:src="@{/js/dynamic-table.js}" src="../static/js/dynamic-table.js"></script>
+    <script th:src="@{/js/jquery.form.js}" src="../static/js/jquery.form.js"></script>
+
+    <!--script for 提示框-->
+    <script th:src="@{/js/xcConfirm.js}" src="../static/js/xcConfirm.js"></script>
+
 </head>
 
 <body>
@@ -50,13 +58,13 @@
                         <!--头部显示所包含的内容 结束-->
 
                         <!--显示每个员工的详细信息-->
+
                         <tbody id="tbody">
                         <tr class="odd gradeX" th:each="product,iterStat:${data}">
                             <td></td>
                             <td hidden></td>
-                            <td th:text="${product.pid}"></td>
-                            <th><img th:src="${product.image}"  width="35" height="35"/></th>
-                            <th th:text="${product.pname}"></th>
+                            <td><img th:src="${product.image}"  width="35" height="35"/></td>
+                            <td th:text="${product.pname}"></td>
                             <td th:text="${product.price}"></td>
                             <td th:text="${product.color}"></td>
                             <td th:text="${product.weight}"></td>
@@ -269,15 +277,6 @@
 <!--引入js 文件-->
 <!--<div th:replace="/common/common_js :: common_js"></div>-->
 
-<script th:src="@{/js/jquery-1.8.3.min.js}" src="../static/js/jquery-1.8.3.min.js"></script>
-<script th:src="@{/js/bootstrap.min.js}" src="../static/js/bootstrap.min.js"></script>
-<script th:src="@{/js/jquery.dataTables.min.js}" src="../static/js/jquery.dataTables.min.js"></script>
-<script th:src="@{/js/DT_bootstrap.js}" src="../static/js/DT_bootstrap.js"></script>
-<script th:src="@{/js/dynamic-table.js}" src="../static/js/dynamic-table.js"></script>
-<script th:src="@{/js/jquery.form.js}" src="../static/js/jquery.form.js"></script>
-
-<!--script for 提示框-->
-<script th:src="@{/js/xcConfirm.js}" src="../static/js/xcConfirm.js"></script>
 
 <script type="text/javascript">
 
@@ -330,8 +329,10 @@
         var id = $(obj).attr("id");
         //获取表格中的一行数据
 
+
+
         var table = $("#sample_1").DataTable();
-        var image = table.row(id).data()[1];
+        var image = table.row(id);
        // var pname = table.row(id).data()[2];
        // var price = table.row(id).data()[3];
         var color = table.row(id).data()[4];

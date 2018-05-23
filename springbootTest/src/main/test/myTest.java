@@ -1,4 +1,8 @@
+import douguo.util.DateUtil;
 import org.junit.Test;
+
+import java.util.Date;
+import java.util.Random;
 
 
 /**
@@ -21,7 +25,18 @@ public class myTest {
 
     @Test
     public void mytest(){
+        Random random=new Random();
+        for(int i=0;i<10;i++){
+            String pname="商品"+i;
+            String color="brown"+i;
+            String  price="5"+ Math.abs(random.nextInt()) % 100;
+            String image="/page/images/m"+i+".png";
+            String  statdate= DateUtil.date2Str(new Date(),"yyyy-MM-dd HH:mm:ss");
+            String weight=2+i+"寸";
 
+            System.out.println("insert into product(pname,price,color,image,statdate,weight) " +
+                    "values (\""+pname+"\","+price+",\""+color+"\",\""+image+"\",\""+statdate+"\",\""+weight+"\");");
+        }
 
 
     }

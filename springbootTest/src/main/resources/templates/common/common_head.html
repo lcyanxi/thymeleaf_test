@@ -178,10 +178,10 @@
                             <ul class="dropdown-menu multi-column columns-4">
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <a th:href="@{/orderInfo}" href="../pages/orderInfo.html"><h4>个人信息</h4></a>
+                                        <a th:href="@{/user/toEditProfile}" href="../pages/editProfile.html"><h4>个人信息</h4></a>
                                     </div>
                                     <div class="col-sm-3">
-                                        <a th:href="@{/orderInfo}" href="../pages/orderInfo.html"><h4>收货地址信息</h4></a>
+                                        <a th:href="@{/user/newProfile}" href="../pages/profile.html"><h4>账户信息</h4></a>
                                     </div>
                                     <div class="col-sm-3">
                                         <a th:href="@{/orderInfo}" href="../pages/orderInfo.html"><h4>订单中心</h4></a>
@@ -209,24 +209,33 @@
                         </form>
                     </div>
                 </div>
-                <div class="header-right login">
-                    <a href="#"><span class="glyphicon glyphicon-user" aria-hidden="true"></span></a>
-                    <div id="loginBox">
-                        <form id="loginForm">
-                            <fieldset id="body">
-                                <fieldset>
-                                    <label for="email">邮箱or手机号</label>
-                                    <input type="text" name="email" id="email"/>
+                <div th:if="${session.user==null}">
+                    <div class="header-right login">
+                        <a href="#"><span class="glyphicon glyphicon-user" aria-hidden="true"></span></a>
+                        <div id="loginBox">
+                            <form id="loginForm" action="">
+                                <fieldset id="body">
+                                    <fieldset>
+                                        <label for="mobile">手机号</label>
+                                        <input type="text" name="mobile" id="mobile"/>
+                                    </fieldset>
+                                    <fieldset>
+                                        <label for="password">密码</label>
+                                        <input type="password" name="password" id="password"/>
+                                    </fieldset>
+                                    <input type="button" id="login" value="登 录"/>
+                                    <label for="checkbox"><input type="checkbox" id="checkbox"/> <i>记住我</i></label>
                                 </fieldset>
-                                <fieldset>
-                                    <label for="password">密码</label>
-                                    <input type="password" name="password" id="password"/>
-                                </fieldset>
-                                <input type="submit" id="login" value="登 录"/>
-                                <label for="checkbox"><input type="checkbox" id="checkbox"/> <i>记住我</i></label>
-                            </fieldset>
-                            <p>新用户? <a class="sign" th:href="@{/account}" href="../pages/account.html">注册</a> <span><a href="#">忘记密码?</a></span></p>
-                        </form>
+                                <p>新用户? <a class="sign" th:href="@{/account}" href="../pages/account.html">注册</a> <span><a href="#">忘记密码?</a></span></p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${session.user!=null}">
+                    <div class="header-right ">
+                    <span  class="glyphicon">
+                        <img alt="" th:src="${session.user.image}" width="40" height="40" src="/static/img/avatar.jpg">
+                    </span>
                     </div>
                 </div>
                 <div class="header-right cart">

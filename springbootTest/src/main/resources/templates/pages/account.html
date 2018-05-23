@@ -17,8 +17,9 @@
     <!-- //Custom Theme files -->
     <link th:href="@{/page/css/bootstrap.css}" href="../../static/page/css/bootstrap.css" type="text/css"
           rel="stylesheet" media="all"/>
-    <link th:href="@{/page/css/style.css}" href="../../static/page/css/style.css" type="text/css" rel="stylesheet"
-          media="all"/>
+    <link th:href="@{/page/css/style.css}" href="../../static/page/css/style.css" type="text/css" rel="stylesheet" media="all"/>
+    <link th:href="@{/css/xcConfirm.css}" href="../../static/css/xcConfirm.css" rel="stylesheet"/>
+
     <!-- js -->
     <script th:src="@{/page/js/jquery.min.js}" src="../../static/page/js/jquery.min.js"></script>
     <script th:src="@{/page/js/bootstrap-3.1.1.min.js}" type="text/javascript"
@@ -27,6 +28,9 @@
     <!-- cart -->
     <script th:src="@{/page/js/simpleCart.min.js}" src="../../static/page/js/simpleCart.min.js"></script>
     <!-- cart -->
+    <script th:src="@{/js/jquery.form.js}" src="../../static/js/jquery.form.js"></script>
+    <!--script for 提示框-->
+    <script th:src="@{/js/xcConfirm.js}" src="../static/js/xcConfirm.js"></script>
 </head>
 <body>
 <!--header-->
@@ -36,7 +40,7 @@
 <div class="account">
     <div class="container">
         <div class="register">
-            <form th:action="@{/user/register}" method="post">
+            <form id="registerFrom" method="post">
                 <div class="register-top-grid">
                     <h3>个人信息</h3>
                     <div class="input">
@@ -55,7 +59,11 @@
                        </select>
                     </div>
                     <div class="input">
-                        <span>邮箱<label>*</label></span>
+                        <span>电话号码<label>*</label></span>
+                        <input type="text" name="mobile"/>
+                    </div>
+                    <div class="input">
+                        <span>邮箱<label></label></span>
                         <input type="text" name="email"/>
                     </div>
                     <a class="news-letter" href="#">
@@ -76,7 +84,7 @@
                 </div>
                 <div class="clearfix"></div>
                 <div class="register-but">
-                    <input type="submit" value="注册"/>
+                    <input type="button" id="register" value="注册"/>
                     <div class="clearfix"></div>
                 </div>
             </form>
@@ -86,5 +94,30 @@
 <!--//account-->
 <!--footer-->
 <div th:replace="common/common_footer :: footer"></div>
+<script>
+    //添加后台管理员
+    $('#register').click(function () {
+        $("#registerFrom").ajaxSubmit({
+            url : "/user/register",
+            type : "post",
+            dataType : 'json',
+            success : function(data) {
+                window.wxc.xcConfirm(data.message, window.wxc.xcConfirm.typeEnum.info, {
+                    onOk: function () {
+                        if (data.status==1){
+                            window.location.href="/"
+                        }
+                    }
+                });
+            },
+            error : function(data) {
+                //发送失败
+                if (status == "timeout") {
+                    $("#message").text("发送超时请重发");
+                }
+            }
+        });
+    });
+</script>
 </body>
 </html>

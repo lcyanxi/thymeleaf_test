@@ -36,16 +36,17 @@
 <div class="account">
     <div class="container">
         <div class="register">
-            <form th:action="@{/user/register}" method="post">
+            <form id="editProfileForm" method="post">
                 <div class="register-top-grid">
                     <h3>个人信息</h3>
+
                     <div class="input">
                         <span>姓名:</span>
-                        <input type="text" name="username"/>
+                        <input type="text" name="username"  th:value="${session.user.username}"/>
                     </div>
                     <div class="input">
                         <span>昵称:</span>
-                        <input type="text" name="nickname"/>
+                        <input type="text" name="nickname" th:value="${session.user.nickname}"/>
                     </div>
                     <div class="select">
                         <span>性别:</span>
@@ -56,24 +57,21 @@
                     </div>
                     <div class="select">
                         <span>电话号码:</span>
-                        <input type="text" name="nickname"/>
+                        <input type="text" name="nickname" th:value="${session.user.mobile}"/>
                     </div>
                     <div class="input">
                         <span>邮箱<label>*</label></span>
-                        <input type="text" name="email"/>
+                        <input type="text" name="email" th:value="${session.user.email}"/>
                     </div>
-                    <a class="news-letter" href="#">
-                        <label class="checkbox"><input type="checkbox" name="checkbox" checked=""/><i> </i>注册通讯录</label>
-                    </a>
                     <div class="select">
                         <span>注册日期:</span>
-                        <input type="text" name="nickname"/>
+                        <input type="text" name="nickname" th:value="${session.user.registerTime}" readonly/>
                     </div>
                     <div class="clearfix"></div>
                 </div>
                 <div class="clearfix"></div>
                 <div class="register-but">
-                    <input type="submit" value="提交修改"/>
+                    <input type="button" id="editProfile" value="提交修改"/>
                     <div class="clearfix"></div>
                 </div>
             </form>
@@ -83,5 +81,30 @@
 <!--//account-->
 <!--footer-->
 <div th:replace="common/common_footer :: footer"></div>
+<script>
+    //更新个人信息
+    $('#editProfile').click(function () {
+        $("#editProfileForm").ajaxSubmit({
+            url : "/user/editProfile",
+            type : "post",
+            dataType : 'json',
+            success : function(data) {
+                window.wxc.xcConfirm(data.message, window.wxc.xcConfirm.typeEnum.info, {
+                    onOk: function () {
+                        if (data.status == 1) {
+                            location.reload();
+                        }
+                    }
+                });
+            },
+            error : function(data) {
+                //发送失败
+                if (status == "timeout") {
+                    $("#message").text("发送超时请重发");
+                }
+            }
+        });
+    });
+</script>
 </body>
 </html>

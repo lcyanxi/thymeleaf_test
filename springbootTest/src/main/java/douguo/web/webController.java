@@ -36,15 +36,8 @@ public class webController {
         return user;
     }
 
-    @RequestMapping("/add")
-    public void save(UserEntity user) {
-        userMapper.insert(user);
-    }
 
-    @RequestMapping(value="update")
-    public void update(UserEntity user) {
-        userMapper.update(user);
-    }
+
 
     @RequestMapping(value="/delete/{id}")
     public void delete(@PathVariable("id") Long id) {

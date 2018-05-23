@@ -12,6 +12,9 @@ public interface ProductMapper {
 
      List<Product>   findAllProductList();
 
+     Product findProductByPid(int pid);
+
 
      int deleteProductById(int pid);
+
 }

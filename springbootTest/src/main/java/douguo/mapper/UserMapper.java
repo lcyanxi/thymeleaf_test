@@ -1,5 +1,6 @@
 package douguo.mapper;
 
+import douguo.model.User;
 import douguo.model.UserEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -24,9 +25,12 @@ public interface UserMapper {
 
     UserEntity getOne(Long id);
 
-    void insert(UserEntity user);
+    User login(@Param("mobile") String mobile,@Param("password") String password);
+    void register(User user);
 
-    @CachePut(key = "#p0") void update(UserEntity user);
+    User selectUserByMobile(String mobile);
+
+    @CachePut(key = "#p0") void update(User user);
 
     //如果指定为 true，则方法调用后将立即清空所有缓存
     @CacheEvict(key = "#p0", allEntries = true) void delete(Long id);

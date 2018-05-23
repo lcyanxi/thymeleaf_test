@@ -51,7 +51,36 @@
     <div class="container">
         <h2>商品中心</h2>
         <div class="col-md-9 product-model-sec">
-            <div class="product-grid">
+            <div class="product-grid" th:each="product,iterStat:${productList}">
+                <a th:href="@{'/product/showSingle/'+${product.pid}}" href="single.html">
+                    <div class="more-product"><span> </span></div>
+                    <div class="product-img b-link-stripe b-animate-go  thickbox">
+                        <img th:src="${product.image}" src="../../static/page/images/m1.png"
+                             class="img-responsive" alt=""/>
+                        <div class="b-wrapper">
+                            <h4 class="b-animate b-from-left  b-delay03">
+                                <button>View</button>
+                            </h4>
+                        </div>
+                    </div>
+                </a>
+                <div class="product-info simpleCart_shelfItem">
+                    <div class="product-info-cust prt_name">
+                        <h4 th:text="${product.pname}">Product #1</h4>
+                        <span class="item_price" th:text="'$'+${product.price}">$2000.00</span>
+                        <div class="ofr">
+                            <p class="pric1">
+                                <del th:text="'$'+${product.price}">$2300.00</del>
+                            </p>
+                            <p class="disc">[15% Off]</p>
+                        </div>
+                        <input type="text" class="item_quantity" value="1"/>
+                        <input type="button" class="item_add items" value="Add"/>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+<!--            <div class="product-grid">
                 <a href="single.html">
                     <div class="more-product"><span> </span></div>
                     <div class="product-img b-link-stripe b-animate-go  thickbox">
@@ -311,7 +340,7 @@
                         <div class="clearfix"></div>
                     </div>
                 </div>
-            </div>
+            </div>-->
         </div>
         <div class="col-md-3 rsidebar span_1_of_left">
             <section class="sky-form">

@@ -25,4 +25,8 @@ public class ProductService {
     public int deleteProductById(int pid){
         return productMapper.deleteProductById(pid);
     }
+
+    public Product findProductByPid(int pid){
+        return  productMapper.findProductByPid(pid);
+    }
 }

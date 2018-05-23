@@ -21,6 +21,10 @@
        select * from product
     </select>
 
+    <select id="findProductByPid" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select * from product where pid=#{pid}
+    </select>
+
 
     <insert id="insert" parameterType="douguo.model.UserEntity">
         INSERT INTO

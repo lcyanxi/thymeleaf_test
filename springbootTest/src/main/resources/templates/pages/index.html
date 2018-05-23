@@ -10,6 +10,8 @@
 	<!-- //Custom Theme files -->
 	<link th:href="@{/page/css/bootstrap.css}" href="../../static/page/css/bootstrap.css" type="text/css" rel="stylesheet" media="all"/>
 	<link th:href="@{/page/css/style.css}" href="../../static/page/css/style.css" type="text/css" rel="stylesheet" media="all"/>
+	<link th:href="@{/css/xcConfirm.css}" href="../../static/css/xcConfirm.css" rel="stylesheet"/>
+
 	<!-- js -->
 	<script th:src="@{/page/js/jquery.min.js}" src="../../static/page/js/jquery.min.js"></script>
 	<script th:src="@{/page/js/bootstrap-3.1.1.min.js}" type="text/javascript" src="../../static/page/js/bootstrap-3.1.1.min.js"></script>
@@ -17,6 +19,11 @@
 	<!-- cart -->
 	<script th:src="@{/page/js/simpleCart.min.js}" src="../../static/page/js/simpleCart.min.js"> </script>
 	<!-- cart -->
+
+	<script th:src="@{/js/jquery.form.js}" src="../../static/js/jquery.form.js"></script>
+
+	<!--script for 提示框-->
+	<script th:src="@{/js/xcConfirm.js}" src="../static/js/xcConfirm.js"></script>
 </head>
 <body>
 <!--header-->
@@ -26,7 +33,7 @@
 		<div class="container">
 			<h2 class="hdng">为你美味的<span>蛋糕</span></h2>
 			<p>我们最好的蛋糕只为你特别的一天</p>
-			<a href="products.html">现在去购物</a>
+			<a th:href="@{/product/showProductList}" href="products.html">现在去购物</a>
 			<div class="banner-text">			
 				<img th:src="@{/page/images/2.png}" src="../../static/page/images/2.png" alt=""/>
 			</div>
@@ -302,5 +309,30 @@
 	<!--//subscribe-->
 	<!--footer-->
 	<div th:replace="common/common_footer :: footer"></div>
+<script>
+    //添加后台管理员
+    $('#login').click(function () {
+        $("#loginForm").ajaxSubmit({
+            url : "/user/login",
+            type : "post",
+            dataType : 'json',
+            success : function(data) {
+                window.wxc.xcConfirm(data.message, window.wxc.xcConfirm.typeEnum.info, {
+                    onOk: function () {
+                        if (data.status == 1) {
+                            location.reload();
+                        }
+                    }
+                });
+            },
+            error : function(data) {
+                //发送失败
+                if (status == "timeout") {
+                    $("#message").text("发送超时请重发");
+                }
+            }
+        });
+    });
+</script>
 </body>
 </html>
