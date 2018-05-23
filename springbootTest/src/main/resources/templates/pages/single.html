@@ -46,13 +46,13 @@
 				<div class="col-md-4 single-grid">		
 					<div class="flexslider">
 						<ul class="slides">
-							<li data-thumb="" th:value="${product.image}">
+							<li th:attr="data-thumb=${product.image}">
 								<div class="thumb-image"> <img th:src="${product.image}" src="../../static/page/images/s1.png" data-imagezoom="true" class="img-responsive"> </div>
 							</li>
-							<li data-thumb="/page/images/m1.png">
+							<li  th:attr="data-thumb=${product.image}">
 								 <div class="thumb-image"> <img th:src="${product.image}" src="../../static/page/images/s2.png" data-imagezoom="true" class="img-responsive"> </div>
 							</li>
-							<li data-thumb=""+${product.image}>
+							<li th:attr="data-thumb=${product.image}">
 							   <div class="thumb-image"> <img th:src="${product.image}" src="../../static/page/images/s3.png" data-imagezoom="true" class="img-responsive"> </div>
 							</li> 
 						</ul>
@@ -60,7 +60,7 @@
 				</div>	
 				<div class="col-md-4 single-grid simpleCart_shelfItem">		
 					<h3 th:text="${product.pname}">Yummy freshly baked Blackforest Cake 1 Kg! with blends of chocochips</h3>
-					<p>Cake cutting is one of the most wonderful ways of celebrating a special moment. What better way to celebrate than with a rich and mouth watering chocochips cake</p>
+					<p>切蛋糕是庆祝特殊时刻最美妙的方式之一。庆祝什么比用丰富和令人垂涎的巧克力蛋糕更好</p>
 					<ul class="size">
 						<h3>尺寸</h3>
 							<li><a href="#">1 KG</a></li>
@@ -70,9 +70,9 @@
 					</ul>
 					<ul class="size">
 						<h3>2-3 Tier Cakes</h3>
-							<li><a href="#">1 Step</a></li>
-							<li><a href="#">2 Step</a></li>
-							<li><a href="#">3 Step</a></li>
+							<li><a href="#">1 层</a></li>
+							<li><a href="#">2 层</a></li>
+							<li><a href="#">3 层</a></li>
 					</ul>
 					<div class="galry">
 						<div class="prices">
@@ -92,23 +92,23 @@
 						<a href="#" class="add-cart item_add">加入购物车</a>
 					</div>
 					<div class="tag">
-						<p>Category : <a href="#"> Cakes</a></p>
+						<p>Category : <a href="#">蛋糕</a></p>
 						<p>Tag : <a href="#"> Lorem ipsum </a></p>
 					</div>
 				</div>
 				<div class="col-md-4 single-grid1">
 					<h2>Account</h2>
 					<ul>
-						<li><a href="#">Offers</a></li>
-						<li><a href="products.html">New products</a></li>
-						<li><a href="account.html">Register</a></li>
-						<li><a href="account.html">Forgot Your Password</a></li>
-						<li><a href="account.html">My account</a></li>
-						<li><a href="contact.html">Address</a></li>
-						<li><a href="checkout.html.html">wishlist</a></li>
-						<li><a href="checkout.html.html">Order history</a></li>
-						<li><a href="#">Downloads</a></li>
-						<li><a href="#">Reward points</a></li>
+						<li><a href="#">详情</a></li>
+						<li><a href="products.html">新产品</a></li>
+						<li><a href="account.html">注册</a></li>
+						<li><a href="account.html">忘记密码</a></li>
+						<li><a href="account.html">我的账户</a></li>
+						<li><a href="contact.html">地址</a></li>
+						<li><a href="checkout.html.html">愿望清单</a></li>
+						<li><a href="checkout.html.html">订单历史</a></li>
+						<li><a href="#">下载</a></li>
+						<li><a href="#">奖励分数</a></li>
 					</ul>
 				</div>
 				<div class="clearfix"> </div>
@@ -123,13 +123,13 @@
 					<div class="panel-heading" role="tab" id="headingOne">
 						<h4 class="panel-title">
 							<a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-							  Description
+							 描述
 							</a>
 						</h4>
 					</div>
 					<div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
 						<div class="panel-body">
-							Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+							Anim pariatur cliche reprehenderit，enim eiusmod high life accusamus terry richardson ad squid。3狼月亮，非cupidatat滑板dolor早午餐。食物卡车奎奴亚藜nesciunt laborum eiusmod。早午餐3狼月亮馅饼，sunt aliqua把一只鸟放在它上面鱿鱼单原产咖啡nulla assumenda shoreditch et。Nihil anim keffiyeh helvetica，手工啤酒工人韦斯安德森信任nesciunt sapiente ea proident。广告素食主义者excepteur屠夫副lomo。Leggings occaecat工艺啤酒农场到餐桌，生牛仔美学合成nesciunt你可能没有听说过他们accusamus labore可持续VHS
 						</div>
 					</div>
 				</div>
@@ -137,7 +137,7 @@
 					<div class="panel-heading" role="tab" id="headingTwo">
 						<h4 class="panel-title">
 							<a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-							   additional information
+							   附加信息
 							</a>
 						</h4>
 					</div>
@@ -151,7 +151,7 @@
 					<div class="panel-heading" role="tab" id="headingThree">
 						<h4 class="panel-title">
 							<a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-								reviews (5)
+								评论 (5)
 							</a>
 						</h4>
 					</div>
@@ -165,7 +165,7 @@
 					<div class="panel-heading" role="tab" id="headingFour">
 						<h4 class="panel-title">
 							<a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
-								help
+								帮助
 							</a>
 						</h4>
 					</div>
