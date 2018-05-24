@@ -12,7 +12,7 @@
 	<link th:href="@{/page/css/bootstrap.css}" href="../../static/page/css/bootstrap.css" type="text/css" rel="stylesheet" media="all">
 	<link th:href="@{/page/css/style.css}" href="../../static/page/css/style.css" type="text/css" rel="stylesheet" media="all">
 	<link th:href="@{/page/css/flexslider.css}"  href="../../static/page/css/flexslider.css" type="text/css"  rel="stylesheet" media="screen" />
-
+	<link th:href="@{/css/xcConfirm.css}" href="../../static/css/xcConfirm.css" rel="stylesheet"/>
 	<!-- js -->
 	<script th:src="@{/page/js/jquery.min.js}" src="../../static/page/js/jquery.min.js"></script>
 	<script th:src="@{/page/js/bootstrap-3.1.1.min.js}" type="text/javascript" src="../../static/page/js/bootstrap-3.1.1.min.js"></script>
@@ -23,7 +23,11 @@
 	<!-- cart -->
 <!-- FlexSlider -->
 <script th:src="@{/page/js/jquery.flexslider.js}"  defer src="../../static/page/js/jquery.flexslider.js"></script>
+	<!--script for 提示框-->
+	<script th:src="@{/js/xcConfirm.js}" src="../static/js/xcConfirm.js"></script>
 
+	<script th:src="@{/js/jquery.form.js}" src="../../static/js/jquery.form.js"></script>
+	<script th:src="@{/js/login.js}" src="../../static/js/login.js"></script>
 <script>
 	// Can also be used with $(document).ready()
 	$(window).load(function() {
@@ -89,7 +93,10 @@
 					</div>
 					<p class="qty"> Qty :  </p><input min="1" type="number" id="quantity" name="quantity" value="1" class="form-control input-small">
 					<div class="btn_form">
-						<a href="#" class="add-cart item_add">加入购物车</a>
+						<a href="#" class="add-cart item_add" id="add_cart">加入购物车</a>
+						<p hidden id="pid" th:text="${product.pid}"></p>
+						<div th:if="${session.user==null}"><p hidden id="uid">0</p></div>
+						<div th:if="${session.user!=null}"><p hidden id="uid">1</p></div>
 					</div>
 					<div class="tag">
 						<p>Category : <a href="#">蛋糕</a></p>
@@ -287,5 +294,43 @@
 	<!--related-products-->
 	<!--footer-->
 	<div th:replace="common/common_footer :: footer"></div>
+
+<script>
+    //加入购物车
+    $('#add_cart').click(function () {
+        var pid=$("#pid").html();
+        // 查看是否登录
+        if (pid==0) {
+            window.wxc.xcConfirm("请先去登录！！", window.wxc.xcConfirm.typeEnum.warning, {
+                onOk: function () {
+                    return false;
+                }
+            });
+        }
+        $.ajax({
+            url: "/cart/addCart",
+            type: "POST",
+            async: false,
+            data: {
+                pid: pid
+            },
+            timeout: 30000,       //超时时间
+            dataType: "json",     //返回的数据类型
+            success: function (data) {
+                window.wxc.xcConfirm(data.message, window.wxc.xcConfirm.typeEnum.success, {
+                    onOk: function () {
+                    }
+                });
+            },
+            complete: function (XMLHttpRequest, status) {
+
+                //发送失败
+                if (status == "timeout") {
+                    $("#message").text("发送超时请重发");
+                }
+            }
+        });
+    });
+</script>
 </body>
 </html>

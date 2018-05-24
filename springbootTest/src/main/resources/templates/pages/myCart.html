@@ -64,38 +64,37 @@
 
 									<!--数据显示部分-->
 									<tbody>
-									<tr class="odd gradeX cart_item" th:each="cartinfo,cartinfoStat:${cartinfos}">
+									<tr class="odd gradeX cart_item" th:each="cart,cartinfoStat:${list}">
 										<td>
 											<div class="row">
 												<div class="col-xs-2 item-check">
-													<input type="checkbox" th:value="${cartinfo.cartid}" name="cartid"
+													<input type="checkbox" th:value="${cart.cid}" name="cartid"
 														   class="check_ck"
 														   onclick="changeTotal()">
 												</div>
 												<div class="col-xs-4">
-													<img class="pro-img" th:src="'/img/'+${cartinfo.img}+'.jpg'"
-														 src="../img/friut1.jpg"
+													<img class="pro-img" th:src="'/img/'+${cart.image}+'.jpg'"
+														 src="../../static/page/images/s3.png"
 														 alt=""/>
 												</div>
 											</div>
 										</td>
-										<td th:text="${cartinfo.proname}">心心相印</td>
-										<td th:text="${cartinfo.price}">156.1</td>
+										<td th:text="${cart.pname}">心心相印</td>
+										<td th:text="${cart.price}">156.1</td>
 										<td class="hidden-phone">
 											<div class="row">
-												<a th:href="@{'/cart/minus/'+${cartinfo.cartid}}">
+												<a>
 													<button type="button"><i class="icon-minus"></i></button>
 												</a>
-												&nbsp;<span th:text="${cartinfo.num}">22</span>&nbsp;
-												<a th:href="@{'/cart/plus/'+${cartinfo.cartid}}">
+												&nbsp;<span th:text="${cart.num}">22</span>&nbsp;
+												<a>
 													<button type="button"><i class="icon-plus"></i></button>
 												</a>
 											</div>
 										</td>
-										<td class="total"><span th:id="'id_'+${cartinfo.cartid}"
-																th:text="${cartinfo.total}">33</span>
+										<td class="total"><span>33</span>
 										</td>
-										<td><a th:href="@{'/cart/delete/'+${cartinfo.cartid}}" href="#">
+										<td><a th:href="@{'/cart/delete/'+${cart.pid}}" href="#">
 											<button type="button" class="btn btn-danger btn-xs" data-toggle="modal"
 													data-target="#delete_staff_myModal">
 												<i class="icon-trash "> 删除</i></button>

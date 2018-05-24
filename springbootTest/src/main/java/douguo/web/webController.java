@@ -1,7 +1,6 @@
 package douguo.web;
 
 import douguo.mapper.UserMapper;
-import douguo.model.Info;
 import douguo.model.OrderInfo;
 import douguo.model.UserEntity;
 import net.sf.json.JSONArray;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -60,10 +58,6 @@ public class webController {
         return "pages/indent";
     }
 
-    @RequestMapping(value = "/myCart",method = RequestMethod.GET)
-    public String toMyCart() {
-        return "pages/myCart";
-    }
     @RequestMapping(value = "/orderInfo",method = RequestMethod.GET)
     public String toOrderInfo(Model model) {
        for (int i=0;i<5;i++){
