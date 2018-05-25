@@ -7,10 +7,7 @@ import douguo.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -44,13 +41,15 @@ public class CartController extends CommonController {
 
     @RequestMapping(value = "/addCart",method = RequestMethod.POST)
     @ResponseBody
-    public Map addProductToMyCart(@RequestParam(value = "pid") int pid){
+    public Map addProductToMyCart(@RequestParam(value = "pid") int pid,Double price){
         System.out.println(pid);
        User user =(User) session.getAttribute("user");
         Map map=new HashMap();
         Cart cart=new Cart();
         cart.setUid(user.getUid());
+        cart.setNum(1);
         cart.setPid(pid);
+        cart.setTotalPrice(cart.getNum()*price);
         cart.setCreateTime(DateUtil.date2Str(new Date(),"yyyy-MM-dd HH:mm:ss"));
         cart.setFlag(1);
         if ( cartService.addProductToMyCart(cart)){
@@ -63,4 +62,32 @@ public class CartController extends CommonController {
         return map;
 
     }
+
+
+
+    @RequestMapping(value = "/changeProductNum/{cid}", method = RequestMethod.GET)
+    public String changeCartProductNum(@PathVariable(value ="cid") int cartid,String type) {
+        System.out.println(type);
+        //修改数量
+        cartService.changeCartNum(type,cartid);
+
+        return "forward:/cart/myCart";
+    }
+
+
+    @RequestMapping(value = "/delete/{cid}", method = RequestMethod.GET)
+    public String delete(@PathVariable(value ="cid") int cartid) {
+        //修改数量
+        cartService.delete(cartid);
+        return "forward:/cart/myCart";
+    }
+
+    @RequestMapping(value = "/deleteall", method = RequestMethod.GET)
+    public String deleteAll() {
+        User user=(User) session.getAttribute("user");
+        //修改数量
+        cartService.deleteAll(user.getUid());
+        return "forward:/cart/myCart";
+    }
+
 }

@@ -80,7 +80,8 @@
 					</ul>
 					<div class="galry">
 						<div class="prices">
-							<h5 class="item_price" th:text="'$'+${product.price}+''">$995.00</h5>
+							<h5 class="item_price"  th:text="'$'+${product.price}+''">$995.00</h5>
+							<p hidden id="item_price" th:text="${product.price}"></p>
 						</div>
 						<div class="rating">
 							<span>☆</span>
@@ -312,7 +313,8 @@
             type: "POST",
             async: false,
             data: {
-                pid: pid
+                pid: pid,
+				price:$("#item_price").html()
             },
             timeout: 30000,       //超时时间
             dataType: "json",     //返回的数据类型

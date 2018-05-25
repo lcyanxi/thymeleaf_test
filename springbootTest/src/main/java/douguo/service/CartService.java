@@ -38,4 +38,26 @@ public class CartService {
         }
         return list;
     }
+
+    public void changeCartNum(String type,int cid){
+        Cart cart=cartMapper.selectCartByCid(cid);
+        int num=cart.getNum();
+        double price=cart.getTotalPrice()/num;
+        double totalPrice;
+        if (type.equals("del")){
+            num=num-1;
+             totalPrice=num*price;
+        }else {
+            num=num+1;
+             totalPrice=num*price;
+        }
+         cartMapper.updateCartNum(cid,num,totalPrice);
+    }
+
+    public void delete(int cid){
+        cartMapper.deleteProdutFromCartByCid(cid);
+    }
+    public void deleteAll(int uid){
+        cartMapper.deleteAll(uid);
+    }
 }

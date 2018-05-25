@@ -17,11 +17,23 @@
                     VALUES (#{uid},#{pid},#{num},#{totalPrice},#{createTime},#{flag})
     </select>
 
+    <select id="updateCartNum" parameterType="douguo.model.Cart">
+        UPDATE
+        cart
+        SET
+        num = #{num},
+        total_price = #{totalPrice}
+        WHERE
+        cid = #{cid}
+    </select>
 
     <select id="selectAllProductByUid" parameterType="java.lang.Integer" resultMap="BaseResultMap">
         select * from cart where uid=#{uid}
     </select>
 
+    <select id="selectCartByCid" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select * from cart where cid=#{cid}
+    </select>
 
     <insert id="insert" parameterType="douguo.model.UserEntity">
         INSERT INTO
@@ -42,8 +54,12 @@
         id = #{id}
     </update>
 
-    <delete id="deleteProductById" parameterType="java.lang.Integer">
-     delete from product where pid=#{pid}
+    <delete id="deleteProdutFromCartByCid" parameterType="java.lang.Integer">
+     delete from cart where cid=#{cid}
+    </delete>
+
+    <delete id="deleteAll" parameterType="java.lang.Integer">
+        delete from cart where uid=#{uid}
     </delete>
 
 </mapper>

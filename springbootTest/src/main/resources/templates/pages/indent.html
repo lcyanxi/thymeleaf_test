@@ -12,14 +12,12 @@
           rel="stylesheet" media="all"/>
     <link th:href="@{/page/css/style.css}" href="../../static/page/css/style.css" type="text/css" rel="stylesheet"
           media="all"/>
-
+    <link rel="stylesheet" type="text/css" th:href="@{/css/indent.css}" href="../../static/css/indent.css">
 
     <script type="text/javascript" th:src="@{/js/jquery.js}" src="../../static/js/jquery.js"></script>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/indent.css}" href="../../static/css/indent.css">
+    <script type="text/javascript" th:src="@{/js/jquery.cookie.js}" src="../../static/js/jquery.cookie.js"></script>
     <script type="text/javascript" th:src="@{/js/indent.js}" src="../../static/js/indent.js"></script>
     <script type="text/javascript" th:src="@{/js/geo.js}" src="../../static/js/geo.js"></script>
-    <script type="text/javascript" th:src="@{/js/jquery.cookie.js}" src="../../static/js/jquery.cookie.js"></script>
-
 </head>
 <body>
 <!--header-->
@@ -142,21 +140,21 @@
                     </div>
                 </div>
                 <!-- 复制 -->
-                <div th:each="cartinfo,cartinfoStat:${cartinfos}">
+                <div th:each="cart,cartinfoStat:${list}">
                     <div class="ci-title">
-                        <input type="checkbox" name="cartid" th:value="${cartinfo.cartid}" checked="checked"
+                        <input type="checkbox" name="cartid" th:value="${cart.cid}" checked="checked"
                                readonly="readonly">
-                        <div class="ci-name" th:text="${cartinfo.proname}">商品名称</div>
-                        <div th:text="${cartinfo.price}">单价</div>
+                        <div class="ci-name" th:text="${cart.pname}">商品名称</div>
+                        <div th:text="${cart.price}">单价</div>
                         <div>0.00</div>
                         <div>有库存</div>
-                        <div th:text="${cartinfo.num}">0</div>
-                        <div th:text="${cartinfo.total}">0.00</div>
+                        <div th:text="${cart.num}">0</div>
+                        <div th:text="${cart.totalPrice}">0.00</div>
                     </div>
                 </div>
             </li>
             <li class="last-li">
-                <div class="account">应付金额:<span id="gross" th:text="${total}"></span></div>
+                <div class="account">应付金额:<span id="gross" th:text="${moneys}"></span></div>
                 &nbsp;&nbsp;
                 <button type="submit" id="sumbit">提交订单</button>
             </li>

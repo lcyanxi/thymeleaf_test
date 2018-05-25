@@ -164,7 +164,7 @@ $(function(){
 		});
 		/***********省市级联**********/
 		var address = [];
-		$.getJSON("js/address.json",function(data){
+		$.getJSON("../js/address.json",function(data){
 			var provinces = data.regions;
 
 			$.each(provinces,function(index,province){

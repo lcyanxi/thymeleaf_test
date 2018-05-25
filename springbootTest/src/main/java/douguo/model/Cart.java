@@ -102,8 +102,11 @@ public class Cart {
                 ", pid=" + pid +
                 ", num=" + num +
                 ", totalPrice=" + totalPrice +
-                ", ceateTime='" + createTime + '\'' +
+                ", createTime='" + createTime + '\'' +
                 ", flag=" + flag +
+                ", pname='" + pname + '\'' +
+                ", price=" + price +
+                ", image='" + image + '\'' +
                 '}';
     }
 }
