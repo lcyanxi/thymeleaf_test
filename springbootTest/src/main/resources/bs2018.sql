@@ -10,10 +10,87 @@ Target Server Type    : MYSQL
 Target Server Version : 50627
 File Encoding         : 65001
 
-Date: 2018-05-23 17:32:55
+Date: 2018-05-28 11:21:22
 */
 
 SET FOREIGN_KEY_CHECKS=0;
+
+-- ----------------------------
+-- Table structure for address
+-- ----------------------------
+DROP TABLE IF EXISTS `address`;
+CREATE TABLE `address` (
+  `aid` int(11) NOT NULL AUTO_INCREMENT,
+  `uid` int(11) NOT NULL,
+  `add_name` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `detail_address` varchar(255) DEFAULT NULL,
+  `phone` char(11) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `flag` int(255) DEFAULT NULL,
+  PRIMARY KEY (`aid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of address
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for cart
+-- ----------------------------
+DROP TABLE IF EXISTS `cart`;
+CREATE TABLE `cart` (
+  `cid` int(11) NOT NULL AUTO_INCREMENT,
+  `uid` int(11) NOT NULL,
+  `pid` int(11) NOT NULL,
+  `num` int(11) DEFAULT NULL,
+  `total_price` double DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `flag` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`cid`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of cart
+-- ----------------------------
+INSERT INTO `cart` VALUES ('10', '4', '25', '2', '1182', '2018-05-25 17:18:31', '1');
+INSERT INTO `cart` VALUES ('11', '4', '28', '3', '1647', '2018-05-25 17:18:59', '1');
+
+-- ----------------------------
+-- Table structure for order_detail_info
+-- ----------------------------
+DROP TABLE IF EXISTS `order_detail_info`;
+CREATE TABLE `order_detail_info` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `oid` int(11) NOT NULL,
+  `pid` int(11) NOT NULL,
+  `create_time` datetime NOT NULL,
+  `flag` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of order_detail_info
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for order_info
+-- ----------------------------
+DROP TABLE IF EXISTS `order_info`;
+CREATE TABLE `order_info` (
+  `oid` int(11) NOT NULL AUTO_INCREMENT,
+  `uid` int(11) NOT NULL,
+  `aid` int(11) NOT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `total_price` double DEFAULT NULL,
+  `pay_mak` int(255) DEFAULT NULL,
+  `flag` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`oid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of order_info
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for product
