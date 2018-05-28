@@ -1,15 +1,13 @@
 package douguo.web;
 
 import douguo.mapper.UserMapper;
-import douguo.model.OrderInfo;
-import douguo.model.UserEntity;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,21 +18,6 @@ public class webController {
 
     @Autowired
     private UserMapper userMapper;
-
-
-    @RequestMapping("/getUsers")
-    public List<UserEntity> getUsers() {
-        List<UserEntity> users=userMapper.getAll(2,10);
-        return users;
-    }
-
-    @RequestMapping("/getUser")
-    public UserEntity getUser(Long id) {
-        UserEntity user=userMapper.getOne(id);
-        return user;
-    }
-
-
 
 
     @RequestMapping(value="/delete/{id}")
@@ -58,16 +41,6 @@ public class webController {
         return "pages/indent";
     }
 
-    @RequestMapping(value = "/orderInfo",method = RequestMethod.GET)
-    public String toOrderInfo(Model model) {
-       for (int i=0;i<5;i++){
-           OrderInfo orderInfo=new OrderInfo();
-           orderInfo.setAddname("商品"+i);
-           orderInfo.setImage("");
-       }
-
-        return "pages/orderInfo";
-    }
 
     @RequestMapping(value = "/index",method = RequestMethod.GET)
     public String toIndex() {
@@ -126,8 +99,8 @@ public class webController {
         }
 
         int totalSize=userMapper.getCount();
-        List<UserEntity> valueList=userMapper.getAll(iDisplayStart,iDisplayLength);
 
+        List valueList=new ArrayList();
 
         JSONObject getObj = new JSONObject();
         System.out.println("sEcho:"+sEcho);

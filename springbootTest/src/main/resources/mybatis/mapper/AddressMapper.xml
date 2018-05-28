@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="douguo.mapper.AddressMapper">
+    <resultMap id="BaseResultMap" type="douguo.model.Address">
+        <id column="aid" property="aid" jdbcType="BIGINT"/>
+        <id column="uid" property="uid" jdbcType="BIGINT"/>
+        <result column="add_name" property="addName" jdbcType="VARCHAR"/>
+        <result column="address" property="address" jdbcType="VARCHAR"/>
+        <result column="detail_address" property="detailAddress" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="CHAR"/>
+        <result column="create_time" property="createTime" jdbcType="DATE"/>
+        <result column="flag" property="flag" jdbcType="BIGINT"/>
+    </resultMap>
+
+
+    <select id="addAddress" parameterType="douguo.model.Address">
+       INSERT  INTO address(uid,add_name,address,detail_address,phone,create_time,flag)
+                    VALUES (#{uid},#{addName},#{address},#{detailAddress},#{phone},#{createTime},#{flag})
+    </select>
+
+
+
+    <select id="selectAllAddressByUid" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select * from address where uid=#{uid}
+    </select>
+
+    <select id="selectCartByCid" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select * from address where cid=#{cid}
+    </select>
+
+
+</mapper>

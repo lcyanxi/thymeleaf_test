@@ -1,4 +1,5 @@
 import douguo.util.DateUtil;
+import douguo.util.ToolRandoms;
 import org.junit.Test;
 
 import java.util.Date;
@@ -9,6 +10,12 @@ import java.util.Random;
  * Created by lichang on 2018/2/27
  */
 public class myTest {
+
+    @Test
+    public void test2(){
+       String id= ToolRandoms.randomCode8();
+       System.out.println(id);
+    }
 
 
     @Test

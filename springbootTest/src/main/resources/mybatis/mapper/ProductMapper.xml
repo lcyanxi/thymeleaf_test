@@ -25,26 +25,6 @@
         select * from product where pid=#{pid}
     </select>
 
-
-    <insert id="insert" parameterType="douguo.model.UserEntity">
-        INSERT INTO
-        users
-        (userName,passWord,user_sex)
-        VALUES
-        (#{userName}, #{passWord}, #{userSex})
-    </insert>
-
-    <update id="update" parameterType="douguo.model.UserEntity">
-        UPDATE
-        users
-        SET
-        <if test="userName != null">userName = #{userName},</if>
-        <if test="passWord != null">passWord = #{passWord},</if>
-        nick_name = #{nickName}
-        WHERE
-        id = #{id}
-    </update>
-
     <delete id="deleteProductById" parameterType="java.lang.Integer">
      delete from product where pid=#{pid}
     </delete>

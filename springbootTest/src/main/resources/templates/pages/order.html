@@ -54,14 +54,10 @@
             <!-- 复制 -->
             <div>
                 <div class="ci-title">
-<!--                    <div class="ci-name" type="text" th:text="${order.orderid}">12312341232142</div>
-                    <div th:text="${total}">234.5</div>
-                    <div th:if="${order.paymark>0}">已支付</div>
-                    <div th:if="${order.paymark<=0}">未支付</div>
-                    <div>已下单</div>-->
-                    <div class="ci-name" type="text">12312341232142</div>
-                    <div>454.5</div>
-                    <div>未支付</div>
+                    <div class="ci-name" type="text" th:text="${order.oid}">12312341232142</div>
+                    <div th:text="${order.totalPrice}">234.5</div>
+                    <div th:if="${order.payMak>0}">已支付</div>
+                    <div th:if="${order.payMak<=0}">未支付</div>
                     <div>已下单</div>
                 </div>
             </div>

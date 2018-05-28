@@ -24,12 +24,6 @@ public class CartController extends CommonController {
     @Autowired
     private CartService cartService;
 
-    @RequestMapping(value = "/order/create",method = RequestMethod.POST)
-    public String  toOrderPage(){
-
-        return "pages/order";
-
-    }
     @RequestMapping(value = "/myCart",method = RequestMethod.GET)
     public String toMyCart(Model model) {
         User user=(User) session.getAttribute("user");

@@ -1,69 +1,83 @@
 package douguo.model;
 
-import java.util.Date;
-
+/**
+ * Created by lcyanxi on 2018/5/28.
+ */
 public class OrderInfo {
-    private String orderid;
-    private Date ordercreatetime;
-    private String addname;
-    private Double totalprice;
-    private int paymark;
-    private int num;
-    private  String image;
+    private String oid;
+    private int uid;
+    private int aid;
+    private String createTime;
+    private double totalPrice;
+    private int payMak;
+    private int flag;
 
-    public String getOrderid() {
-        return orderid;
+    public String getOid() {
+        return oid;
     }
 
-    public void setOrderid(String orderid) {
-        this.orderid = orderid;
+    public void setOid(String oid) {
+        this.oid = oid;
     }
 
-    public Date getOrdercreatetime() {
-        return ordercreatetime;
+    public int getUid() {
+        return uid;
     }
 
-    public void setOrdercreatetime(Date ordercreatetime) {
-        this.ordercreatetime = ordercreatetime;
+    public void setUid(int uid) {
+        this.uid = uid;
     }
 
-    public String getAddname() {
-        return addname;
+    public int getAid() {
+        return aid;
     }
 
-    public void setAddname(String addname) {
-        this.addname = addname;
+    public void setAid(int aid) {
+        this.aid = aid;
     }
 
-    public Double getTotalprice() {
-        return totalprice;
+    public String getCreateTime() {
+        return createTime;
     }
 
-    public void setTotalprice(Double totalprice) {
-        this.totalprice = totalprice;
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
     }
 
-    public int getPaymark() {
-        return paymark;
+    public double getTotalPrice() {
+        return totalPrice;
     }
 
-    public void setPaymark(int paymark) {
-        this.paymark = paymark;
+    public void setTotalPrice(double totalPrice) {
+        this.totalPrice = totalPrice;
     }
 
-    public int getNum() {
-        return num;
+    public int getPayMak() {
+        return payMak;
     }
 
-    public void setNum(int num) {
-        this.num = num;
+    public void setPayMak(int payMak) {
+        this.payMak = payMak;
     }
 
-    public String getImage() {
-        return image;
+    public int getFlag() {
+        return flag;
     }
 
-    public void setImage(String image) {
-        this.image = image;
+    public void setFlag(int flag) {
+        this.flag = flag;
+    }
+
+    @Override
+    public String toString() {
+        return "OrderInfo{" +
+                "oid=" + oid +
+                ", uid=" + uid +
+                ", aid=" + aid +
+                ", createTime='" + createTime + '\'' +
+                ", totalPrice=" + totalPrice +
+                ", payMak=" + payMak +
+                ", flag=" + flag +
+                '}';
     }
 }

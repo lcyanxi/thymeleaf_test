@@ -1,7 +1,6 @@
 package douguo.mapper;
 
 import douguo.model.User;
-import douguo.model.UserEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.cache.annotation.CacheConfig;
@@ -9,7 +8,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 
-import java.util.List;
 
 /**
  * Created by lcyanxi on 2018/2/26.
@@ -19,11 +17,6 @@ import java.util.List;
 public interface UserMapper {
 
     @Cacheable(value = "count") int getCount();
-
-    @Cacheable(key = "#p0+#p1")
-    List<UserEntity> getAll(@Param("start") int start, @Param("length") int length);
-
-    UserEntity getOne(Long id);
 
     User login(@Param("mobile") String mobile,@Param("password") String password);
     void register(User user);

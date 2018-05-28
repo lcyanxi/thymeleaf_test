@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="douguo.mapper.OrderMapper">
+    <resultMap id="BaseResultMap" type="douguo.model.OrderInfo">
+        <id column="oid" property="oid" jdbcType="BIGINT"/>
+        <id column="uid" property="uid" jdbcType="BIGINT"/>
+        <id column="aid" property="aid" jdbcType="BIGINT"/>
+        <result column="total_price" property="totalPrice" jdbcType="DOUBLE"/>
+        <result column="create_time" property="createTime" jdbcType="DATE"/>
+        <result column="pay_mak" property="payMak" jdbcType="BIGINT"/>
+        <result column="flag" property="flag" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <resultMap id="OrderDetailResultMap" type="douguo.model.OrderInfo">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <id column="oid" property="oid" jdbcType="BIGINT"/>
+        <id column="pid" property="pid" jdbcType="BIGINT"/>
+        <id column="num" property="num" jdbcType="BIGINT"/>
+    </resultMap>
+
+
+    <select id="addOderInfo" parameterType="douguo.model.OrderInfo">
+       INSERT  INTO order_info(oid,uid,aid,total_price,pay_mak,create_time,flag)
+                    VALUES (#{oid},#{uid},#{aid},#{totalPrice},#{payMak},#{createTime},#{flag})
+    </select>
+
+    <select id="addOderDetailInfo" parameterType="douguo.model.OrderDetailInfo">
+        INSERT  INTO order_detail_info(oid,pid,num)
+        VALUES (#{oid},#{pid},#{num})
+    </select>
+
+
+
+    <select id="selectAllAddressByUid" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select * from address where uid=#{uid}
+    </select>
+
+    <select id="selectCartByCid" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select * from address where cid=#{cid}
+    </select>
+
+
+</mapper>
