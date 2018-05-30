@@ -22,8 +22,6 @@
 
 
     <link rel="stylesheet" type="text/css" th:href="@{/css/indent.css}" href="../../static/css/indent.css">
-    <script type="text/javascript" th:src="@{/js/indent.js}" src="../../static/js/indent.js"></script>
-    <script type="text/javascript" th:src="@{/js/geo.js}" src="../../static/js/geo.js"></script>
     <script type="text/javascript" th:src="@{/js/jquery.js}" src="../../static/js/jquery.js"></script>
     <script type="text/javascript" th:src="@{/js/jquery.cookie.js}" src="../../static/js/jquery.cookie.js"></script>
 
@@ -34,7 +32,7 @@
 <!--//header-->
 <!-- main -->
 <div id="indent-main">
-    <form th:action="@{/order/payment}" action="" id="indent-create" method="post">
+    <form th:action="@{/order/payment}"  id="indent-create" method="post">
         <h3 class="indentHd">完成订单</h3>
         <li>
             <div class="userInfo">
@@ -63,19 +61,15 @@
             </div>
         </li>
         <li class="last-li">
-          <!--  <div class="account">应付金额:<span id="gross" th:text="${total}"></span></div>-->
-            <div class="account">应付金额:454.5</div>
+            <div class="account">应付金额:<span id="gross" th:text="${order.totalPrice}">454.5</span></div>
             &nbsp;&nbsp;
-            <a th:href="@{'/order/payment/'}">
-
+            <a th:href="@{'/order/payment/'+${order.oid}}">
                 <button type="button" id="sumbit">去支付</button>
             </a>
         </li>
         </ul>
     </form>
 </div>
-
-
 <!--footer-->
 <div th:replace="common/common_footer :: footer"></div>
 </body>

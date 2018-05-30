@@ -11,7 +11,7 @@
         <result column="flag" property="flag" jdbcType="BIGINT"/>
     </resultMap>
 
-    <resultMap id="OrderDetailResultMap" type="douguo.model.OrderInfo">
+    <resultMap id="OrderDetailResultMap" type="douguo.model.OrderDetailInfo">
         <id column="id" property="id" jdbcType="BIGINT"/>
         <id column="oid" property="oid" jdbcType="BIGINT"/>
         <id column="pid" property="pid" jdbcType="BIGINT"/>
@@ -19,25 +19,26 @@
     </resultMap>
 
 
-    <select id="addOderInfo" parameterType="douguo.model.OrderInfo">
+    <insert id="addOderInfo" parameterType="douguo.model.OrderInfo">
        INSERT  INTO order_info(oid,uid,aid,total_price,pay_mak,create_time,flag)
                     VALUES (#{oid},#{uid},#{aid},#{totalPrice},#{payMak},#{createTime},#{flag})
-    </select>
+    </insert>
 
-    <select id="addOderDetailInfo" parameterType="douguo.model.OrderDetailInfo">
+    <insert id="addOderDetailInfo" parameterType="douguo.model.OrderDetailInfo">
         INSERT  INTO order_detail_info(oid,pid,num)
         VALUES (#{oid},#{pid},#{num})
+    </insert>
+
+    <update id="toPayMent" parameterType="java.lang.String">
+        update order_info set pay_mak =1 WHERE oid=#{oid}
+    </update>
+
+    <select id="selectAllOrderByUid" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select * from order_info where uid=#{uid} order by create_time desc
     </select>
 
-
-
-    <select id="selectAllAddressByUid" parameterType="java.lang.Integer" resultMap="BaseResultMap">
-        select * from address where uid=#{uid}
+    <select id="selectAllOrderByOid" parameterType="java.lang.String" resultMap="OrderDetailResultMap">
+        select * from order_detail_info where oid=#{oid}
     </select>
-
-    <select id="selectCartByCid" parameterType="java.lang.Integer" resultMap="BaseResultMap">
-        select * from address where cid=#{cid}
-    </select>
-
 
 </mapper>

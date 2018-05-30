@@ -5,19 +5,27 @@
     <title>Checkout</title>
     <!-- Custom Theme files -->
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="keywords" content="" />
-    <script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="keywords" content=""/>
+    <script type="application/x-javascript"> addEventListener("load", function () {
+        setTimeout(hideURLbar, 0);
+    }, false);
+    function hideURLbar() {
+        window.scrollTo(0, 1);
+    } </script>
     <!-- //Custom Theme files -->
-    <link th:href="@{/page/css/bootstrap.css}" href="../../static/page/css/bootstrap.css" type="text/css" rel="stylesheet" media="all"/>
-    <link th:href="@{/page/css/style.css}" href="../../static/page/css/style.css" type="text/css" rel="stylesheet" media="all"/>
+    <link th:href="@{/page/css/bootstrap.css}" href="../../static/page/css/bootstrap.css" type="text/css"
+          rel="stylesheet" media="all"/>
+    <link th:href="@{/page/css/style.css}" href="../../static/page/css/style.css" type="text/css" rel="stylesheet"
+          media="all"/>
     <link th:href="@{/css/car.css}" href="../../static/css/car.css" type="text/css" rel="stylesheet" media="all"/>
     <!-- js -->
     <script th:src="@{/page/js/jquery.min.js}" src="../../static/page/js/jquery.min.js"></script>
-    <script th:src="@{/page/js/bootstrap-3.1.1.min.js}" type="text/javascript" src="../../static/page/js/bootstrap-3.1.1.min.js"></script>
+    <script th:src="@{/page/js/bootstrap-3.1.1.min.js}" type="text/javascript"
+            src="../../static/page/js/bootstrap-3.1.1.min.js"></script>
     <!-- //js -->
     <!-- cart -->
-    <script th:src="@{/page/js/simpleCart.min.js}" src="../../static/page/js/simpleCart.min.js"> </script>
+    <script th:src="@{/page/js/simpleCart.min.js}" src="../../static/page/js/simpleCart.min.js"></script>
     <!-- cart -->
 </head>
 <body>
@@ -64,28 +72,33 @@
 
                                 <!--显示每个订单的详细信息-->
                                 <tbody id="tbody">
-                                <tr class="odd gradeX" th:each="orderInfo,iterStat:${orderlist}">
+                                <tr class="odd gradeX" th:each="orderInfo,iterStat:${list}">
 
 
                                     <td>
-                                    <span th:each="proImgInfo,itemStat:${orderInfo.proImgInfos}">
-                                        <span><img th:src="'/img/'+${proImgInfo.img}+'.jpg'" width="50" height="50"></span>
+                                    <span th:each="proImgInfo,itemStat:${orderInfo.products}">
+                                        <span><img th:src="${proImgInfo.image}" width="50" height="50"></span>
                                     </span>
                                     </td>
 
-                                    <th th:text="${orderInfo.orderid}"></th>
-                                    <th th:text="${orderInfo.num}"></th>
-                                    <td th:text="${#dates.format(orderInfo.ordercreatetime, 'yyyy-MM-dd HH:mm:ss')}"></td>
-                                    <td th:text="${orderInfo.addname}"></td>
-                                    <td th:text="${orderInfo.totalprice}"></td>
+                                    <th th:text="${orderInfo.oid}"></th>
+                                    <th>
+                                        <span th:each="proImgInfo,itemStat:${orderInfo.products}">
+                                        <p><span th:text="${proImgInfo.pname}"></span>x<span th:text="${proImgInfo.num}"></span></p>
+                                       </span>
+                                    </th>
+                                    <td th:text="${orderInfo.createTime}"></td>
+                                    <td th:text="${orderInfo.addName}"></td>
+                                    <td th:text="${orderInfo.totalPrice}"></td>
                                     <td>
-                                        <span th:if="${orderInfo.paymark==1}">已付款</span>
-                                        <span th:if="${orderInfo.paymark==-1}">待付款</span>
+                                        <span th:if="${orderInfo.paymak==1}">已付款</span>
+                                        <span th:if="${orderInfo.paymak==0}">待付款</span>
                                     </td>
                                     <td>
 
-                                    <span th:if="${orderInfo.paymark==-1}">
-                                       <a th:href="@{'/order/payment/'+${orderInfo.orderid}}" ><button class="btn btn-danger btn-sm">
+                                    <span th:if="${orderInfo.paymak==0}">
+                                       <a th:href="@{'/order/payment/'+${orderInfo.oid}}"><button
+                                               class="btn btn-danger btn-sm">
                                         <i class="icon-trash "></i>立即付款</button></a>
                                     </span>
 

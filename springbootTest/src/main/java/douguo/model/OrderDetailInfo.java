@@ -1,5 +1,7 @@
 package douguo.model;
 
+import java.util.List;
+
 /**
  * Created by lcyanxi on 2018/5/28.
  */
@@ -8,6 +10,8 @@ public class OrderDetailInfo {
     private String oid;
     private int pid;
     private int num;
+
+    private List<Product> products;
 
     public int getId() {
         return id;
@@ -39,6 +43,14 @@ public class OrderDetailInfo {
 
     public void setNum(int num) {
         this.num = num;
+    }
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<Product> products) {
+        this.products = products;
     }
 
     @Override

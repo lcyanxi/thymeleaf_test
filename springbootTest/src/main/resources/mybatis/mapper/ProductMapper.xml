@@ -12,10 +12,10 @@
     </resultMap>
 
 
-    <select id="addProduct" parameterType="douguo.model.Product" resultType="Integer">
+    <insert id="addProduct" parameterType="douguo.model.Product">
        INSERT  INTO product(pname,price,image,color,weight,statdate,flag)
                     VALUES (#{pname},#{price},#{image},#{color},#{weight},#{statdate},#{flag})
-    </select>
+    </insert>
 
     <select id="findAllProductList" resultMap="BaseResultMap">
        select * from product

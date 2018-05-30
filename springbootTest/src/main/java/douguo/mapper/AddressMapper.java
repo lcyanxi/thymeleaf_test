@@ -13,4 +13,5 @@ public interface AddressMapper {
 
     void addAddress(Address address);
     List<Address> selectAllAddressByUid(int uid);
+    Address selectAddressByAid(int oid);
 }

@@ -184,7 +184,7 @@
                                         <a th:href="@{/user/newProfile}" href="../pages/profile.html"><h4>账户信息</h4></a>
                                     </div>
                                     <div class="col-sm-3">
-                                        <a th:href="@{/orderInfo}" href="../pages/orderInfo.html"><h4>订单中心</h4></a>
+                                        <a th:href="@{/order/showOrderInfo}" href="../pages/orderInfo.html"><h4>订单中心</h4></a>
                                     </div>
                                     <div class="col-sm-3">
                                         <a th:href="@{/orderInfo}" href="../pages/orderInfo.html"><h4>我的购物车</h4></a>
@@ -241,10 +241,10 @@
                 <div class="header-right cart">
                     <a href="#"><span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span></a>
                     <div class="cart-box">
-                        <h4><a  th:href="@{/cart/myCart}" href="../pages/myCart.html">
-                            <span class="simpleCart_total"> $0.00 </span> (<span id="simpleCart_quantity" class="simpleCart_quantity"> 0 </span>)
+                        <h4 th:if="${session.user!=null}"><a  th:href="@{/cart/myCart}" href="../pages/myCart.html">
+                            <span class="simpleCart_total"> $0.00 </span> (<span class="simpleCart_quantity" th:text="${session.num}"> 0 </span>)
                         </a></h4>
-                        <p><a href="javascript:;" class="simpleCart_empty">Empty cart</a></p>
+                        <p th:if="${session.num==0}"><a href="javascript:;" class="simpleCart_empty">Empty cart</a></p>
                         <div class="clearfix"> </div>
                     </div>
                 </div>

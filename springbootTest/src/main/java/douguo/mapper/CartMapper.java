@@ -16,4 +16,6 @@ public interface CartMapper {
 
     void deleteProdutFromCartByCid(int cid);
     void deleteAll(int uid);
+
+    int CountCartNumByUid(int uid);
 }

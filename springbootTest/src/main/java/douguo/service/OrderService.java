@@ -1,14 +1,13 @@
 package douguo.service;
 
+import douguo.mapper.AddressMapper;
 import douguo.mapper.CartMapper;
 import douguo.mapper.OrderMapper;
 import douguo.mapper.ProductMapper;
-import douguo.model.Cart;
-import douguo.model.OrderDetailInfo;
-import douguo.model.OrderInfo;
-import douguo.model.Product;
+import douguo.model.*;
 import douguo.util.DateUtil;
 import douguo.util.ToolRandoms;
+import douguo.vo.Products;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Transient;
 import org.springframework.stereotype.Service;
@@ -26,6 +25,9 @@ public class OrderService {
 
     @Autowired
     private OrderMapper orderMapper;
+
+    @Autowired
+    private AddressMapper addressMapper;
 
     public List<Cart> findAllProductByCid(String []  cartids){
         List<Cart>  cartList=new ArrayList<>();
@@ -54,7 +56,6 @@ public class OrderService {
             detailInfo.setNum(cart.getNum());
             detailInfo.setOid(orderId);
             detailInfo.setPid(cart.getPid());
-            System.out.println(detailInfo);
             orderMapper.addOderDetailInfo(detailInfo);
             totalPrice=totalPrice+cart.getTotalPrice();
         }
@@ -68,8 +69,41 @@ public class OrderService {
 
         orderMapper.addOderInfo(orderInfo);
 
-
         return orderInfo;
 
+    }
+
+    public void toPayMent(String oid) throws Exception{
+        orderMapper.toPayMent(oid);
+    }
+
+    public List selectAllOrderByUid(int uid){
+        List<OrderInfo>  orderInfos=orderMapper.selectAllOrderByUid(uid);
+        List<ShowOrderInfos> showOrderInfosList=new ArrayList<>();
+
+        for (OrderInfo orderInfo:orderInfos){
+            ShowOrderInfos showOrderInfos=new ShowOrderInfos();
+            showOrderInfos.setOid(orderInfo.getOid());
+            showOrderInfos.setTotalPrice(orderInfo.getTotalPrice());
+            showOrderInfos.setPaymak(orderInfo.getPayMak());
+            showOrderInfos.setCreateTime(orderInfo.getCreateTime());
+
+            Address address=addressMapper.selectAddressByAid(orderInfo.getAid());
+            showOrderInfos.setAddName(address.getAddName());
+
+            List<OrderDetailInfo>  orderDetailInfos=orderMapper.selectAllOrderByOid(orderInfo.getOid());
+            List<Products> productsList=new ArrayList<>();
+            for (OrderDetailInfo orderDetailInfo:orderDetailInfos){
+                Products products=new Products();
+                products.setNum(orderDetailInfo.getNum());
+                Product product=productMapper.findProductByPid(orderDetailInfo.getPid());
+                products.setImage(product.getImage());
+                products.setPname(product.getPname());
+                productsList.add(products);
+            }
+            showOrderInfos.setProducts(productsList);
+            showOrderInfosList.add(showOrderInfos);
+        }
+        return  showOrderInfosList;
     }
 }

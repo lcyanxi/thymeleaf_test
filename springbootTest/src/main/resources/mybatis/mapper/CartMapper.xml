@@ -35,6 +35,10 @@
         select * from cart where cid=#{cid}
     </select>
 
+    <select id="CountCartNumByUid" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        select count(*) from cart where uid=#{uid}
+    </select>
+
 
     <delete id="deleteProdutFromCartByCid" parameterType="java.lang.Integer">
      delete from cart where cid=#{cid}

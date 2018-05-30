@@ -1,6 +1,7 @@
 package douguo.web;
 
 import douguo.model.User;
+import douguo.service.CartService;
 import douguo.service.UserService;
 import douguo.util.DateUtil;
 import douguo.util.MD5Util;
@@ -27,6 +28,8 @@ import static douguo.util.constent.STATUS;
 public class UserController extends CommonController {
     @Autowired
     private UserService userService;
+    @Autowired
+    private CartService cartService;
 
 
     @RequestMapping(value = "/register",method = RequestMethod.POST)
@@ -70,10 +73,14 @@ public class UserController extends CommonController {
         Map map=new HashMap();
         password=MD5Util.encode(password);
 
-        System.out.println(mobile+password);
         User user =userService.login(mobile,password);
+
+        int cartNum=cartService.CountCartNumByUid(user.getUid());
+        System.out.println(cartNum);
+
         if (user!=null){
             session.setAttribute("user",user);
+            session.setAttribute("num",cartNum);
             map.put(STATUS, 1);
             map.put(MESSAGE, "登录成功！！");
         }else {

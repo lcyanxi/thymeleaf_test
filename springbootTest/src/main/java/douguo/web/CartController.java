@@ -47,6 +47,7 @@ public class CartController extends CommonController {
         cart.setCreateTime(DateUtil.date2Str(new Date(),"yyyy-MM-dd HH:mm:ss"));
         cart.setFlag(1);
         if ( cartService.addProductToMyCart(cart)){
+            session.setAttribute("num",(int)session.getAttribute("num")+1);
             map.put(STATUS, 1);
             map.put(MESSAGE, "成功加入我的购物车！！");
         }else {

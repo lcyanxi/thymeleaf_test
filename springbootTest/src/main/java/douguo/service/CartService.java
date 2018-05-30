@@ -60,4 +60,8 @@ public class CartService {
     public void deleteAll(int uid){
         cartMapper.deleteAll(uid);
     }
+
+    public int  CountCartNumByUid(int uid){
+        return cartMapper.CountCartNumByUid(uid);
+    }
 }
