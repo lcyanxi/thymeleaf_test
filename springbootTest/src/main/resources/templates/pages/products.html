@@ -20,11 +20,10 @@
     <link th:href="@{/page/css/style.css}" href="../../static/page/css/style.css" type="text/css" rel="stylesheet"
           media="all"/>
     <link th:href="@{/page/css/form.css}" href="../../static/page/css/form.css" rel="stylesheet" type="text/css" media="all" />
-
+    <link th:href="@{/css/xcConfirm.css}" href="../../static/css/xcConfirm.css" rel="stylesheet"/>
     <!-- js -->
     <script th:src="@{/page/js/jquery.min.js}" src="../../static/page/js/jquery.min.js"></script>
-    <script th:src="@{/page/js/bootstrap-3.1.1.min.js}" type="text/javascript"
-            src="../../static/page/js/bootstrap-3.1.1.min.js"></script>
+    <script th:src="@{/page/js/bootstrap-3.1.1.min.js}" type="text/javascript" src="../../static/page/js/bootstrap-3.1.1.min.js"></script>
     <!-- //js -->
     <!-- cart -->
     <script th:src="@{/page/js/simpleCart.min.js}" src="../../static/page/js/simpleCart.min.js"></script>
@@ -32,15 +31,16 @@
     <!-- the jScrollPane script -->
     <script th:src="@{/page/js/jquery.jscrollpane.min.js}" type="text/javascript"
             src="../../static/page/js/jquery.jscrollpane.min.js"></script>
+    <!--script for 提示框-->
+    <script th:src="@{/js/xcConfirm.js}" src="../../static/js/xcConfirm.js"></script>
     <script type="text/javascript" id="sourcecode">
         $(function () {
             $('.scroll-pane').jScrollPane();
         });
     </script>
     <!-- //the jScrollPane script -->
-    <script th:src="@{/page/js/jquery.mousewheel.js}" type="text/javascript"
-            src="../../static/page/js/jquery.mousewheel.js"></script>
-    <!-- the mousewheel plugin -->
+    <script th:src="@{/page/js/jquery.mousewheel.js}" type="text/javascript" src="../../static/page/js/jquery.mousewheel.js"></script>
+    <script th:src="@{/js/myCart.js}" src="../../static/js/mycart.js"></script>
 </head>
 <body>
 <!--header-->
@@ -50,6 +50,8 @@
 <div class="products">
     <div class="container">
         <h2>商品中心</h2>
+        <div th:if="${session.user==null}"><p hidden id="uid">0</p></div>
+        <div th:if="${session.user!=null}"><p hidden id="uid">1</p></div>
         <div class="col-md-9 product-model-sec">
             <div class="product-grid" th:each="product,iterStat:${productList}">
                 <a th:href="@{'/product/showSingle/'+${product.pid}}" href="single.html">
@@ -64,6 +66,7 @@
                         </div>
                     </div>
                 </a>
+                <!--<p hidden id="item_price" th:id="" th:text="${product.price}"></p>-->
                 <div class="product-info simpleCart_shelfItem">
                     <div class="product-info-cust prt_name">
                         <h4 th:text="${product.pname}">Product #1</h4>
@@ -75,7 +78,7 @@
                             <p class="disc">[15% Off]</p>
                         </div>
                         <input type="text" class="item_quantity" value="1"/>
-                        <input type="button" class="item_add items" value="Add"/>
+                        <input type="button" class="item_add items" th:id="${product.pid}" th:attr="title=${product.price}"  onclick="addCart(this)" value="add"/>
                         <div class="clearfix"></div>
                     </div>
                 </div>
@@ -280,5 +283,45 @@
 <!--//products-->
 <!--footer-->
 <div th:replace="common/common_footer :: footer"></div>
+<script>
+    //加入购物车
+    function addCart(obj) {
+        var pid = $(obj).attr("id");
+        var uid=$("#uid").html();
+        // 查看是否登录
+        if (uid==0) {
+            window.wxc.xcConfirm("请先去登录！！", window.wxc.xcConfirm.typeEnum.warning, {
+                onOk: function () {
+                    return false;
+                }
+            });
+        }
+        $.ajax({
+            url: "/cart/addCart",
+            type: "POST",
+            async: false,
+            data: {
+                pid: pid,
+                price:$(obj).attr("title")
+            },
+            timeout: 30000,       //超时时间
+            dataType: "json",     //返回的数据类型
+            success: function (data) {
+                window.wxc.xcConfirm(data.message, window.wxc.xcConfirm.typeEnum.success, {
+                    onOk: function () {
+                    }
+                });
+            },
+            complete: function (XMLHttpRequest, status) {
+
+                //发送失败
+                if (status == "timeout") {
+                    $("#message").text("发送超时请重发");
+                }
+            }
+        });
+    }
+
+</script>
 </body>
 </html>

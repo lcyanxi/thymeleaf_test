@@ -22,4 +22,8 @@ public class AddressService {
     public List<Address> selectAllAddressByUid(int uid){
         return addressMapper.selectAllAddressByUid(uid);
     }
+
+    public int deleteAddress(int aid){
+        return addressMapper.deleteAddress(aid);
+    }
 }

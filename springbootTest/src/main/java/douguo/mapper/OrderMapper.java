@@ -12,9 +12,16 @@ public interface OrderMapper {
     void addOderInfo(OrderInfo orderInfo);
     void addOderDetailInfo(OrderDetailInfo orderDetailInfo);
     void toPayMent(String oid);
+
+    int manage(String oid);
+
     List<OrderInfo> selectAllOrderByUid(int uid);
+    List<OrderInfo> selectAllOrder();
 
     List<OrderDetailInfo> selectAllOrderByOid(String oid);
+
+    int deleteOrder(String oid);
+    int deleteOrderDetailByOid(String oid);
 
 
 }

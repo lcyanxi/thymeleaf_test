@@ -33,12 +33,28 @@
         update order_info set pay_mak =1 WHERE oid=#{oid}
     </update>
 
+    <update id="manage" parameterType="java.lang.String">
+        update order_info set flag =1 WHERE oid=#{oid}
+    </update>
+
     <select id="selectAllOrderByUid" parameterType="java.lang.Integer" resultMap="BaseResultMap">
         select * from order_info where uid=#{uid} order by create_time desc
+    </select>
+
+    <select id="selectAllOrder"  resultMap="BaseResultMap">
+        select * from order_info where pay_mak=1 order by create_time desc
     </select>
 
     <select id="selectAllOrderByOid" parameterType="java.lang.String" resultMap="OrderDetailResultMap">
         select * from order_detail_info where oid=#{oid}
     </select>
+
+    <delete id="deleteOrder" parameterType="java.lang.String">
+        delete from order_info where oid=#{oid}
+    </delete>
+
+    <delete id="deleteOrderDetailByOid" parameterType="java.lang.String">
+        delete from order_detail_info where oid=#{oid}
+    </delete>
 
 </mapper>

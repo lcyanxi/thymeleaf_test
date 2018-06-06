@@ -31,6 +31,10 @@ public class UserService {
         return userMapper.login(mobile,password);
     }
 
+    public int editProfile(User user){
+     return userMapper.editProfile(user);
+    }
+
 
 
 }

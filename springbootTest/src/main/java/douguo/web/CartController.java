@@ -36,7 +36,6 @@ public class CartController extends CommonController {
     @RequestMapping(value = "/addCart",method = RequestMethod.POST)
     @ResponseBody
     public Map addProductToMyCart(@RequestParam(value = "pid") int pid,Double price){
-        System.out.println(pid);
        User user =(User) session.getAttribute("user");
         Map map=new HashMap();
         Cart cart=new Cart();
@@ -62,7 +61,6 @@ public class CartController extends CommonController {
 
     @RequestMapping(value = "/changeProductNum/{cid}", method = RequestMethod.GET)
     public String changeCartProductNum(@PathVariable(value ="cid") int cartid,String type) {
-        System.out.println(type);
         //修改数量
         cartService.changeCartNum(type,cartid);
 

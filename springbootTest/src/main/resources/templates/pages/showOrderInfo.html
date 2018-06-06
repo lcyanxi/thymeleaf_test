@@ -2,7 +2,7 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Checkout</title>
+    <title>Products</title>
     <!-- Custom Theme files -->
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -10,6 +10,7 @@
     <script type="application/x-javascript"> addEventListener("load", function () {
         setTimeout(hideURLbar, 0);
     }, false);
+
     function hideURLbar() {
         window.scrollTo(0, 1);
     } </script>
@@ -18,26 +19,32 @@
           rel="stylesheet" media="all"/>
     <link th:href="@{/page/css/style.css}" href="../../static/page/css/style.css" type="text/css" rel="stylesheet"
           media="all"/>
-    <link th:href="@{/css/car.css}" href="../../static/css/car.css" type="text/css" rel="stylesheet" media="all"/>
+    <link th:href="@{/page/css/form.css}" href="../../static/page/css/form.css" rel="stylesheet" type="text/css" media="all" />
+    <link th:href="@{/css/xcConfirm.css}" href="../../static/css/xcConfirm.css" rel="stylesheet"/>
     <!-- js -->
     <script th:src="@{/page/js/jquery.min.js}" src="../../static/page/js/jquery.min.js"></script>
-    <script th:src="@{/page/js/bootstrap-3.1.1.min.js}" type="text/javascript"
-            src="../../static/page/js/bootstrap-3.1.1.min.js"></script>
+    <script th:src="@{/page/js/bootstrap-3.1.1.min.js}" type="text/javascript" src="../../static/page/js/bootstrap-3.1.1.min.js"></script>
     <!-- //js -->
     <!-- cart -->
     <script th:src="@{/page/js/simpleCart.min.js}" src="../../static/page/js/simpleCart.min.js"></script>
     <!-- cart -->
+    <!-- the jScrollPane script -->
+    <script th:src="@{/page/js/jquery.jscrollpane.min.js}" type="text/javascript"
+            src="../../static/page/js/jquery.jscrollpane.min.js"></script>
+    <!--script for 提示框-->
+    <script th:src="@{/js/xcConfirm.js}" src="../../static/js/xcConfirm.js"></script>
+    <!-- //the jScrollPane script -->
+    <script th:src="@{/page/js/jquery.mousewheel.js}" type="text/javascript" src="../../static/page/js/jquery.mousewheel.js"></script>
 </head>
 <body>
 <!--header-->
 <div th:replace="common/common_head :: head"></div>
 <!--//header-->
-<!--cart-items-->
-<!-- main -->
+<!--products-->
 <div id="car-main">
     <br/>
     <!-- 购物车 -->
-    <form th:action="@{/order/prepare}" method="post" id="fm_cart">
+    <form id="fm_cart">
         <!--page_start 主要内容部分-->
         <section id="main-content">
             <section class="wrapper">
@@ -84,7 +91,8 @@
                                     <th th:text="${orderInfo.oid}"></th>
                                     <th>
                                         <span th:each="proImgInfo,itemStat:${orderInfo.products}">
-                                        <p><span th:text="${proImgInfo.pname}"></span>x<span th:text="${proImgInfo.num}"></span></p>
+                                        <p><span th:text="${proImgInfo.pname}"></span>x<span
+                                                th:text="${proImgInfo.num}"></span></p>
                                        </span>
                                     </th>
                                     <td th:text="${orderInfo.createTime}"></td>
@@ -97,11 +105,13 @@
                                     <td>
 
                                     <span th:if="${orderInfo.paymak==0}">
-                                       <a th:href="@{'/order/payment/'+${orderInfo.oid}}"><button
-                                               class="btn btn-danger btn-sm">
-                                        <i class="icon-trash "></i>立即付款</button></a>
+                                           <button class="btn btn-success btn-sm" onclick="payment(this)"
+                                                   th:id="${orderInfo.oid}">
+                                        <i class="icon-bar "></i>立即付款</button>
                                     </span>
-
+                                        <button class="btn btn-danger btn-sm" onclick="deleteOrder(this)"
+                                                th:id="${orderInfo.oid}">
+                                        <i class="icon-trash "></i>删除</button>
                                     </td>
                                 </tr>
                                 </tbody>
@@ -115,26 +125,54 @@
         </section>
     </form>
     <!-- 复制 -->
-    <div class="template" style="display:none;">
-        <div><input type="checkbox" class="ck"/></div>
-        <div class="id goods">
-            <img src="" alt="" style="widows: 50px;height: 50px;"/>
-            <p></p>
-        </div>
-        <div class="price"></div>
-        <div class="amount">
-            <button class="minus">-</button>
-            <input type="text" class="num" value="1" size="1"/>
-            <button class="addnum">+</button>
-        </div>
-        <div class="sub"></div>
-        <div class="oper">
-            <a href="javascript:void(0)" class="detele">删除</a>
-        </div>
-    </div>
 </div>
-<!--//checkout-->
+<!--//products-->
 <!--footer-->
 <div th:replace="common/common_footer :: footer"></div>
+<script type="text/javascript">
+    function payment(obj) {
+        var oid = $(obj).attr("id");
+        $.get("/order/toPayment", {oid: oid}, function (data) {
+            if (data.status==1){
+                alert(data.message);
+                window.location.reload()
+            }else {
+                alert(data.message)
+            }
+
+        });
+    }
+
+
+    function deleteOrder(obj) {
+        var oid = $(obj).attr("id");
+        $.ajax({
+            url: "/order/deleteOrder",
+            type: "GET",
+            async: false,
+            data: {
+                oid: oid
+            },
+            timeout: 30000,       //超时时间
+            dataType: "json",     //返回的数据类型
+            success: function (data) {
+                if (data.status==1){
+                    alert(data.message);
+                    window.location.reload()
+                }else {
+                    alert(data.message)
+                }
+            },
+            complete: function (XMLHttpRequest, status) {
+                //发送失败
+                if (status == "timeout") {
+                    $("#message").text("发送超时请重发");
+                }
+            }
+        });
+    }
+
+
+</script>
 </body>
 </html>

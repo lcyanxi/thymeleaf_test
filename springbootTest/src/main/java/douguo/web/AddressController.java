@@ -56,4 +56,19 @@ public class AddressController extends CommonController {
 
         return map;
     }
+
+    @RequestMapping(value = "/deleteAddress", method = RequestMethod.GET)
+    @ResponseBody
+    public Map deleteAddress(int aid) {
+        Map map = new HashMap();
+
+        if (addressService.deleteAddress(aid)>0){
+            map.put(STATUS, 1);
+            map.put(MESSAGE, "联系人删除成功！！");
+        }else {
+            map.put(STATUS, 0);
+            map.put(MESSAGE, "联系人删除失败！！");
+        }
+        return map;
+    }
 }

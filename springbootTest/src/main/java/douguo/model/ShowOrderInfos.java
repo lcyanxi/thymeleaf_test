@@ -15,6 +15,7 @@ public class ShowOrderInfos {
     private String addName;
     private double totalPrice;
     private int paymak;
+    private int flag;
     private List<Products> products;
 
     public String getOid() {
@@ -79,5 +80,13 @@ public class ShowOrderInfos {
 
     public void setProducts(List<Products> products) {
         this.products = products;
+    }
+
+    public int getFlag() {
+        return flag;
+    }
+
+    public void setFlag(int flag) {
+        this.flag = flag;
     }
 }

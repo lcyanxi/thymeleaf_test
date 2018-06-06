@@ -24,10 +24,11 @@
 <!-- FlexSlider -->
 <script th:src="@{/page/js/jquery.flexslider.js}"  defer src="../../static/page/js/jquery.flexslider.js"></script>
 	<!--script for 提示框-->
-	<script th:src="@{/js/xcConfirm.js}" src="../static/js/xcConfirm.js"></script>
+	<script th:src="@{/js/xcConfirm.js}" src="../../static/js/xcConfirm.js"></script>
 
 	<script th:src="@{/js/jquery.form.js}" src="../../static/js/jquery.form.js"></script>
 	<script th:src="@{/js/login.js}" src="../../static/js/login.js"></script>
+	<script th:src="@{/js/mycart.js}" src="../../static/js/mycart.js"></script>
 <script>
 	// Can also be used with $(document).ready()
 	$(window).load(function() {
@@ -300,8 +301,9 @@
     //加入购物车
     $('#add_cart').click(function () {
         var pid=$("#pid").html();
+        var uid=$("#uid").html();
         // 查看是否登录
-        if (pid==0) {
+        if (uid==0) {
             window.wxc.xcConfirm("请先去登录！！", window.wxc.xcConfirm.typeEnum.warning, {
                 onOk: function () {
                     return false;

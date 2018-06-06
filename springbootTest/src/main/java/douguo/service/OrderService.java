@@ -106,4 +106,46 @@ public class OrderService {
         }
         return  showOrderInfosList;
     }
+
+    public List selectAllOrder(){
+        List<OrderInfo>  orderInfos=orderMapper.selectAllOrder();
+        List<ShowOrderInfos> showOrderInfosList=new ArrayList<>();
+
+        for (OrderInfo orderInfo:orderInfos){
+            ShowOrderInfos showOrderInfos=new ShowOrderInfos();
+            showOrderInfos.setOid(orderInfo.getOid());
+            showOrderInfos.setTotalPrice(orderInfo.getTotalPrice());
+            showOrderInfos.setPaymak(orderInfo.getPayMak());
+            showOrderInfos.setCreateTime(orderInfo.getCreateTime());
+            showOrderInfos.setFlag(orderInfo.getFlag());
+
+            Address address=addressMapper.selectAddressByAid(orderInfo.getAid());
+            showOrderInfos.setAddName(address.getAddName());
+
+            List<OrderDetailInfo>  orderDetailInfos=orderMapper.selectAllOrderByOid(orderInfo.getOid());
+            List<Products> productsList=new ArrayList<>();
+            for (OrderDetailInfo orderDetailInfo:orderDetailInfos){
+                Products products=new Products();
+                products.setNum(orderDetailInfo.getNum());
+                Product product=productMapper.findProductByPid(orderDetailInfo.getPid());
+                products.setImage(product.getImage());
+                products.setPname(product.getPname());
+                productsList.add(products);
+            }
+            showOrderInfos.setProducts(productsList);
+            showOrderInfosList.add(showOrderInfos);
+        }
+        return  showOrderInfosList;
+    }
+
+    @Transient
+    public int deleteOrderByOid(String oid){
+        orderMapper.deleteOrderDetailByOid(oid);
+       return orderMapper.deleteOrder(oid);
+    }
+
+    @Transient
+    public int manage(String oid){
+        return  orderMapper.manage(oid);
+    }
 }

@@ -83,15 +83,15 @@
             <li id="addparent">
                 <div class="userInfo">
                     收货人信息:
-                    <a href="#" class="amend" id="amend">[修改]</a>
                     <a href="#" class="amend" id="addAmend" onclick="showAmend()">[新增]</a>
+                    <a href="#" class="amend" id="deleteAmend" onclick="deleteaddress()">[删除]</a>
                 </div>
                 <div class="userAddress" th:each="address,addressStat:${addList}">
                     <input type="radio" th:if="${addressStat.index==0}" checked="checked" th:value="${address.aid}"
-                           name="aid">
+                           name="aid" id="aid">
                     <input type="radio" th:if="${addressStat.index!=0}" th:value="${address.aid}"
-                           name="aid">
-                    <span class="f-name" th:text="${address.addName}"></span>
+                           name="aid" id="aid">
+                    <span class="f-name" th:text="${address.addName}" id="addName"></span>
                     <span class="f-phone" th:text="${address.phone}">13526547895</span>
                     <span class="f-shi" th:text="${address.detailAddress}"></span>
                 </div>
@@ -124,7 +124,7 @@
                     商品信息:
                     <a href="#" class="amend">[修改]</a>
                 </div>
-                <a th:href="@{/cart/all}" href="cart.html" class="goto-cart">返回购物车</a>
+                <a th:href="@{/cart/myCart}" href="cart.html" class="goto-cart">返回购物车</a>
                 <p>商品下单后尽快为您发货</p>
                 <!-- 购物车详情 -->
                 <div>
@@ -198,6 +198,26 @@
             }
         });
     }
+
+    function deleteaddress() {
+        var group = $("#aid").val();
+        var txt = "您确定要删除收货人地址" + $("#addName").html()+ "？";
+        window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.confirm, {
+            onOk: function () {
+                $.get("/address/deleteAddress", {aid: group}, function (data) {
+                    if(data.status==1){
+                        location.reload();
+                    }else {
+                        window.wxc.xcConfirm(data.message, window.wxc.xcConfirm.typeEnum.info, {
+                            onOk: function () {
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
 
     function closemodel() {
 

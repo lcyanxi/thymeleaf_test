@@ -70,12 +70,6 @@
                             <td th:text="${product.weight}"></td>
                             <td th:text="${product.statdate}"></td>
                             <td>
-                                <button class="btn btn-primary btn-xs" onclick="editInfo(this)"
-                                        th:id="${iterStat.index}" data-toggle="modal"
-                                        data-target="#update_staff_myModal">
-                                    <i class="icon-pencil"></i></button>
-
-                                &nbsp;&nbsp;&nbsp;&nbsp;
                                 <button class="btn btn-danger btn-xs" onclick="delete_product(this)"
                                         th:id="${product.pid}">
                                     <i class="icon-trash "></i></button>
@@ -324,53 +318,6 @@
         });
     }
 
-    //触发更新staff模态框的同时调用此方法  -----用于模态框传值
-    function editInfo(obj) {
-        var id = $(obj).attr("id");
-        //获取表格中的一行数据
-
-
-
-        var table = $("#sample_1").DataTable();
-        var image = table.row(id);
-       // var pname = table.row(id).data()[2];
-       // var price = table.row(id).data()[3];
-        var color = table.row(id).data()[4];
-        var weight = table.row(id).data()[5];
-
-
-        //向模态框中传值
-/*        $('#update_image').val(image);*/
-       // $('#update_pname').val(pname);
-        $('#update_price').val(price);
-        $('#update_color').val(color);
-        $('#update_weight').val(weight);
-        $('#update_product_myModal').modal('show');
-    }
-
-
-    //更新员工操作
-    function update_staff() {
-        //获取模态框数据
-        var sId = $('#update_sId').html();
-        var rName = $('#update_rName').val();
-        $.ajax({
-            type: "POST",
-            url: "/staffs/updatestaff",
-            data: {
-                sId: sId,
-                rName: rName
-            },
-            dataType: 'json',
-            success: function (data) {
-                window.wxc.xcConfirm(data.message, window.wxc.xcConfirm.typeEnum.info, {
-                    onOk: function () {
-                        location.reload();
-                    }
-                });
-            }
-        });
-    }
 </script>
 
 </body>

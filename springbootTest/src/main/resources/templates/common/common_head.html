@@ -8,7 +8,8 @@
         <div class="container">
             <nav class="navbar navbar-default" role="navigation">
                 <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse"
+                            data-target="#bs-example-navbar-collapse-1">
                         <span class="sr-only">Toggle navigation</span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
@@ -19,7 +20,7 @@
                 <!--navbar-header-->
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                     <ul class="nav navbar-nav">
-                        <li><a th:href="@{/index}" href="../pages/index.html" class="active">首页</a></li>
+                        <li><a th:href="@{/}" href="../pages/index.html" class="active">首页</a></li>
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">生日<b class="caret"></b></a>
                             <ul class="dropdown-menu multi-column columns-4">
@@ -122,75 +123,80 @@
                                 </div>
                             </ul>
                         </li>
+                        <!--                        <li class="dropdown grid">
+                                                    <a href="#" class="dropdown-toggle list1" data-toggle="dropdown">特别优惠 <b class="caret"></b></a>
+                                                    <ul class="dropdown-menu multi-column columns-4">
+                                                        <div class="row">
+                                                            <div class="col-sm-3">
+                                                                <h4>By Relation</h4>
+                                                                <ul class="multi-column-dropdown">
+                                                                    <li><a class="list" href="products.html">Friend</a></li>
+                                                                    <li><a class="list" href="products.html">Lover</a></li>
+                                                                    <li><a class="list" href="products.html">Sister</a></li>
+                                                                    <li><a class="list" href="products.html">Brother</a></li>
+                                                                    <li><a class="list" href="products.html">Kids</a></li>
+                                                                    <li><a class="list" href="products.html">Parents</a></li>
+                                                                </ul>
+                                                            </div>
+                                                            <div class="col-sm-3">
+                                                                <h4>By Flavour</h4>
+                                                                <ul class="multi-column-dropdown">
+                                                                    <li><a class="list" href="products.html">Chocolate</a></li>
+                                                                    <li><a class="list" href="products.html">Mixed Fruit</a></li>
+                                                                    <li><a class="list" href="products.html">Butterscotch</a></li>
+                                                                    <li><a class="list" href="products.html">Strawberry</a></li>
+                                                                    <li><a class="list" href="products.html">Vanilla</a></li>
+                                                                    <li><a class="list" href="products.html">Eggless Cakes</a></li>
+                                                                </ul>
+                                                            </div>
+                                                            <div class="col-sm-3">
+                                                                <h4>By Theme</h4>
+                                                                <ul class="multi-column-dropdown">
+                                                                    <li><a class="list" href="products.html">Heart shaped</a></li>
+                                                                    <li><a class="list" href="products.html">Cartoon Cakes</a></li>
+                                                                    <li><a class="list" href="products.html">2-3 Tier Cakes</a></li>
+                                                                    <li><a class="list" href="products.html">Square shape</a></li>
+                                                                    <li><a class="list" href="products.html">Round shape</a></li>
+                                                                    <li><a class="list" href="products.html">Photo cakes</a></li>
+                                                                </ul>
+                                                            </div>
+                                                            <div class="col-sm-3">
+                                                                <h4>Weight</h4>
+                                                                <ul class="multi-column-dropdown">
+                                                                    <li><a class="list" href="products.html">1 kG</a></li>
+                                                                    <li><a class="list" href="products.html">1.5 kG</a></li>
+                                                                    <li><a class="list" href="products.html">2 kG</a></li>
+                                                                    <li><a class="list" href="products.html">3 kG</a></li>
+                                                                    <li><a class="list" href="products.html">4 kG</a></li>
+                                                                    <li><a class="list" href="products.html">Large</a></li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </ul>
+                                                </li>-->
                         <li class="dropdown grid">
-                            <a href="#" class="dropdown-toggle list1" data-toggle="dropdown">特别优惠 <b class="caret"></b></a>
+                            <a class="dropdown-toggle list1"  data-toggle="dropdown">个人中心<b class="caret"></b></a>
                             <ul class="dropdown-menu multi-column columns-4">
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <h4>By Relation</h4>
-                                        <ul class="multi-column-dropdown">
-                                            <li><a class="list" href="products.html">Friend</a></li>
-                                            <li><a class="list" href="products.html">Lover</a></li>
-                                            <li><a class="list" href="products.html">Sister</a></li>
-                                            <li><a class="list" href="products.html">Brother</a></li>
-                                            <li><a class="list" href="products.html">Kids</a></li>
-                                            <li><a class="list" href="products.html">Parents</a></li>
-                                        </ul>
+                                        <a th:href="@{/user/toEditProfile}" href="../pages/editProfile.html"><h4>
+                                            个人信息</h4></a>
                                     </div>
                                     <div class="col-sm-3">
-                                        <h4>By Flavour</h4>
-                                        <ul class="multi-column-dropdown">
-                                            <li><a class="list" href="products.html">Chocolate</a></li>
-                                            <li><a class="list" href="products.html">Mixed Fruit</a></li>
-                                            <li><a class="list" href="products.html">Butterscotch</a></li>
-                                            <li><a class="list" href="products.html">Strawberry</a></li>
-                                            <li><a class="list" href="products.html">Vanilla</a></li>
-                                            <li><a class="list" href="products.html">Eggless Cakes</a></li>
-                                        </ul>
+                                        <a th:href="@{/order/showOrderInfo}" href="../pages/orderInfo.html"><h4>
+                                            订单中心</h4></a>
                                     </div>
                                     <div class="col-sm-3">
-                                        <h4>By Theme</h4>
-                                        <ul class="multi-column-dropdown">
-                                            <li><a class="list" href="products.html">Heart shaped</a></li>
-                                            <li><a class="list" href="products.html">Cartoon Cakes</a></li>
-                                            <li><a class="list" href="products.html">2-3 Tier Cakes</a></li>
-                                            <li><a class="list" href="products.html">Square shape</a></li>
-                                            <li><a class="list" href="products.html">Round shape</a></li>
-                                            <li><a class="list" href="products.html">Photo cakes</a></li>
-                                        </ul>
+                                        <a th:href="@{/cart/myCart}" href="../pages/myCart.html"><h4>我的购物车</h4></a>
                                     </div>
-                                    <div class="col-sm-3">
-                                        <h4>Weight</h4>
-                                        <ul class="multi-column-dropdown">
-                                            <li><a class="list" href="products.html">1 kG</a></li>
-                                            <li><a class="list" href="products.html">1.5 kG</a></li>
-                                            <li><a class="list" href="products.html">2 kG</a></li>
-                                            <li><a class="list" href="products.html">3 kG</a></li>
-                                            <li><a class="list" href="products.html">4 kG</a></li>
-                                            <li><a class="list" href="products.html">Large</a></li>
-                                        </ul>
+                                    <div class="col-sm-3" th:if="${session.user!=null && session.user.role=='admin'}">
+                                        <a th:href="@{/manage/index}" href="../index.html"><h4>后台管理系统</h4></a>
                                     </div>
                                 </div>
                             </ul>
                         </li>
-                        <li class="dropdown grid">
-                            <a  class="dropdown-toggle list1" data-toggle="dropdown">个人中心<b class="caret"></b></a>
-                            <ul class="dropdown-menu multi-column columns-4">
-                                <div class="row">
-                                    <div class="col-sm-3">
-                                        <a th:href="@{/user/toEditProfile}" href="../pages/editProfile.html"><h4>个人信息</h4></a>
-                                    </div>
-                                    <div class="col-sm-3">
-                                        <a th:href="@{/user/newProfile}" href="../pages/profile.html"><h4>账户信息</h4></a>
-                                    </div>
-                                    <div class="col-sm-3">
-                                        <a th:href="@{/order/showOrderInfo}" href="../pages/orderInfo.html"><h4>订单中心</h4></a>
-                                    </div>
-                                    <div class="col-sm-3">
-                                        <a th:href="@{/orderInfo}" href="../pages/orderInfo.html"><h4>我的购物车</h4></a>
-                                    </div>
-                                </div>
-                            </ul>
+                        <li class="dropdown grid" th:if="${session.user!=null}">
+                                <a th:href="@{/user/logout}" href="../pages/index.html" class="dropdown-toggle list1">安全退出</a>
                         </li>
                     </ul>
                     <!--/.navbar-collapse-->
@@ -226,31 +232,32 @@
                                     <input type="button" id="login" value="登 录"/>
                                     <label for="checkbox"><input type="checkbox" id="checkbox"/> <i>记住我</i></label>
                                 </fieldset>
-                                <p>新用户? <a class="sign" th:href="@{/account}" href="../pages/account.html">注册</a> <span><a href="#">忘记密码?</a></span></p>
+                                <p>新用户? <a class="sign" th:href="@{/account}" href="../pages/account.html">注册</a> <span><a
+                                        href="#">忘记密码?</a></span></p>
                             </form>
                         </div>
                     </div>
                 </div>
                 <div th:if="${session.user!=null}">
                     <div class="header-right ">
-                    <span  class="glyphicon">
-                        <img alt="" th:src="${session.user.image}" width="40" height="40" src="/static/img/avatar.jpg">
+                    <span class="glyphicon">
+                       <a th:href="@{/user/toEditProfile}" href="../pages/editProfile.html">
+                           <!--<img alt="" th:src="${session.user.image}" width="40" height="40" src="/static/img/avatar.jpg">-->
+                           <span th:text="${session.user.username}"></span>
+                       </a>
                     </span>
                     </div>
                 </div>
                 <div class="header-right cart">
-                    <a href="#"><span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span></a>
-                    <div class="cart-box">
-                        <h4 th:if="${session.user!=null}"><a  th:href="@{/cart/myCart}" href="../pages/myCart.html">
-                            <span class="simpleCart_total"> $0.00 </span> (<span class="simpleCart_quantity" th:text="${session.num}"> 0 </span>)
-                        </a></h4>
-                        <p th:if="${session.num==0}"><a href="javascript:;" class="simpleCart_empty">Empty cart</a></p>
-                        <div class="clearfix"> </div>
-                    </div>
+                    <h4 th:if="${session.user!=null}">
+                        <a th:href="@{/cart/myCart}" href="../pages/myCart.html">
+                            <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span>
+                        </a>
+                    </h4>
                 </div>
-                <div class="clearfix"> </div>
+                <div class="clearfix"></div>
             </div>
-            <div class="clearfix"> </div>
+            <div class="clearfix"></div>
         </div>
     </div>
     <!--//header-->

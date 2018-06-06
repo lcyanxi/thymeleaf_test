@@ -18,9 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static douguo.util.constent.IMAGEUPLOADPATH;
-import static douguo.util.constent.MESSAGE;
-import static douguo.util.constent.STATUS;
+import static douguo.util.constent.*;
 
 @Controller
 @RequestMapping("/product")
@@ -50,7 +48,6 @@ public class ProductController {
                           @RequestParam(value = "color") String color,
                           @RequestParam(value = "weight") String weight){
         Map map=new HashMap();
-        System.out.println(weight);
         try {
             String imageName = FileUploadUtil.uploadHeadImage(IMAGEUPLOADPATH,image);
             if (imageName != null) {    //判断文件是否存在文件夹里
@@ -59,7 +56,7 @@ public class ProductController {
                 product.setPrice(Double.valueOf(price));
                 product.setColor(color);
                 product.setWeight(weight);
-                product.setImage("/upImage/"+imageName);
+                product.setImage(IMAGE_UPLOAD_DOMAIN+"page/images/"+imageName);
                 product.setStatdate(DateUtil.date2Str(new Date(),"yyyy-MM-dd HH:mm:ss"));
                 product.setFlag(1);
                 productService.addProduct(product);
@@ -69,6 +66,7 @@ public class ProductController {
                 return map;
             }
         } catch (IOException e) {
+            e.printStackTrace();
             map.put(STATUS, 0);
             map.put(MESSAGE, "添加商品失败！！");
         }

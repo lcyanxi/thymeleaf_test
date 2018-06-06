@@ -5,12 +5,12 @@ public interface constent {
     /**
      * 图片上传路径地址
      */
-    String IMAGEUPLOADPATH = "E:\\李常毕业设计\\代码\\thymeleaf_test\\springbootTest\\src\\main\\resources\\static\\upImage";
+    String IMAGEUPLOADPATH = "G:\\thymeleaf_test\\springbootTest\\target\\classes\\static\\page\\images";
 
     /**
      * 图片上传的域名前缀
      */
-    String IMAGE_UPLOAD_DOMAIN = "https://localhost:8080/";
+    String IMAGE_UPLOAD_DOMAIN = "https://localhost:8443/";
 
     /**
      * 状态

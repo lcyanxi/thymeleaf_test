@@ -28,5 +28,10 @@
         select * from address where aid=#{oid}
     </select>
 
-
+    <delete id="deleteAddress" parameterType="java.lang.Integer">
+        DELETE FROM
+        address
+        WHERE
+        aid =#{aid}
+    </delete>
 </mapper>

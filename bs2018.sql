@@ -2,15 +2,15 @@
 Navicat MySQL Data Transfer
 
 Source Server         : localhost_3306
-Source Server Version : 50627
+Source Server Version : 50171
 Source Host           : localhost:3306
 Source Database       : bs2018
 
 Target Server Type    : MYSQL
-Target Server Version : 50627
+Target Server Version : 50171
 File Encoding         : 65001
 
-Date: 2018-05-28 11:21:22
+Date: 2018-06-06 10:20:25
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -29,11 +29,15 @@ CREATE TABLE `address` (
   `create_time` datetime DEFAULT NULL,
   `flag` int(255) DEFAULT NULL,
   PRIMARY KEY (`aid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of address
 -- ----------------------------
+INSERT INTO `address` VALUES ('15', '4', '张三', '北京市 北京市市辖区 东城区', '北京市朝阳区银河soho', '15730870204', '2018-05-30 08:50:58', '1');
+INSERT INTO `address` VALUES ('16', '4', '王刚', '重庆市 重庆市市辖区 万州区', '重庆市万州区岭南路68号', '13525748779', '2018-05-30 16:52:02', '1');
+INSERT INTO `address` VALUES ('17', '4', '李四', '吉林省 长春市 南关区', '吉林省长春市南关区88号', '15730870204', '2018-06-05 10:29:14', '1');
+INSERT INTO `address` VALUES ('18', '10', '特朗普', '北京市 北京市市辖区 东城区', '北京市东城区朝阳soho68号', '13131340204', '2018-06-06 08:42:42', '1');
 
 -- ----------------------------
 -- Table structure for cart
@@ -48,13 +52,15 @@ CREATE TABLE `cart` (
   `create_time` datetime DEFAULT NULL,
   `flag` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`cid`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of cart
 -- ----------------------------
-INSERT INTO `cart` VALUES ('10', '4', '25', '2', '1182', '2018-05-25 17:18:31', '1');
-INSERT INTO `cart` VALUES ('11', '4', '28', '3', '1647', '2018-05-25 17:18:59', '1');
+INSERT INTO `cart` VALUES ('46', '4', '30', '2', '1034', '2018-06-03 10:57:36', '1');
+INSERT INTO `cart` VALUES ('47', '4', '28', '1', '549', '2018-06-05 10:27:04', '1');
+INSERT INTO `cart` VALUES ('49', '10', '26', '2', '1100', '2018-06-06 08:41:12', '1');
+INSERT INTO `cart` VALUES ('50', '10', '27', '3', '1668', '2018-06-06 08:41:33', '1');
 
 -- ----------------------------
 -- Table structure for order_detail_info
@@ -64,21 +70,29 @@ CREATE TABLE `order_detail_info` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `oid` int(11) NOT NULL,
   `pid` int(11) NOT NULL,
-  `create_time` datetime NOT NULL,
+  `create_time` datetime DEFAULT NULL,
   `flag` int(11) DEFAULT NULL,
+  `num` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=188 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of order_detail_info
 -- ----------------------------
+INSERT INTO `order_detail_info` VALUES ('181', '20189974', '25', null, null, '2');
+INSERT INTO `order_detail_info` VALUES ('182', '20189974', '30', null, null, '2');
+INSERT INTO `order_detail_info` VALUES ('183', '20186068', '25', null, null, '2');
+INSERT INTO `order_detail_info` VALUES ('184', '20186068', '30', null, null, '2');
+INSERT INTO `order_detail_info` VALUES ('185', '20186068', '28', null, null, '1');
+INSERT INTO `order_detail_info` VALUES ('186', '20183392', '26', null, null, '2');
+INSERT INTO `order_detail_info` VALUES ('187', '20183392', '27', null, null, '3');
 
 -- ----------------------------
 -- Table structure for order_info
 -- ----------------------------
 DROP TABLE IF EXISTS `order_info`;
 CREATE TABLE `order_info` (
-  `oid` int(11) NOT NULL AUTO_INCREMENT,
+  `oid` int(11) NOT NULL,
   `uid` int(11) NOT NULL,
   `aid` int(11) NOT NULL,
   `create_time` datetime DEFAULT NULL,
@@ -91,6 +105,9 @@ CREATE TABLE `order_info` (
 -- ----------------------------
 -- Records of order_info
 -- ----------------------------
+INSERT INTO `order_info` VALUES ('20183392', '10', '18', '2018-06-06 08:42:51', '2768', '1', '1');
+INSERT INTO `order_info` VALUES ('20186068', '4', '15', '2018-06-05 14:37:06', '2765', '1', '1');
+INSERT INTO `order_info` VALUES ('20189974', '4', '17', '2018-06-05 10:29:31', '2216', '1', '1');
 
 -- ----------------------------
 -- Table structure for product
@@ -106,7 +123,7 @@ CREATE TABLE `product` (
   `statdate` datetime DEFAULT NULL,
   `weight` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`pid`)
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of product
@@ -120,6 +137,8 @@ INSERT INTO `product` VALUES ('29', '商品6', '510', 'brown6', '/page/images/m6
 INSERT INTO `product` VALUES ('30', '商品7', '517', 'brown7', '/page/images/m7.png', null, '2018-05-23 14:50:54', '9寸');
 INSERT INTO `product` VALUES ('31', '商品8', '542', 'brown8', '/page/images/m8.png', null, '2018-05-23 14:50:54', '10寸');
 INSERT INTO `product` VALUES ('32', '商品9', '546', 'brown9', '/page/images/m9.png', null, '2018-05-23 14:50:54', '11寸');
+INSERT INTO `product` VALUES ('42', '豆果4', '989', 'pink', 'https://localhost:8443/page/images/152819048309389994196_src.png', '1', '2018-06-05 17:21:23', '10寸');
+INSERT INTO `product` VALUES ('45', 'aa', '587', 'orange', 'https://localhost:8443/page/images/15282459664155473377_src.png', '1', '2018-06-06 08:46:06', '7寸');
 
 -- ----------------------------
 -- Table structure for sys_permission
@@ -186,26 +205,6 @@ INSERT INTO `sys_role_permission` VALUES ('3', '6', '20');
 INSERT INTO `sys_role_permission` VALUES ('4', '7', '21');
 
 -- ----------------------------
--- Table structure for sys_user_role
--- ----------------------------
-DROP TABLE IF EXISTS `sys_user_role`;
-CREATE TABLE `sys_user_role` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) DEFAULT NULL,
-  `rid` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `uid` (`uid`),
-  KEY `rid` (`rid`),
-  CONSTRAINT `sys_user_role_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `user_info` (`uid`) ON DELETE SET NULL ON UPDATE NO ACTION,
-  CONSTRAINT `sys_user_role_ibfk_2` FOREIGN KEY (`rid`) REFERENCES `sys_role` (`rid`) ON DELETE SET NULL ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Records of sys_user_role
--- ----------------------------
-INSERT INTO `sys_user_role` VALUES ('1', '6', '5');
-
--- ----------------------------
 -- Table structure for user
 -- ----------------------------
 DROP TABLE IF EXISTS `user`;
@@ -223,36 +222,11 @@ CREATE TABLE `user` (
   `status` varchar(255) DEFAULT NULL,
   `image` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`uid`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of user
 -- ----------------------------
-INSERT INTO `user` VALUES ('4', '李常', 'lichang', 'ddf7d0e8fe8f368ff69dd7775c50325e', null, 'man', '15730870204', '845892601', '2018-05-23 10:59:33', 'user', null, '/img/avatar.jpg');
-INSERT INTO `user` VALUES ('8', '张三', '张三', 'ddf7d0e8fe8f368ff69dd7775c50325e', null, 'man', '15110148779', '845892601@qq.com', '2018-05-23 12:15:50', 'user', null, '/img/avatar.jpg');
-INSERT INTO `user` VALUES ('9', '', '', '2fb1c5cf58867b5bbc9a1b145a86f3a0', null, 'man', '', '', '2018-05-23 12:19:34', 'user', null, '/img/avatar.jpg');
-
--- ----------------------------
--- Table structure for user_info
--- ----------------------------
-DROP TABLE IF EXISTS `user_info`;
-CREATE TABLE `user_info` (
-  `uid` int(11) NOT NULL AUTO_INCREMENT,
-  `username` varchar(255) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `salt` varchar(255) DEFAULT NULL,
-  `state` int(255) DEFAULT NULL,
-  `age` int(11) DEFAULT NULL,
-  `sex` int(255) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `registerTime` datetime DEFAULT NULL,
-  `mobile` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`uid`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Records of user_info
--- ----------------------------
-INSERT INTO `user_info` VALUES ('6', 'admin', '管理员', 'b427273f16677088bdeb2a25c6bccef2', '2ed5638b50433ffef5642fe6008ead29', '0', null, null, null, '0000-00-00 00:00:00', null);
-INSERT INTO `user_info` VALUES ('9', 'lichang', 'lichang', '222222222222222', '222222222', null, null, null, null, '2018-05-14 00:00:00', '15730870204');
+INSERT INTO `user` VALUES ('4', '李常', 'lichang', 'ddf7d0e8fe8f368ff69dd7775c50325e', null, 'man', '15730870204', '2757710657@qq.com', '2018-05-23 10:59:33', 'user', null, '/img/avatar.jpg');
+INSERT INTO `user` VALUES ('8', '张三', '张三', 'ddf7d0e8fe8f368ff69dd7775c50325e', null, 'man', '15110148779', '845892601@qq.com', '2018-05-23 12:15:50', 'admin', null, '/img/avatar.jpg');
+INSERT INTO `user` VALUES ('10', '特朗普', '特朗普', 'ddf7d0e8fe8f368ff69dd7775c50325e', null, 'man', '13131340204', '845892601@qq.com', '2018-06-06 08:39:22', 'user', null, '/img/avatar.jpg');

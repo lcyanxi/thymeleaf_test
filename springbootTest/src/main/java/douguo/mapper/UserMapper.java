@@ -23,6 +23,8 @@ public interface UserMapper {
 
     User selectUserByMobile(String mobile);
 
+    int editProfile(User user);
+
     @CachePut(key = "#p0") void update(User user);
 
     //如果指定为 true，则方法调用后将立即清空所有缓存

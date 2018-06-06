@@ -32,72 +32,109 @@ public class UserController extends CommonController {
     private CartService cartService;
 
 
-    @RequestMapping(value = "/register",method = RequestMethod.POST)
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
     public Map register(@RequestParam String username, @RequestParam String nickname, @RequestParam String email,
-                           @RequestParam String password, String mobile, String sex){
+                        @RequestParam String password, String mobile, String sex) {
 
-        Map map=new HashMap();
+        Map map = new HashMap();
 
-        if (userService.selectUserByMobile(mobile)!=null){
-            map.put(STATUS,0);
-            map.put(MESSAGE,"该电话号码已经注册了");
-        }else {
+        if (userService.selectUserByMobile(mobile) != null) {
+            map.put(STATUS, 0);
+            map.put(MESSAGE, "该电话号码已经注册了");
+        } else {
 
             try {
-                User user=new User();
+                User user = new User();
                 user.setUsername(username);
                 user.setNickname(nickname);
                 user.setPassword(MD5Util.encode(password));
                 user.setEmail(email);
                 user.setMobile(mobile);
                 user.setSex(sex);
-                user.setRegisterTime(DateUtil.date2Str(new Date(),"yyyy-MM-dd HH:mm:ss"));
+                user.setRegisterTime(DateUtil.date2Str(new Date(), "yyyy-MM-dd HH:mm:ss"));
                 user.setRole("user");
                 user.setImage("/img/avatar.jpg");//默认头像
                 userService.register(user);
-                map.put(STATUS,1);
-                map.put(MESSAGE,"注册成功,立即去登录");
+                map.put(STATUS, 1);
+                map.put(MESSAGE, "注册成功,立即去登录");
 
-            }catch (Exception e){
-                map.put(STATUS,0);
-                map.put(MESSAGE,"注册失败");
+            } catch (Exception e) {
+                map.put(STATUS, 0);
+                map.put(MESSAGE, "注册失败");
             }
         }
         return map;
     }
 
-    @RequestMapping(value = "login",method = RequestMethod.POST)
+
+    @RequestMapping(value = "/editProfile", method = RequestMethod.POST)
     @ResponseBody
-    public Map login(@RequestParam String mobile,String password){
-        Map map=new HashMap();
-        password=MD5Util.encode(password);
+    public Map editProfile(@RequestParam String username, @RequestParam String nickname, @RequestParam String email,
+                           String mobile, String sex) {
 
-        User user =userService.login(mobile,password);
+        Map map = new HashMap();
 
-        int cartNum=cartService.CountCartNumByUid(user.getUid());
-        System.out.println(cartNum);
+        User sessinUser = (User) session.getAttribute("user");
+        if (!mobile.equals(sessinUser.getMobile()) && userService.selectUserByMobile(mobile) != null) {
+            map.put(STATUS, 0);
+            map.put(MESSAGE, "更新失败，该电话号码已经注册了");
+        } else {
 
-        if (user!=null){
-            session.setAttribute("user",user);
-            session.setAttribute("num",cartNum);
+            try {
+                User user = new User();
+                user.setUid(sessinUser.getUid());
+                user.setUsername(username);
+                user.setNickname(nickname);
+                user.setEmail(email);
+                user.setMobile(mobile);
+                user.setSex(sex);
+                userService.editProfile(user);
+                session.setAttribute("user",userService.selectUserByMobile(mobile));
+                map.put(STATUS, 1);
+                map.put(MESSAGE, "更新成功");
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                map.put(STATUS, 0);
+                map.put(MESSAGE, "更新失败");
+            }
+        }
+        return map;
+    }
+
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    @ResponseBody
+    public Map login(@RequestParam String mobile, String password) {
+        Map map = new HashMap();
+        password = MD5Util.encode(password);
+
+        User user = userService.login(mobile, password);
+
+        int cartNum = cartService.CountCartNumByUid(user.getUid());
+
+        if (user != null) {
+            session.setAttribute("user", user);
+            session.setAttribute("num", cartNum);
             map.put(STATUS, 1);
             map.put(MESSAGE, "登录成功！！");
-        }else {
+        } else {
             map.put(STATUS, 0);
             map.put(MESSAGE, "用户名或者密码不正确！！");
         }
         return map;
     }
 
-    @RequestMapping(value = "/toEditProfile",method = RequestMethod.GET)
-    public String toEditProfile(Model model){
+    @RequestMapping(value = "/logout", method = RequestMethod.GET)
+    public String loginOut() {
+        session.removeAttribute("user");
+        return "pages/index";
+    }
+
+    @RequestMapping(value = "/toEditProfile", method = RequestMethod.GET)
+    public String toEditProfile(Model model) {
         return "pages/editProfile";
     }
 
-    @RequestMapping(value = "/newProfile",method = RequestMethod.GET)
-    public String toNewProfile(Model model){
-        model.addAttribute("user",session.getAttribute("user"));
-        return "pages/profile";
-    }
+
 }

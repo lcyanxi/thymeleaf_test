@@ -7,26 +7,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta name="keywords" content=""/>
-    <script type="application/x-javascript"> addEventListener("load", function () {
-        setTimeout(hideURLbar, 0);
-    }, false);
-
-    function hideURLbar() {
-        window.scrollTo(0, 1);
-    } </script>
     <!-- //Custom Theme files -->
     <link th:href="@{/page/css/bootstrap.css}" href="../../static/page/css/bootstrap.css" type="text/css"
           rel="stylesheet" media="all"/>
     <link th:href="@{/page/css/style.css}" href="../../static/page/css/style.css" type="text/css" rel="stylesheet"
           media="all"/>
+    <link th:href="@{/css/xcConfirm.css}" href="../../static/css/xcConfirm.css" rel="stylesheet"/>
     <!-- js -->
     <script th:src="@{/page/js/jquery.min.js}" src="../../static/page/js/jquery.min.js"></script>
     <script th:src="@{/page/js/bootstrap-3.1.1.min.js}" type="text/javascript"
             src="../../static/page/js/bootstrap-3.1.1.min.js"></script>
     <!-- //js -->
-    <!-- cart -->
-    <script th:src="@{/page/js/simpleCart.min.js}" src="../../static/page/js/simpleCart.min.js"></script>
-    <!-- cart -->
+    <script th:src="@{/js/jquery.form.js}" src="../../static/js/jquery.form.js"></script>
+    <!--script for 提示框-->
+    <script th:src="@{/js/xcConfirm.js}" src="../../static/js/xcConfirm.js"></script>
 </head>
 <body>
 <!--header-->
@@ -36,13 +30,19 @@
 <div class="account">
     <div class="container">
         <div class="register">
-            <form id="editProfileForm" method="post">
+            <form id="editProfileForm" >
                 <div class="register-top-grid">
                     <h3>个人信息</h3>
-
+                    <div class="input">
+                        <span>
+                            <button class="btn btn-warning btn-lg" onclick="update_Image()">
+                             <img th:src="${session.user.image}" width="80" height="80"/>
+                           </button>
+                        </span>
+                    </div>
                     <div class="input">
                         <span>姓名:</span>
-                        <input type="text" name="username"  th:value="${session.user.username}"/>
+                        <input type="text" name="username" th:value="${session.user.username}"/>
                     </div>
                     <div class="input">
                         <span>昵称:</span>
@@ -50,14 +50,14 @@
                     </div>
                     <div class="select">
                         <span>性别:</span>
-                       <select name="sex">
-                           <option value="man" selected="selected">男</option>
-                           <option value="woman">女</option>
-                       </select>
+                        <select name="sex">
+                            <option value="man" selected="selected">男</option>
+                            <option value="woman">女</option>
+                        </select>
                     </div>
                     <div class="select">
                         <span>电话号码:</span>
-                        <input type="text" name="nickname" th:value="${session.user.mobile}"/>
+                        <input type="text" name="mobile" th:value="${session.user.mobile}"/>
                     </div>
                     <div class="input">
                         <span>邮箱<label>*</label></span>
@@ -65,7 +65,7 @@
                     </div>
                     <div class="select">
                         <span>注册日期:</span>
-                        <input type="text" name="nickname" th:value="${session.user.registerTime}" readonly/>
+                        <input type="text" name="registerTime" th:value="${session.user.registerTime}" readonly/>
                     </div>
                     <div class="clearfix"></div>
                 </div>
@@ -78,11 +78,12 @@
         </div>
     </div>
 </div>
+
 <!--//account-->
 <!--footer-->
 <div th:replace="common/common_footer :: footer"></div>
 <script>
-    //更新个人信息
+    //添加后台管理员
     $('#editProfile').click(function () {
         $("#editProfileForm").ajaxSubmit({
             url : "/user/editProfile",
@@ -91,9 +92,6 @@
             success : function(data) {
                 window.wxc.xcConfirm(data.message, window.wxc.xcConfirm.typeEnum.info, {
                     onOk: function () {
-                        if (data.status == 1) {
-                            location.reload();
-                        }
                     }
                 });
             },

@@ -34,15 +34,17 @@
                  values(#{username},#{nickname},#{password},#{sex},#{mobile},#{email},#{registerTime},#{role},#{image})
     </insert>
 
-    <update id="update" parameterType="douguo.model.User">
+    <update id="editProfile" parameterType="douguo.model.User">
         UPDATE
-        users
+        user
         SET
-        <if test="userName != null">userName = #{userName},</if>
-        <if test="passWord != null">passWord = #{passWord},</if>
-        nick_name = #{nickName}
+        <if test="username != null">username = #{username},</if>
+        <if test="nickname != null">nickname = #{nickname},</if>
+        <if test="sex != null">sex = #{sex},</if>
+        <if test="email != null">email = #{email},</if>
+        <if test="mobile != null">mobile = #{mobile}</if>
         WHERE
-        id = #{id}
+        uid = #{uid}
     </update>
 
     <delete id="delete" parameterType="java.lang.Long">

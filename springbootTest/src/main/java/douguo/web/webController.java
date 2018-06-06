@@ -42,7 +42,7 @@ public class webController {
     }
 
 
-    @RequestMapping(value = "/index",method = RequestMethod.GET)
+    @RequestMapping(value = "/manage/index",method = RequestMethod.GET)
     public String toIndex() {
         return "index";
     }
