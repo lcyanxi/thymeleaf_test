@@ -1,5 +1,5 @@
 # thymeleaf_test
-  spring-boot+thymeleaf测试demo
+  spring-boot+thymeleaf的乐糕糕点网站
   
 ## 所用到的技术
 * spring boot
